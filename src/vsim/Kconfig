@@ -1,0 +1,50 @@
+menu "AXI Options"# {{{
+
+config AXI_DWID
+int "AXI bus data channal width"
+default 32
+
+config AXI_AWID
+int "AXI bus address channal width"
+default 32
+
+config AXI_IDWID
+int "AXI bus xID signal width"
+default 4
+endmenu# }}}
+
+menu "Perference Test"# {{{
+config PERF_START
+int "Start to run perference test from which program"
+range 1 10
+default 1
+
+config PERF_END
+int "Stop perference test after run which program"
+range PERF_START 10
+default 1
+
+endmenu# }}}
+
+menu "Wave Options"# {{{
+config TRACE_ON
+bool "log wave by file"
+default y
+
+choice
+  prompt "Wave file extension"
+  depends on TRACE_ON
+  default EXT_FST
+config EXT_VCD
+  bool "vcd"
+config EXT_FST
+  bool "fst"
+endchoice
+
+config WAVE_EXT
+  string
+  default "vcd" if EXT_VCD
+  default "fst" if EXT_FST
+  default "none"
+
+endmenu# }}}
