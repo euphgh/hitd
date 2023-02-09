@@ -9,13 +9,6 @@ BINARY   = $(BUILD_DIR)/$(NAME)$(SO)
 
 # Add necessary options if the target is a shared library
 ifeq ($(SHARE),1)
-CXXSRC += $(DIFF_HOME)/csrc/diff_proj/nemu_paddr_top.cc
-CPPSRC += $(DIFF_HOME)/csrc/device/Pmem.cpp
-CPPSRC += $(DIFF_HOME)/csrc/device/PaddrTop.cpp
-CPPSRC += $(DIFF_HOME)/csrc/device/PaddrConfreg.cpp
-INC_PATH += $(DIFF_HOME)/include
-CFLAGS += -DNSCSCC_HOME=\"$(NSCSCC_HOME)\"
-CFLAGS += -DDIFF_HOME=\"$(DIFF_HOME)\"
 SO = -so
 CFLAGS  += -fPIC
 LDFLAGS += -rdynamic -shared -fPIC
@@ -32,8 +25,7 @@ INCLUDES = $(addprefix -I, $(INC_PATH))
 CFLAGS  := -O2 -MMD -Wall -Werror $(INCLUDES) $(CFLAGS)
 LDFLAGS := -O2 $(LDFLAGS)
 
-OBJS = $(SRCS:%.c=$(OBJ_DIR)/%.o) $(CXXSRC:%.cc=$(OBJ_DIR)/%.o) $(CPPSRC:%.cpp=$(OBJ_DIR)/%.o)
-OBJS += /home/hgh/code/chong/difftest/obj_dir/log.o
+OBJS = $(SRCS:%.c=$(OBJ_DIR)/%.o) $(CXXSRC:%.cc=$(OBJ_DIR)/%.o) $(CPPSRC:%.cpp=$(OBJ_DIR)/%.o
 
 # Compilation patterns
 $(OBJ_DIR)/%.o: %.c
