@@ -13,5 +13,5 @@
 # See the Mulan PSL v2 for more details.
 #**************************************************************************************/
 
-INC_PATH += $($HITD_HOME)/src/nemu/isa/$(GUEST_ISA)/include
+INC_PATH += $(HITD_HOME)/src/nemu/isa/$(GUEST_ISA)/include
 DIRS-y += src/nemu/isa/$(GUEST_ISA)

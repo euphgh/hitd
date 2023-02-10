@@ -16,7 +16,7 @@
 #ifndef __DEBUG_H__
 #define __DEBUG_H__
 
-#include <utils.h>
+#include <utils.hpp>
 
 #define Log(format, ...) \
     _Log(ANSI_FMT("[" \

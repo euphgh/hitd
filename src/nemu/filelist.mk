@@ -13,7 +13,6 @@
 # See the Mulan PSL v2 for more details.
 #**************************************************************************************/
 
-SHARE = $(if $(CONFIG_NSC_DIFF),1,0)
 LIBS += $(if $(CONFIG_NSC_NEMU),-lreadline -ldl -pie,)
 
 SRCS-$(CONFIG_NSC_NEMU) += src/nemu/nemu-main.c

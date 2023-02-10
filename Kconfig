@@ -98,5 +98,5 @@ source "src/nemu/Kconfig"
 endmenu
 
 menu "Verilog Simulate Options"
-source "src/vsim/Kconfig"
+source "src/testbench/Kconfig"
 endmenu

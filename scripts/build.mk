@@ -22,10 +22,18 @@ CXX := g++
 endif
 LD := $(CXX)
 INCLUDES = $(addprefix -I, $(INC_PATH))
-CFLAGS  := -O2 -MMD -Wall -Werror $(INCLUDES) $(CFLAGS)
+CFLAGS  := -MMD -Wall -Werror $(INCLUDES) $(CFLAGS)
+
+ifdef CFLAGFILE
+CFLAGS  += $(CFLAGS) @$(CFLAGFILE)
+endif
+
 LDFLAGS := -O2 $(LDFLAGS)
 
-OBJS = $(SRCS:%.c=$(OBJ_DIR)/%.o) $(CXXSRC:%.cc=$(OBJ_DIR)/%.o) $(CPPSRC:%.cpp=$(OBJ_DIR)/%.o
+OBJS = $(SRCS:%.c=$(OBJ_DIR)/%.o) 
+OBJS += $(CXXSRC:%.cc=$(OBJ_DIR)/%.o) 
+OBJS += $(CPPSRC:%.cpp=$(OBJ_DIR)/%.o)
+
 
 # Compilation patterns
 $(OBJ_DIR)/%.o: %.c
@@ -40,7 +48,7 @@ $(OBJ_DIR)/%.o: %.cc
 	@$(CXX) $(CFLAGS) $(CXXFLAGS) -c -o $@ $<
 	$(call call_fixdep, $(@:.o=.d), $@)
 
-$(OBJ_DIR)/%.o: %.cpp
+$(OBJ_DIR)/%.o: %.cpp $(SRCS_APPEND)
 	@echo + CXX $<
 	@mkdir -p $(dir $@)
 	@$(CXX) $(CFLAGS) $(CXXFLAGS) -c -o $@ $<
@@ -54,9 +62,9 @@ $(OBJ_DIR)/%.o: %.cpp
 
 app: $(BINARY)
 
-$(BINARY): $(OBJS) $(ARCHIVES)
+$(BINARY): $(OBJS) $(OBJS_APPEND) $(ARCHIVES)
 	@echo + LD $@
-	@$(LD) -o $@ $(OBJS) $(LDFLAGS) $(ARCHIVES) $(LIBS)
+	@$(LD) -o $@ $(OBJS) $(OBJS_APPEND) $(LDFLAGS) $(ARCHIVES) $(LIBS)
 
 clean:
-	-rm -rf $(BUILD_DIR)
+	rm -rf $(BUILD_DIR)

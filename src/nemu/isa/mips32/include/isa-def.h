@@ -16,7 +16,7 @@
 #ifndef __ISA_MIPS32_H__
 #define __ISA_MIPS32_H__
 
-#include <common.h>
+#include <common.hpp>
 #include "cp0.h"
 
 #ifdef CONFIG_NSC_MODE

@@ -1,8 +1,7 @@
 menu "ISA Option"# {{{
 choice
   prompt "Base ISA"
-  default ISA_mips32 if NSC_MODE
-  default ISA_riscv32
+  default ISA_mips32
 config ISA_x86
   bool "x86"
 config ISA_mips32

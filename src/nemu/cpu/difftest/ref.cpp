@@ -12,7 +12,7 @@
 *
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
-#include <isa.h>
+#include <nemu/isa.hpp>
 #include <cpu/cpu.h>
 #include "cp0.h"
 #include <difftest-def.h>

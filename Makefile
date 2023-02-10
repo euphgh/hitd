@@ -1,18 +1,3 @@
-#***************************************************************************************
-# Copyright (c) 2014-2022 Zihao Yu, Nanjing University
-#
-# NEMU is licensed under Mulan PSL v2.
-# You can use this software according to the terms and conditions of the Mulan PSL v2.
-# You may obtain a copy of Mulan PSL v2 at:
-#          http://license.coscl.org.cn/MulanPSL2
-#
-# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
-# EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
-# MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-#
-# See the Mulan PSL v2 for more details.
-#**************************************************************************************/
-
 # Sanity check
 ifeq ($(wildcard $(HITD_HOME)/src/nemu/nemu-main.cpp),)
   $(error HITD_HOME=$(HITD_HOME) is not a HITD repo)
@@ -24,46 +9,47 @@ endif
 
 remove_quote = $(patsubst "%",%,$(1))
 
+# Include rules for menuconfig
+include $(HITD_HOME)/scripts/config.mk
+
+# include rule for vtoc
+include $(HITD_HOME)/scripts/ver_to_cpp.mk
+
+
 # Extract variabls from menuconfig
 GUEST_ISA ?= $(call remove_quote,$(CONFIG_ISA))
 ENGINE ?= $(call remove_quote,$(CONFIG_ENGINE))
 NAME    = $(GUEST_ISA)-nemu-$(ENGINE)
 
 # Include all filelist.mk to merge file lists
-FILELIST_MK = $(shell find ./src -name "filelist.mk")
+FILELIST_MK = $(shell find ./src/nemu -name "filelist.mk")
 include $(FILELIST_MK)
 
 # Filter out directories and files in blacklist to obtain the final set of source files
 DIRS-BLACKLIST-y += $(DIRS-BLACKLIST)
-SRCS-BLACKLIST-y += $(SRCS-BLACKLIST) $(shell find $(DIRS-BLACKLIST-y) -name "*.c")
-SRCS-y += $(shell find $(DIRS-y) -name "*.c")
-SRCS = $(filter-out $(SRCS-BLACKLIST-y),$(SRCS-y))
+SRCS-BLACKLIST-y += $(SRCS-BLACKLIST) $(shell find $(DIRS-BLACKLIST-y) -name "*.cpp")
+SRCS-y += $(shell find $(DIRS-y) -name "*.cpp")
+NEMU_SRCS = $(filter-out $(SRCS-BLACKLIST-y),$(SRCS-y))
 
 # Extract compiler and options from menuconfig
 CC = $(call remove_quote,$(CONFIG_CC))
-CFLAGS_BUILD += -D__NEMU_PROJ__=1
-CFLAGS_BUILD += $(call remove_quote,$(CONFIG_CC_OPT))
+CFLAGS_BUILD += $(if $(CONFIG_CC_DEBUG),,$(call remove_quote,$(CONFIG_CC_OPT)))
 CFLAGS_BUILD += $(if $(CONFIG_CC_LTO),-flto,)
 CFLAGS_BUILD += $(if $(CONFIG_CC_DEBUG),-Og -ggdb3,)
 CFLAGS_BUILD += $(if $(CONFIG_CC_ASAN),-fsanitize=address,)
-CFLAGS_TRACE += -DITRACE_COND=$(if $(CONFIG_ITRACE_COND),$(call remove_quote,$(CONFIG_ITRACE_COND)),true)
 CFLAGS  += $(CFLAGS_BUILD) $(CFLAGS_TRACE) -D__GUEST_ISA__=$(GUEST_ISA)
 LDFLAGS += $(CFLAGS_BUILD)
 
-# Include rules for menuconfig
-include $(HITD_HOME)/scripts/config.mk
+CXX_CLOF    = $(HITD_HOME)/scripts/tb_cpp_flags.txt
+LD_CLOF     = $(HITD_HOME)/scripts/tb_ld_flags.txt
+OBJS_EXTRA  = $(HITD_HOME)/scripts/tb_ld_objs.txt
+ARCHIVES 	= $(HITD_HOME)/obj_dir/Vmycpu_top__ALL.a
 
-# Include rules to build NEMU
-include $(HITD_HOME)/scripts/native.mk
+$(CXX_CLOF) $(LD_CLOF) $(OBJS_EXTRA) $(ARCHIVES) &: vsrc
+	$(MAKE) -C $(HITD_HOME)/obj_dir -f $(HITD_HOME)/scripts/precompile_tb.mk default
+	$(MAKE) -C $(HITD_HOME)/obj_dir -f $(HITD_HOME)/scripts/precompile_tb.mk files
 
-######################################################################
-### Debugging
-debug-make::
-	@echo
-	@echo CFLAGS: $(CFLAGS)
-	@echo CXXFLAGS: $(CXXFLAGS)
-	@echo CPPFLAGS: $(CPPFLAGS)
-	@echo
+TB_SRCS = $(shell find src/testbench -name "*.cpp")
+SRCS = $(NEMU_SRCS) $(TB_SRCS)
 
-######################################################################
-### Detect out of date files and rebuild.
+include $(HITD_HOME)/scripts/compile_tb.mk

@@ -16,7 +16,7 @@
 #ifndef __UTILS_H__
 #define __UTILS_H__
 
-#include <common.h>
+#include <common.hpp>
 
 #ifdef __NEMU_PROJ__
 // ----------- state -----------
@@ -67,7 +67,7 @@ uint64_t get_time();
 
 #define ANSI_FMT(str, fmt) fmt str ANSI_NONE
 
-#include "diff_proj/diff_log.h"
+#include "testbench/diff_proj/diff_log.hpp"
 
 #define _Log(...) \
   do { \
