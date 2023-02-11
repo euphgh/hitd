@@ -4,7 +4,7 @@
 #include <cstring>
 FILE * log_fp = nullptr;
 #ifdef CONFIG_LRING_ENABLE
-char lring[CONFIG_LRING_LEN][CONFIG_LRING_NR];
+char lring[CONFIG_LRING_NR][CONFIG_LRING_LEN];
 int lring_head;
 void log_init(const char* filename){
     lring_head = 0;
@@ -17,7 +17,7 @@ void log_init(const char* filename){
 void log_update(){
     for (int i = 0; i < CONFIG_LRING_NR; i++) {
         if (lring[lring_head+i][0]){
-            fprintf(log_dt, "%s\n", lring[lring_head+i]);
+            fprintf(log_fp, "%s\n", lring[lring_head+i]);
         }
     }
 }

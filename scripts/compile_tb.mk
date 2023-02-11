@@ -28,28 +28,31 @@ $(TB_OBJS): $(OBJ_DIR)/%.o: %.cpp $(CXX_CLOF)
 
 OBJS += $(TB_OBJS) $(NEMU_OBJS)
 
-debug:
-	@echo NEMU_SRCS: $(NEMU_SRCS)
-	@echo NEMU_OBJS: $(NEMU_OBJS)
-	@echo NEMU_CFLAGS: $(NEMU_CFLAGS)
-	@echo TB_SRCS: $(TB_SRCS)
-	@echo TB_OBJS: $(TB_OBJS)
-	@echo TB_CFLAGS: $(TB_CFLAGS)
-	@echo OBJS: $(OBJS)
-
 # Depencies
 -include $(OBJS:.o=.d)
 
 # Some convenient rules
-.PHONY: app clean
-
-app: $(BINARY)
+.PHONY: tb gdb sim
 
 EXTRA_OBJS = $(file < $(EXTRA_OBJS_LIST))
-
 $(BINARY): $(OBJS) $(OBJS_EXTRA) $(LD_HEAD_OF) $(LD_TAIL_OF) $(ARCHIVES)
 	@echo + LD $@
 	@$(LD) $(LDFLAGS) @$(LD_HEAD_OF) $(OBJS) $(EXTRA_OBJS) $(ARCHIVES) @$(LD_TAIL_OF) $(LIBS) -o $@ 
+
+override ARGS ?= --log=$(BUILD_DIR)/tb-log.txt
+override ARGS += $(ARGS_DIFF)
+
+tb: $(BINARY)
+
+sim: tb
+	$(TB_EXEC)
+
+TB_EXEC := $(BINARY) $(ARGS)
+gdb: tb
+	gdb -s $(BINARY) --args $(TB_EXEC)
+
+log:
+	cat $(BUILD_DIR)/tb-log.txt
 
 clean:
 	rm -rf $(BUILD_DIR)

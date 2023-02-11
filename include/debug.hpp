@@ -19,33 +19,21 @@
 #include <utils.hpp>
 
 #define Log(format, ...) \
-    _Log(ANSI_FMT("[" \
-                IFDEF(__NEMU_PROJ__,"$NEMU/") \
-                "%s:%d %s] " format, \
-                MUXDEF(__NEMU_PROJ__, ANSI_FG_BLUE, ANSI_FG_CYAN) \
-                ) "\n", \
+    _Log(ANSI_FMT("[%s:%d %s] " format, ANSI_FG_BLUE) "\n", \
         __FILE__, __LINE__, __func__, ## __VA_ARGS__)
 
 #define Warn(format, ...) \
-    _Log(ANSI_FMT("[" \
-                IFDEF(__NEMU_PROJ__,"$NEMU/") \
-                "%s:%d %s] " format, \
-                MUXDEF(__NEMU_PROJ__, ANSI_FG_YELLOW, ANSI_FG_B_YELLOW) \
-                ) "\n", \
+    _Log(ANSI_FMT("[%s:%d %s] " format, ANSI_FG_YELLOW) "\n", \
         __FILE__, __LINE__, __func__, ## __VA_ARGS__)
 
 #define Error(format, ...) \
-    _Log(ANSI_FMT("["\
-                IFDEF(__NEMU_PROJ__,"$NEMU/") \
-                "%s:%d %s] " format, \
-                MUXDEF(__NEMU_PROJ__, ANSI_FG_RED, ANSI_FG_B_RED) \
-                ) "\n", \
+    printf(ANSI_FMT("[%s:%d %s] " format, ANSI_FG_RED) "\n", \
         __FILE__, __LINE__, __func__, ## __VA_ARGS__)
 
 #define __ASSERT_NEMU__(cond, format, ...) \
     do { \
         if (!(cond)) { \
-            fprintf(stderr, ANSI_FMT(format, ANSI_FG_RED) "\n", ##  __VA_ARGS__); \
+            printf(ANSI_FMT(format, ANSI_FG_RED) "\n", ##  __VA_ARGS__); \
             nemu_state.state = NEMU_ABORT; \
         } \
   } while (0)

@@ -38,7 +38,7 @@ static inline void log_reg(word_t ref, word_t my_ans, const char* name){
 }
 
 void isa_difftest_log_error(CPU_state *ref_r){
-    Log("Difftest FAIL for " ANSI_FMT("reference",ANSI_FG_GREEN) " is different from " ANSI_FMT("nemu",ANSI_FG_RED));
+    // Log("Difftest FAIL for " ANSI_FMT("reference",ANSI_FG_GREEN) " is different from " ANSI_FMT("nemu",ANSI_FG_RED));
 
     for (uint8_t i = 0; i < ARRLEN(ref_r->gpr); i++) {
         char tmp[10] = {0};

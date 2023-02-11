@@ -1,11 +1,11 @@
 #ifndef __DIFF_LOG_H__
 #define __DIFF_LOG_H__
 #ifdef CONFIG_LRING_ENABLE
-extern char lring[CONFIG_LRING_ENABLE][CONFIG_LRING_NR];\
-extern int lring_head;\
 #define log_write(...) \
     do { \
-        snprintf(lring[lring_head] __VA_ARGS__); \
+        extern char lring[CONFIG_LRING_NR][CONFIG_LRING_LEN];\
+        extern int lring_head;\
+        snprintf(lring[lring_head], CONFIG_LRING_LEN, __VA_ARGS__); \
         lring_head = (lring_head+1)%CONFIG_LRING_NR;\
     } while(0)
 #else 

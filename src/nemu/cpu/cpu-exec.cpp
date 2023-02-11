@@ -64,7 +64,7 @@ void check_deadloop(word_t pc){
 }
 
 static void trace_and_difftest(const Decode *_this, vaddr_t dnpc) {
-    IFDEF(CONFIG_ITRACE, log_write("%s\n", _this->logbuf)); 
+    IFDEF(CONFIG_ITRACE, log_write("%s", _this->logbuf)); 
     IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
     IFDEF(CONFIG_WATCH_POINT if(is_wp_change()) nemu_state.state=NEMU_STOP);
     IFDEF(CONFIG_FTRACE, check_ftrace(_this));
@@ -94,13 +94,6 @@ static void execute(uint64_t n) {
 }
 
 static void statistic() {
-    IFNDEF(CONFIG_TARGET_AM, setlocale(LC_NUMERIC, ""));
-#define NUMBERIC_FMT MUXDEF(CONFIG_TARGET_AM, "%", "%'") PRIu64
-    Log("host time spent = " NUMBERIC_FMT " us", g_timer);
-    Log("total guest instructions = " NUMBERIC_FMT, g_nr_guest_inst);
-    if (g_timer > 0) Log("simulation frequency = " NUMBERIC_FMT " inst/s", g_nr_guest_inst * 1000000 / g_timer);
-    else Log("Finish running in less than 1 us and can not calculate the simulation frequency");
-    IFDEF(CONFIG_IRING_TRACE, log_iring());
 }
 
 

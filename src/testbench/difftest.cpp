@@ -12,7 +12,6 @@ bool difftest_check(diff_state *cpu, diff_state *ref_r){
 }
 void difftest_show_error(diff_state *cpu, diff_state *ref_r){
 #define FMT_REG  "%-8s" FMT_WORD "%20d\n"
-    Log("Difftest FAIL for " ANSI_FMT("reference",ANSI_FG_GREEN) " is different from " ANSI_FMT("nemu",ANSI_FG_RED));
     for (size_t i = 0; i < ARRLEN(ref_r->gpr); i++) {
         bool error = ref_r->gpr[i]!=cpu->gpr[i];
         const char *my_fmt = error ? ANSI_FMT(FMT_REG, ANSI_FG_RED) : FMT_REG;

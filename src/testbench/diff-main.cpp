@@ -35,9 +35,6 @@ void compare (debug_info_t debug){
         if ((debug.pc != ref.pc) || (debug.wnum != ref.wnum) || (debug.wdata != ref.wdata)) {
             __ASSERT_SIM__(((debug.pc == ref.pc) && (debug.wnum == ref.wnum) && (debug.wdata == ref.wdata)), \
                     "Error!!!\n"  \
-                    "    mycpu    : PC = 0x%8x, wb_wnum = 0x%2x, wb_wdata = 0x%8x\n"  \
-                    "    reference: PC = 0x%8x, wb_wnum = 0x%2x, wb_wdata = 0x%8x\n", \
-                    debug.pc, debug.wnum, debug.wdata, ref.pc, ref.wnum, ref.wdata
                     );
         }
     }
@@ -144,6 +141,8 @@ int main (int argc, char *argv[]) {
         }
         ticks ++;
     }
+    extern void log_update();
+    IFDEF(CONFIG_LRING_ENABLE,log_update());
     IFDEF(CONFIG_TRACE_ON,tfp.close());
     top->final();
     printf("total ticks = %lu\n", ticks);
