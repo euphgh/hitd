@@ -1,6 +1,6 @@
 #ifndef __CP0_H__
 #define __CP0_H__
-#include "common.h"
+#include "common.hpp"
 #define __W__ 1
 #define __R__ 0
 #define __cp0_info__(f2,f1) \

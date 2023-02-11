@@ -13,9 +13,11 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include <isa.h>
-#include <memory/paddr.h>
-#include <ftrace.h>
+#include "nemu/isa.hpp"
+#include "nemu/memory/paddr.hpp"
+#include "nemu/ftrace.hpp"
+#include <cassert>
+#include <cstdlib>
 
 void init_rand();
 void init_log(const char *log_file);
@@ -53,7 +55,7 @@ static long load_img() {
     }
 
     FILE *fp = fopen(img_file, "rb");
-    Assert(fp, "Can not open '%s'", img_file);
+    __ASSERT_NEMU__(fp, "Can not open '%s'", img_file);
 
     fseek(fp, 0, SEEK_END);
     long size = ftell(fp);
@@ -69,13 +71,13 @@ static long load_img() {
 #define PATH_LEN 128
     char path[PATH_LEN];
     int len = strlen(img_file);
-    if (len >=128) Assert(0,"file path is too short!");
+    if (len >=128) __ASSERT_NEMU__(0,"file path is too short!");
     strcpy(path,img_file);
     char *format = path + len - 4;
     if (strcmp(format,".bin")==0){
         strcpy(format,".elf");
     }
-    else Assert(0,"image file's format is not \".bin\"");
+    else __ASSERT_NEMU__(0,"image file's format is not \".bin\"");
     Log("start initial %s",path);
     init_ftrace(path);
 #endif

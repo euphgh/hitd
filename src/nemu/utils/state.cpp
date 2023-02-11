@@ -13,7 +13,7 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include <utils.h>
+#include "utils.hpp"
 
 NEMUState nemu_state = { .state = NEMU_STOP };
 

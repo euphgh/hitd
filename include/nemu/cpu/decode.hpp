@@ -16,7 +16,9 @@
 #ifndef __CPU_DECODE_H__
 #define __CPU_DECODE_H__
 
-#include <isa.h>
+#include "nemu/isa.hpp"
+#include "debug.hpp"
+#include "cassert"
 
 #define IS_CALL(flag) BITS(flag,0,0)
 #define SET_CALL(flag) flag |= 0x1
@@ -104,7 +106,7 @@ finish:
   } \
 } while (0)
 
-#define INSTPAT_START(name) { const void ** __instpat_end = &&concat(__instpat_end_, name);
+#define INSTPAT_START(name) { const void ** __instpat_end = (const void **)(&&concat(__instpat_end_, ));
 #define INSTPAT_END(name)   concat(__instpat_end_, name): ; }
 
 #endif

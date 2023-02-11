@@ -17,18 +17,7 @@ typedef enum{
         } \
     } while (0)
 
-#ifdef __DIFF_PROJ__
-#define Assert(cond, format, ...) \
-    do { \
-        if (!(cond)) { \
-            fflush(stdout);\
-            fprintf(stderr, ANSI_FMT(format, ANSI_FG_RED) "\n", ##  __VA_ARGS__);\
-            assert(cond);\
-        } \
-    } while (0)
-#endif // __DIFF_PROJ__
-
 extern sim_status_t sim_status;
 #define __FUNC_BIN__ NSCSCC_HOME "/func_test_v0.01/soft/func/obj/main.bin"
-#define __WAVE_DIR__ DIFF_HOME "/vlogs/wave/"
+#define __WAVE_DIR__ HITD_HOME "/vlogs/wave/"
 #endif /* !__DIFF_SIM__ */

@@ -13,10 +13,10 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include <utils.h>
-#include <cpu/ifetch.h>
-#include <isa.h>
-#include <cpu/difftest.h>
+#include "utils.hpp"
+#include "nemu/cpu/ifetch.hpp"
+#include "nemu/isa.hpp"
+#include "nemu/cpu/difftest.hpp"
 
 void set_nemu_state(int state, vaddr_t pc, int halt_ret) {
   difftest_skip_ref();

@@ -13,10 +13,9 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include <isa.h>
-#include <cpu/difftest.h>
-#include <stdio.h>
-#include "../local-include/reg.h"
+#include "nemu/isa.hpp"
+#include "nemu/cpu/difftest.hpp"
+#include "../local-include/reg.hpp"
 
 bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
     bool ans = ref_r->pc==cpu.pc;
@@ -32,7 +31,7 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
 
 static inline void log_reg(word_t ref, word_t my_ans, const char* name){
     bool error = ref!=my_ans;
-    char *my_fmt = error ? ANSI_FMT(FMT_REG, ANSI_FG_RED) : FMT_REG;
+    const char *my_fmt = error ? ANSI_FMT(FMT_REG, ANSI_FG_RED) : FMT_REG;
     printf(my_fmt, name, my_ans,my_ans);
     if (error) printf(ANSI_FMT(FMT_REG, ANSI_FG_GREEN),
             name,ref,ref);

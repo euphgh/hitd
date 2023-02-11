@@ -6,8 +6,9 @@
 #include <cstdio>
 #include <vector>
 #include <queue>
-#include "common.h"
-#include "diff_struct.h"
+#include "common.hpp"
+#include "testbench/difftest/struct.hpp"
+
 
 class AddrIntv {// address interval{{{
     public:

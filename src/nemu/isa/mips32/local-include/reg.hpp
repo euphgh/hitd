@@ -16,7 +16,8 @@
 #ifndef __MIPS32_REG_H__
 #define __MIPS32_REG_H__
 
-#include <common.h>
+#include "common.hpp"
+#include <cassert>
 
 static inline int check_reg_idx(int idx) {
   IFDEF(CONFIG_RT_CHECK, assert(idx >= 0 && idx < 32));

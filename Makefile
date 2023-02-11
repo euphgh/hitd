@@ -22,7 +22,7 @@ ENGINE ?= $(call remove_quote,$(CONFIG_ENGINE))
 NAME    = $(GUEST_ISA)-nemu-$(ENGINE)
 
 # Include all filelist.mk to merge file lists
-FILELIST_MK = $(shell find ./src/nemu -name "filelist.mk")
+FILELIST_MK = $(shell find ./src -name "filelist.mk")
 include $(FILELIST_MK)
 
 # Filter out directories and files in blacklist to obtain the final set of source files
@@ -37,19 +37,27 @@ CFLAGS_BUILD += $(if $(CONFIG_CC_DEBUG),,$(call remove_quote,$(CONFIG_CC_OPT)))
 CFLAGS_BUILD += $(if $(CONFIG_CC_LTO),-flto,)
 CFLAGS_BUILD += $(if $(CONFIG_CC_DEBUG),-Og -ggdb3,)
 CFLAGS_BUILD += $(if $(CONFIG_CC_ASAN),-fsanitize=address,)
-CFLAGS  += $(CFLAGS_BUILD) $(CFLAGS_TRACE) -D__GUEST_ISA__=$(GUEST_ISA)
+CFLAGS_PATH  += -DNSCSCC_HOME=\"$(NSCSCC_HOME)\" -DHITD_HOME=\"$(HITD_HOME)\" 
+NEMU_CFLAGS  += -I$(HITD_HOME)/include $(CFLAGS_BUILD) -D__GUEST_ISA__=$(GUEST_ISA) $(CFLAGS_PATH) $(CXXFLAGS)
+
+CXX_CLOF    	= $(HITD_HOME)/scripts/tb_cpp_flags.txt
+LD_HEAD_OF     	= $(HITD_HOME)/scripts/tb_ld_head_flags.txt
+LD_TAIL_OF     	= $(HITD_HOME)/scripts/tb_ld_tail_flags.txt
+EXTRA_OBJS_LIST = $(HITD_HOME)/scripts/tb_ld_extra_objs.txt
+ARCHIVES 		= $(HITD_HOME)/obj_dir/Vmycpu_top__ALL.a
+
+pre: $(CXX_CLOF) $(LD_HEAD_OF) $(LD_TAIL_OF) $(EXTRA_OBJS_LIST) $(ARCHIVES) 
+
+$(CXX_CLOF) $(LD_HEAD_OF) $(LD_TAIL_OF) $(EXTRA_OBJS_LIST) $(ARCHIVES) &: vsrc
+	$(MAKE) -C $(HITD_HOME)/obj_dir -f $(HITD_HOME)/scripts/precompile_tb.mk all \
+	CXX_CLOF=$(CXX_CLOF) \
+	LD_HEAD_OF=$(LD_HEAD_OF) \
+	LD_TAIL_OF=$(LD_TAIL_OF) \
+	EXTRA_OBJS_LIST=$(EXTRA_OBJS_LIST)
+
+TB_SRCS := $(shell find src/testbench -name "*.cpp")
+TB_CFLAGS    += -I$(HITD_HOME)/include $(CFLAGS_BUILD) $(CFLAGS_PATH) -I$(HITD_HOME)/obj_dir
+
 LDFLAGS += $(CFLAGS_BUILD)
-
-CXX_CLOF    = $(HITD_HOME)/scripts/tb_cpp_flags.txt
-LD_CLOF     = $(HITD_HOME)/scripts/tb_ld_flags.txt
-OBJS_EXTRA  = $(HITD_HOME)/scripts/tb_ld_objs.txt
-ARCHIVES 	= $(HITD_HOME)/obj_dir/Vmycpu_top__ALL.a
-
-$(CXX_CLOF) $(LD_CLOF) $(OBJS_EXTRA) $(ARCHIVES) &: vsrc
-	$(MAKE) -C $(HITD_HOME)/obj_dir -f $(HITD_HOME)/scripts/precompile_tb.mk default
-	$(MAKE) -C $(HITD_HOME)/obj_dir -f $(HITD_HOME)/scripts/precompile_tb.mk files
-
-TB_SRCS = $(shell find src/testbench -name "*.cpp")
-SRCS = $(NEMU_SRCS) $(TB_SRCS)
 
 include $(HITD_HOME)/scripts/compile_tb.mk

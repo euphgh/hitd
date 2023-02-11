@@ -13,9 +13,9 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include <isa.h>/*{{{*/
-#include <cpu/cpu.h>
-#include <macro.h>
+#include <nemu/isa.hpp>/*{{{*/
+#include <nemu/cpu/cpu.hpp>
+#include <macro.hpp>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <stdbool.h>
@@ -23,10 +23,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "common.h"
-#include "memory/vaddr.h"
-#include "sdb.h"
-#include "utils.h"
+#include "common.hpp"
+#include "nemu/memory/vaddr.hpp"
+#include "sdb.hpp"
+#include "utils.hpp"
 /*}}}*/
 
 static int is_batch_mode = false;
@@ -158,7 +158,7 @@ static int cmd_p(char *args) {/*{{{*/
     bool success = false;
     word_t value = expr(args, &success);
     if (success) {
-        printf("Decimal    :\t"FMT_WORD_U"\n",value);
+        printf("Decimal    :\t" FMT_WORD_U "\n",value);
         printf("Hexadecimal:\t" FMT_WORD "\n",value);
     }
     else print_description("p");

@@ -40,6 +40,7 @@ endmenu# }}}
 menu "Testing and Debugging"# {{{
 
 config WATCH_POINT
+  depends on NSC_NEMU
   bool "Watch points in simple debug"
   default y
 
@@ -47,29 +48,9 @@ config TRACE
   bool "Enable tracer"
   default y
 
-config TRACE_START
-  depends on TRACE
-  int "When tracing is enabled (unit: number of instructions)"
-  default 0
-
-config TRACE_END
-  depends on TRACE
-  int "When tracing is disabled (unit: number of instructions)"
-  default 10000
-
 config ITRACE
-  depends on TRACE && ENGINE_INTERPRETER
+  depends on TRACE
   bool "Enable instruction tracer"
-  default y
-
-config ITRACE_COND
-  depends on ITRACE
-  string "Only trace instructions when the condition is true"
-  default "true"
-
-config IRING_TRACE
-  depends on ITRACE
-  bool "trace the last 63 instructions"
   default y
 
 config MTRACE
@@ -82,22 +63,17 @@ config FTRACE
   bool "Function call will be traced"
   default n
 
-config DTRACE
+config ETRACE
   depends on TRACE
-  bool "Device access will be traced"
+  bool "Exception trigger and return will be traced"
   default n
 
 config DEADLOOP
   bool "Detect Dead loop in guest program"
   default n
 
-config ETRACE
-  depends on TRACE
-  bool "Exception trigger and return will be traced"
-  default n
-
 config DIFFTEST
-  depends on TARGET_NATIVE_ELF
+  depends on NSC_NEMU
   bool "Enable differential testing for nemu"
   default n
   help

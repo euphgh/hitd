@@ -1,5 +1,5 @@
-#include "deadloop.h"
-static PC_FIFO pc_fifo = {0};
+#include "nemu/deadloop.hpp"
+static PC_FIFO pc_fifo = {{0}};
 long loop_times = 0;
 inline static int next(int x){
     return (x+1) & (PC_FIFO_NR-1);

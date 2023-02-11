@@ -1,6 +1,6 @@
-#include "diff_sim.hpp"
-#include "PaddrInterface.hpp"
-#include "debug.h"
+#include "testbench/sim_state.hpp"
+#include "paddr/paddr_interface.hpp"
+#include "debug.hpp"
 #include <utility>
 
 PaddrTop::PaddrTop(){ devices.clear(); };

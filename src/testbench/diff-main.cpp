@@ -1,14 +1,12 @@
 #include <csignal>
-#include "common.h"
-#include "diff_sim.hpp"
-#include "diff_func.hpp"
+#include "common.hpp"
+#include "testbench/sim_state.hpp"
+#include "testbench/difftest/api.hpp"
 #include "verilated.h"
-#include "diff_proj/diff_log.h"
-#include "axi.hpp"
+#include "testbench/axi.hpp"
 #include "Vmycpu_top.h"
-#include "dpic.hpp"
+#include "testbench/dpic.hpp"
 #include <getopt.h>
-#include "diff_proj/diff_log.h"
 
 #define wave_file_t MUXDEF(CONFIG_EXT_FST,VerilatedFstC,VerilatedVcdC)
 #define __WAVE_INC__ MUXDEF(CONFIG_EXT_FST,"verilated_fst_c.h","verilated_vcd_c.h")
@@ -31,6 +29,7 @@ void compare (debug_info_t debug){
         unsigned int check;
         unsigned int wnum;
         int res = fscanf(golden_trace, "%u %x %x %x",&check,&ref.pc,&wnum,&ref.wdata);
+        assert(res==4);
         ref.wnum = wnum;
         inst_count++;
         if ((debug.pc != ref.pc) || (debug.wnum != ref.wnum) || (debug.wdata != ref.wdata)) {
@@ -45,11 +44,9 @@ void compare (debug_info_t debug){
 }
 
 static char *log_file = nullptr;
-static char *diff_so = nullptr;
 static int parse_args(int argc, char *argv[]) {
     const struct option table[] = {
         {"log"     , required_argument, NULL, 'l'},
-        {"diff"     , required_argument, NULL, 'd'},
         {"help"     , no_argument      , NULL, 'h'},
         {0          , 0                , NULL,  0 },
     };
@@ -57,11 +54,9 @@ static int parse_args(int argc, char *argv[]) {
     while ( (o = getopt_long(argc, argv, "-hl:n:d:", table, NULL)) != -1) {
         switch (o) {
             case 'l': log_file = optarg; break;
-            case 'd': diff_so = optarg; break;
             default:
                       printf("Usage: %s [OPTION...] IMAGE [args]\n\n", argv[0]);
                       printf("\t-l,--log=FILE           output difftest log to FILE\n");
-                      printf("\t-d,--diff=FILE          dynamic shared so FILE\n");
                       printf("\n");
                       exit(0);
         }
@@ -75,8 +70,6 @@ int main (int argc, char *argv[]) {
 
     extern void log_init(const char* filename);
     log_init(log_file);
-
-    difftest_init(diff_so);
 
     std::signal(SIGINT, [](int) {sim_status = SIM_ABORT;});
 
@@ -104,8 +97,8 @@ int main (int argc, char *argv[]) {
 
     uint64_t ticks = 0;
     uint64_t rst_ticks = 5;
-    uint64_t last_commit = ticks;
-    uint64_t commit_timeout = 1024;
+    // uint64_t last_commit = ticks;
+    // uint64_t commit_timeout = 1024;
     sim_status = SIM_RUN;
 
     top->aclk = 0;

@@ -1,4 +1,4 @@
-#include "mytrace.h"
+#include "nemu/mytrace.hpp"
 void read_dtrace(int len, paddr_t addr, const char* name, word_t value){/*{{{*/
     char buf[44];
     hex_display(len, value, buf);

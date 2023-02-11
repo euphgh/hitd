@@ -13,9 +13,9 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include <isa.h>
-#include "cp0.h"
-#include "local-include/reg.h"
+#include "nemu/isa.hpp"
+#include "cp0.hpp"
+#include "local-include/reg.hpp"
 
 const char *regs[] = {
   "$0", "at", "v0", "v1", "a0", "a1", "a2", "a3",

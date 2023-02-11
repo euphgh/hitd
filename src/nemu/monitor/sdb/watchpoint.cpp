@@ -13,9 +13,9 @@
  * See the Mulan PSL v2 for more details.
  ***************************************************************************************/
 
-#include "common.h"
-#include "debug.h"
-#include "sdb.h"
+#include "common.hpp"
+#include "debug.hpp"
+#include "sdb.hpp"
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -46,7 +46,7 @@ void init_wp_pool() {
 }
 
 static WP* malloc_wp(){/*{{{*/
-    if (free_==NULL) Assert(0, "no more watchpoint");
+    if (free_==NULL) __ASSERT_NEMU__(0, "no more watchpoint");
     WP* tmp = free_;
     free_ = free_->next;
     tmp->next = head;
@@ -97,12 +97,12 @@ bool is_wp_change(){/*{{{*/
     while (tmp!=NULL) {
         bool success = false;
         word_t new_value = expr(tmp->expression, &success);
-        Assert(success, "fail to calculate \"%s\"\n",tmp->expression);
+        __ASSERT_NEMU__(success, "fail to calculate \"%s\"\n",tmp->expression);
         if (new_value!=tmp->last_value){
             printf("Hardware watchpoint %d: %s\n",tmp->NO,tmp->expression);
             printf("\n");
-            printf("Old value = "FMT_WORD_U"\n",tmp->last_value);
-            printf("New value = "FMT_WORD_U"\n",new_value);
+            printf("Old value = " FMT_WORD_U "\n",tmp->last_value);
+            printf("New value = " FMT_WORD_U "\n",new_value);
             printf("\n");
             tmp->last_value = new_value;
             is_change = true;

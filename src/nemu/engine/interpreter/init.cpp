@@ -13,7 +13,7 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include <cpu/cpu.h>
+#include <nemu/cpu/cpu.hpp>
 
 IFNDEF(CONFIG_NSC_DIFF,void sdb_mainloop());
 

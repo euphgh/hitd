@@ -1,4 +1,4 @@
-#include "svdpi.h"
+#include "testbench/dpic.hpp"
 #include "Vmycpu_top__Dpi.h"
 #include <stdio.h>
 void dpic_scope() {

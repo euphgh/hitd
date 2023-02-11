@@ -1,7 +1,7 @@
-#include "common.h"
-#include "PaddrInterface.hpp"
-#include "diff_sim.hpp"
-#include "diff_proj/paddr_top.h"
+#include "common.hpp"
+#include "paddr/paddr_interface.hpp"
+#include "testbench/sim_state.hpp"
+#include "paddr/nemu_paddr.hpp"
 bool paddr_do_read (void* paddr_top, word_t addr, wen_t info, word_t* data){
     PaddrTop* obj = (PaddrTop*) paddr_top;
     return obj->do_read(addr, info, data);

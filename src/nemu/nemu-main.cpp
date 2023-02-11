@@ -12,10 +12,13 @@
 *
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
-#include "diff_proj/paddr_top.h"
-#include <common.h>
-#include "nemu_proj/difftest-ref.hh"
-#include "debug.h"
+#include "paddr/nemu_paddr.hpp"
+#include "common.hpp"
+#include "debug.hpp"
+#include "nemu/cpu/cpu.hpp"
+#include "testbench/diff_func.hpp"
+#include <cstdlib>
+#include <cassert>
 #ifndef CONFIG_NSC_DIFF
 void init_monitor(int, char *[]);
 void am_init_monitor();
@@ -44,11 +47,11 @@ void compare (debug_info_t *debug){
         unsigned int check;
         unsigned int wnum;
         int res = fscanf(golden_trace, "%u %x %x %x",&check,&ref.pc,&wnum,&ref.wdata);
-        Assert(res==4, "file read error");
+        __ASSERT_NEMU__(res==4, "file read error");
         if (!check) return;
         ref.wnum = wnum;
         if ((debug->pc != ref.pc) || (debug->wnum != ref.wnum) || (debug->wdata != ref.wdata)) {
-            Assert(((debug->pc == ref.pc) && (debug->wnum == ref.wnum) && (debug->wdata == ref.wdata)), \
+            __ASSERT_NEMU__(((debug->pc == ref.pc) && (debug->wnum == ref.wnum) && (debug->wdata == ref.wdata)), \
                     "Error!!!\n"  \
                     "    mycpu    : PC = 0x%8x, wb_wnum = 0x%2x, wb_wdata = 0x%8x\n"  \
                     "    reference: PC = 0x%8x, wb_wnum = 0x%2x, wb_wdata = 0x%8x\n", \
@@ -64,7 +67,6 @@ const struct option table[] = {
     {"help"     , no_argument      , NULL, 'h'},
     {0          , 0                , NULL,  0 },
 };
-#include "cpu/cpu.h"
 int main (int argc, char *argv[]){
     int o;
     while ( (o = getopt_long(argc, argv, "-bhl:d:p:", table, NULL)) != -1) {
@@ -79,7 +81,7 @@ int main (int argc, char *argv[]){
     }
     ref_init(new_paddr_top(),log_file);
     golden_trace = fopen("/home/hgh/code/nscscc-group/func_test_v0.01/cpu132_gettrace/golden_trace.txt","r+");
-    Assert(golden_trace!=0, "can not open golden_trace");
+    __ASSERT_NEMU__(golden_trace!=0, "can not open golden_trace");
     bool res = true;
     do {
         ref_tick_int(0);

@@ -16,9 +16,9 @@
 #ifndef __CPU_DIFFTEST_H__
 #define __CPU_DIFFTEST_H__
 
-#include <common.h>
-#include "debug.h"
-#include <difftest-def.h>
+#include "common.hpp"
+#include "debug.hpp"
+#include "nemu/difftest-def.hpp"
 
 #ifdef CONFIG_DIFFTEST
 void difftest_skip_ref();

@@ -13,21 +13,21 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include "isa.h"
-#include "local-include/reg.h"
-#include <cpu/cpu.h>
-#include <cpu/ifetch.h>
-#include <cpu/decode.h>
-#include "isa-def.h"
-#include "cp0.h"
-#include "utils.h"
+#include "nemu/isa.hpp"
+#include "local-include/reg.hpp"
+#include <nemu/cpu/cpu.hpp>
+#include <nemu/cpu/ifetch.hpp>
+#include <nemu/cpu/decode.hpp>
+#include "isa-def.hpp"
+#include "cp0.hpp"
+#include "utils.hpp"
 #include <signal.h>
 
 #define R(i) gpr(i)
 #define Rw(i,value) do {s->wnum = i; cpu.gpr[i] = value;} while(0)
 #define Mr vaddr_read
 #define Mw vaddr_write
-#define __NOT_DELAY__ Assert(!cpu.is_delay_slot,"this instr can not be delay slot")
+#define __NOT_DELAY__ __ASSERT_NEMU__(!cpu.is_delay_slot,"this instr can not be delay slot")
 
 enum {
   TYPE_I, // signed extended imm

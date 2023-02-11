@@ -13,10 +13,10 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include "common.h"
-#include "debug.h"
-#include "memory/vaddr.h"
-#include <isa.h>
+#include "common.hpp"
+#include "debug.hpp"
+#include "nemu/memory/vaddr.hpp"
+#include <nemu/isa.hpp>
 
 /* We use the POSIX regex functions to process regular expressions.
  * Type 'man regex' for more information about POSIX regex functions.
@@ -118,7 +118,7 @@ static bool make_token(char *e) {/*{{{*/
       if (regexec(&re[i], e + position, 1, &pmatch, 0) == 0 && pmatch.rm_so == 0) {
         char *substr_start = e + position;
         int substr_len = pmatch.rm_eo;
-        Assert(substr_len<32, "token \"%.*s\"'s width is %d, greater than 32!",substr_len,substr_start,substr_len);
+        __ASSERT_NEMU__(substr_len<32, "token \"%.*s\"'s width is %d, greater than 32!",substr_len,substr_start,substr_len);
 
         // Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
         //     i, rules[i].regex, position, substr_len, substr_len, substr_start);
@@ -245,7 +245,7 @@ static word_t eval(uint8_t p, uint8_t q, bool* success){/*{{{*/
         }
         word_t val1 = 0;
         if (tokens[op].type==TK_DEREF) {
-            Assert(op==p, "dereference operator panic!!!");
+            __ASSERT_NEMU__(op==p, "dereference operator panic!!!");
         }
         else {
             val1 = eval(p, op - 1,success);
@@ -262,7 +262,7 @@ static word_t eval(uint8_t p, uint8_t q, bool* success){/*{{{*/
             case TK_EQ  : res = val1 == val2;break;
             case TK_NOTEQ:res = val1 != val2;break;
             case TK_DEREF:res = vaddr_read(val2, 8);break;
-            default: Assert(0, "main operator \"%s\" type is not legal",tokens[op].str);break;
+            default: __ASSERT_NEMU__(0, "main operator \"%s\" type is not legal",tokens[op].str);break;
         }
     }
     return res;

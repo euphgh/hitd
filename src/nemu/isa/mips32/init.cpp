@@ -13,8 +13,8 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include <isa.h>
-#include <memory/paddr.h>
+#include "nemu/isa.hpp"
+#include "nemu/memory/paddr.hpp"
 
 // this is not consistent with uint8_t
 // but it is ok since we do not access the array directly

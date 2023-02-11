@@ -13,5 +13,5 @@
 # See the Mulan PSL v2 for more details.
 #**************************************************************************************/
 
-INC_PATH += $(HITD_HOME)/src/nemu/engine/$(ENGINE)
+NEMU_INC_PATH += $(HITD_HOME)/src/nemu/engine/$(ENGINE)
 DIRS-y += src/nemu/engine/$(ENGINE)

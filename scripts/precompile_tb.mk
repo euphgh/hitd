@@ -1,14 +1,22 @@
 include Vmycpu_top.mk
 
-CXX_CLOF    = $(HITD_HOME)/scripts/tb_cpp_flags.txt
-LD_CLOF     = $(HITD_HOME)/scripts/tb_ld_flags.txt
-OBJS_EXTRA  = $(HITD_HOME)/scripts/tb_ld_objs.txt
+all: $(VK_USER_OBJS) $(VK_GLOBAL_OBJS) $(VM_PREFIX)__ALL.a $(VM_HIER_LIBS) $(CXX_CLOF) $(LD_HEAD_OF) $(LD_TAIL_OF) $(EXTRA_OBJS_LIST)
+
+COLOR_RED := $(shell echo "\033[1;31m")
+COLOR_END := $(shell echo "\033[0m")
+ifneq ($(wildcard $(VM_HIER_LIBS)),)
+$(warning $(COLOR_RED)Warning: VM_HIER_LIBS not empty $(VM_HIER_LIBS)$(COLOR_END))
+endif
+ifneq ($(wildcard $(VK_USER_OBJS)),)
+$(warning $(COLOR_RED)Warning: VK_USER_OBJS not empty $(VK_USER_OBJS)$(COLOR_END))
+endif
+
 
 files: $(CXX_CLOF) $(LD_CLOF) $(OBJS_EXTRA)
 	@echo CXX_CLOF: $(CXX_CLOF)
 	@echo LD_CLOF: $(LD_CLOF)
 	@echo OBJS_EXTRA: $(OBJS_EXTRA)
-var::
+var:
 	@echo
 	@echo OBJCACHE: $(OBJCACHE) 
 	@echo CXX: $(CXX) 
@@ -31,10 +39,18 @@ var::
 $(CXX_CLOF): 
 	$(file > $@,$(CPPFLAGS))
 	$(file >>$@,$(CXXFLAGS))
-$(LD_CLOF):
+
+# $(LINK) $(LDFLAGS)  $(VK_USER_OBJS) $(VK_GLOBAL_OBJS) $(VM_PREFIX)__ALL.a $(VM_HIER_LIBS) $(LOADLIBES) $(LDLIBS) $(LIBS) $(SC_LIBS) -o $@
+# 		  |LD_HEAD_OF|				  |EXTRA_OBJS_LIST|									    |LD_TAIL_OF 							|
+
+$(LD_HEAD_OF):
 	$(file > $@,$(LDFLAGS))
+
+$(LD_TAIL_OF):
+	$(file > $@,$(LOADLIBES))
 	$(file >>$@,$(LDLIBS))
 	$(file >>$@,$(LIBS))
 	$(file >>$@,$(SC_LIBS))
-$(OBJS_EXTRA):
-	$(file > $@,$(HITD_HOME)/obj_dir/$(VK_GLOBAL_OBJS))
+
+$(EXTRA_OBJS_LIST):
+	$(file > $@,$(foreach element, $(VK_GLOBAL_OBJS), $(HITD_HOME)/obj_dir/$(element)))

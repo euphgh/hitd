@@ -16,8 +16,8 @@
 #ifndef __CPU_CPU_H__
 #define __CPU_CPU_H__
 
-#include "cpu/decode.h"
-#include <common.h>
+#include "nemu/cpu/decode.hpp"
+#include "common.hpp"
 
 void cpu_exec(uint64_t n);
 

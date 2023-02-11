@@ -1,7 +1,7 @@
 #include <fstream>
 #include <iostream>
-#include "diff_sim.hpp"
-#include "PaddrInterface.hpp"
+#include "testbench/sim_state.hpp"
+#include "paddr/paddr_interface.hpp"
 
 Pmem::Pmem(word_t size_bytes) {/*{{{*/
     Assert(IS_2_POW(size_bytes),"Pmem size is not 2 power: %x",size_bytes);

@@ -1,6 +1,6 @@
 #ifndef __DEADLOOP_H__
 #define __DEADLOOP_H__
-#include "common.h"
+#include "common.hpp"
 #define PC_FIFO_NR 256
 #define LOOP_MAX 65536
 typedef struct{

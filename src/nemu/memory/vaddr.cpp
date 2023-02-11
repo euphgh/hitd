@@ -13,8 +13,9 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include <isa.h>
-#include <memory/paddr.h>
+#include "nemu/memory/paddr.hpp"
+#include <nemu/isa.hpp>
+#include <paddr/nemu_paddr.hpp>
 
 word_t vaddr_ifetch(vaddr_t addr, int len) {
     word_t paddr = ((addr>>30)==0x2) ? (addr & 0x1fffffff) : addr;

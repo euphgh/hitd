@@ -2,10 +2,10 @@
 #define __AXI_HH__
 
 #include "Vmycpu_top.h"
-#include "common.h"
+#include "common.hpp"
 #include "generated/autoconf.h"
 #include <memory>
-#include "PaddrInterface.hpp"
+#include "paddr/paddr_interface.hpp"
 
 typedef enum {/*{{{*/
     BURST_FIXED = 0,

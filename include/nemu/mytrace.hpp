@@ -2,7 +2,7 @@
 #define __MYTRACE_H__
 
 #include <elf.h>
-#include <common.h>
+#include <common.hpp>
 char* search_ftable(uint64_t addr);
 void print_ftable();
 typedef enum {

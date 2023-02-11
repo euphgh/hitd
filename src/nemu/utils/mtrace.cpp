@@ -1,4 +1,4 @@
-#include "mytrace.h"
+#include "nemu/mytrace.hpp"
 void hex_display(int len, word_t data, char* buf){/*{{{*/
     char* p = buf;
 #ifdef CONFIG_ISA64
@@ -16,7 +16,7 @@ void read_mtrace(int len, paddr_t addr, word_t value){/*{{{*/
     log_write("READ  memory %d byte:\t%8s[" FMT_PADDR "] = %s\n", len, "mem",addr, buf);
 }/*}}}*/
 void write_mtrace(int len, paddr_t addr, word_t value){/*{{{*/
-    char buf[32];
+    char buf[44];
     hex_display(len, value, buf);
     log_write("WRITE memory %d byte:\t%8s[" FMT_PADDR "] = %s\n", len, "mem",addr, buf);
 }/*}}}*/

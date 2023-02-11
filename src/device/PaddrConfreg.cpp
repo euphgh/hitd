@@ -1,6 +1,5 @@
-#include "diff_sim.hpp"
-#include "diff_proj/diff_log.h"
-#include "PaddrInterface.hpp"
+#include "testbench/sim_state.hpp"
+#include "paddr/paddr_interface.hpp"
 
 #define CR0_ADDR            0x8000  //32'hbfaf_8000 
 #define CR1_ADDR            0x8004  //32'hbfaf_8004 

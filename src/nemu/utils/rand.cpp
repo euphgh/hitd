@@ -13,7 +13,8 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include <common.h>
+#include "common.hpp"
+#include <cstdlib>
 #ifndef CONFIG_TARGET_AM
 #include <time.h>
 #endif

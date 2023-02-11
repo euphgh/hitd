@@ -18,7 +18,6 @@
 
 #include <common.hpp>
 
-#ifdef __NEMU_PROJ__
 // ----------- state -----------
 
 enum { NEMU_RUNNING, NEMU_STOP, NEMU_END, NEMU_ABORT, NEMU_QUIT };
@@ -34,7 +33,7 @@ extern NEMUState nemu_state;
 // ----------- timer -----------
 
 uint64_t get_time();
-#endif /* __NEMU_PROJ__ */
+
 // ----------- log -----------
 
 #define ANSI_FG_B_BLACK   "\33[1;90m"
@@ -67,7 +66,7 @@ uint64_t get_time();
 
 #define ANSI_FMT(str, fmt) fmt str ANSI_NONE
 
-#include "testbench/diff_proj/diff_log.hpp"
+#include "log_write.hpp"
 
 #define _Log(...) \
   do { \

@@ -1,4 +1,5 @@
-#include "mytrace.h"
+#include "nemu/mytrace.hpp"
+#include <cassert>
 #ifdef CONFIG_ISA64
 #define Elf_Ehdr Elf64_Ehdr
 #define Elf_Ehdr Elf64_Ehdr 
@@ -73,9 +74,9 @@ void print_ftable(){/*{{{*/
 void set_level(Action act){
     if (act==push) level++;
     if (act==pop)  level--;
-    Assert(level>=0, "Call stack must be positive");
+    __ASSERT_NEMU__(level>=0, "Call stack must be positive");
 }
-inline int get_level(){
+int get_level(){
     return level;
 }
 
@@ -123,7 +124,7 @@ void init_ftrace(const char* filename){
     Elf_Off  symbol_tb_a;
     symbol_tb_a = symbol_shd.sh_offset;
     int total = symbol_shd.sh_size/symbol_shd.sh_entsize;
-    for (size_t i = 0; i < total; i++) {
+    for (int i = 0; i < total; i++) {
         Elf_Sym sym;
         int res = fread_at(fp, symbol_tb_a+symbol_shd.sh_entsize*i, symbol_shd.sh_entsize, &sym);
         assert (res);

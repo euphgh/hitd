@@ -13,23 +13,22 @@
  * See the Mulan PSL v2 for more details.
  ***************************************************************************************/
 
-#include "common.h"
-#include <cpu/cpu.h>
-#include <cpu/decode.h>
-#include <cpu/difftest.h>
-#include <locale.h>
-#include "cp0.h"
-#include "iring.h"
-#include "macro.h"
-#include "mytrace.h"
-#include "deadloop.h"
+#include <clocale>
+#include "common.hpp"
+#include "nemu/cpu/cpu.hpp"
+#include "nemu/cpu/decode.hpp"
+#include "nemu/cpu/difftest.hpp"
+#include "cp0.hpp"
+#include "macro.hpp"
+#include "nemu/mytrace.hpp"
+#include "nemu/deadloop.hpp"
 /* The assembly code of instructions executed is only output to the screen
  * when the number of instructions executed is less than this value.
  * This is useful when you use the `si' command.
  * You can modify this value as you want.
  */
 #define MAX_INST_TO_PRINT 10
-CPU_state cpu = {0};
+CPU_state cpu = {{0}};
 uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
 static bool g_print_step = false;
@@ -65,17 +64,13 @@ void check_deadloop(word_t pc){
 }
 
 static void trace_and_difftest(const Decode *_this, vaddr_t dnpc) {
-#ifdef CONFIG_ITRACE_COND/*{{{*/
-    if (ITRACE_COND) { log_write("%s\n", _this->logbuf); }
-#endif/*}}}*/
-    if (g_print_step) { 
-        IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); 
-    }
+    IFDEF(CONFIG_ITRACE, log_write("%s\n", _this->logbuf)); 
     IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
-    IFDEF(CONFIG_WATCH_POINT if(is_wp_change())nemu_state.state=NEMU_STOP);
+    IFDEF(CONFIG_WATCH_POINT if(is_wp_change()) nemu_state.state=NEMU_STOP);
     IFDEF(CONFIG_FTRACE, check_ftrace(_this));
     IFDEF(CONFIG_DEADLOOP, check_deadloop(_this->pc));
 }
+
 static void exec_once(Decode *s, vaddr_t pc) {/*{{{*/
     s->pc = pc;
     s->snpc = pc;
