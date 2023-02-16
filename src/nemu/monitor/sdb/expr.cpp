@@ -206,7 +206,7 @@ static word_t eval(uint8_t p, uint8_t q, bool* success){/*{{{*/
         }
         if (*success) {
             if (!is_reg) sscanf(tokens[p].str, pattern, &res);
-            else res = isa_reg_str2val((tokens[p].str)+1, success);
+            else res = nemu->isa_reg_str2val((tokens[p].str)+1, success);
         }
     }
     else if (surround_by_parentheses(p, q) == true) {

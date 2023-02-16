@@ -14,6 +14,7 @@
 ***************************************************************************************/
 
 #include "common.h"
+#include "generated/autoconf.h"
 
 static struct gdb_conn *conn;
 
@@ -58,6 +59,49 @@ bool gdb_memcpy_to_qemu(uint32_t dest, void *src, int len) {
   ok &= gdb_memcpy_to_qemu_small(dest, src, len);
   return ok;
 }
+#ifdef CONFIG_NSC_NEMU
+bool gdb_getregs(diff_state *r) {
+    gdb_send(conn, (const uint8_t *)"g", 1);
+    size_t size;
+    uint8_t *reply = gdb_recv(conn, &size);
+
+    int i;
+    uint8_t *p = reply;
+    uint8_t c;
+
+    for (i = 0; i < 32; i ++) {// get gpr
+        c = p[8];
+        p[8] = '\0';
+        r->array[i] = gdb_decode_hex_str(p);
+        p[8] = c;
+        p += 8;
+    }
+
+    p += 8; // skip cp0_status
+
+    for (i = 0; i < 2; i ++) {// get lohi
+        c = p[8];
+        p[8] = '\0';
+        r->array[i] = gdb_decode_hex_str(p);
+        p[8] = c;
+        p += 8;
+    }
+
+    p += 16; // skip cp0_cause and cp0_badvaddr
+
+    p[8] = '\0'; //get pc
+    r->array[i] = gdb_decode_hex_str(p);
+
+    free(reply);
+
+    return true;
+}
+bool gdb_setregs(diff_state *r) {
+    printf("gdb_setregs now can not use!");
+    assert(0);
+    return false;
+}
+#else
 
 bool gdb_getregs(union isa_gdb_regs *r) {
   gdb_send(conn, (const uint8_t *)"g", 1);
@@ -103,6 +147,7 @@ bool gdb_setregs(union isa_gdb_regs *r) {
 
   return ok;
 }
+#endif /* CONFIG_NSC_NEMU */
 
 bool gdb_si() {
   char buf[] = "vCont;s:1";

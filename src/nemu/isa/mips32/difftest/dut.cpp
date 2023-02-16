@@ -17,14 +17,14 @@
 #include "nemu/cpu/difftest.hpp"
 #include "../local-include/reg.hpp"
 
-bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
-    bool ans = ref_r->pc==cpu.pc;
+bool CPU_state::isa_difftest_checkregs(diff_state *ref_r) {
+    bool ans = ref_r->pc==arch_state.pc;
     for (size_t i = 0; i < ARRLEN(ref_r->gpr); i++) {
-        ans &= (ref_r->gpr[i]==cpu.gpr[i]);
+        ans &= (ref_r->gpr[i]==arch_state.gpr[i]);
     }
-    if (cpu.hilo_valid){
-        ans &= ref_r->hi==cpu.hi;
-        ans &= ref_r->lo==cpu.lo;
+    if (hilo_valid){
+        ans &= ref_r->hi==arch_state.hi;
+        ans &= ref_r->lo==arch_state.lo;
     }
     return ans;
 }
@@ -37,19 +37,17 @@ static inline void log_reg(word_t ref, word_t my_ans, const char* name){
             name,ref,ref);
 }
 
-void isa_difftest_log_error(CPU_state *ref_r){
-    // Log("Difftest FAIL for " ANSI_FMT("reference",ANSI_FG_GREEN) " is different from " ANSI_FMT("nemu",ANSI_FG_RED));
-
-    for (uint8_t i = 0; i < ARRLEN(ref_r->gpr); i++) {
+void CPU_state::isa_difftest_log_error(diff_state *ref_r){
+    for (uint8_t i = 0; i < 32; i++) {
         char tmp[10] = {0};
         sprintf(tmp, "%s($%d)", reg_name(i), i);
-        log_reg(ref_r->gpr[i], gpr(i), tmp);
+        log_reg(ref_r->gpr[i], arch_state.gpr[i], tmp);
     }
-    if (cpu.hilo_valid){
-        log_reg(ref_r->hi, cpu.hi, "$hi");
-        log_reg(ref_r->lo, cpu.lo, "$lo");
+    if (hilo_valid){
+        log_reg(ref_r->hi, arch_state.hi, "$hi");
+        log_reg(ref_r->lo, arch_state.lo, "$lo");
     }
-    log_reg(ref_r->pc, cpu.pc, "next-pc");
+    log_reg(ref_r->pc, arch_state.pc, "next-pc");
 }
 void isa_difftest_attach() {
 }

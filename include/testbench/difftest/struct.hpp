@@ -11,9 +11,9 @@ typedef struct{
 } debug_info_t;
 
 typedef struct {
-    word_t pc;
-    word_t hi,lo;
     word_t gpr[32];
+    word_t lo,hi;
+    word_t pc;
     //TODO:add cp0 or exception
 } diff_state;
 

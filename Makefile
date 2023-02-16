@@ -56,7 +56,7 @@ $(CXX_CLOF) $(LD_HEAD_OF) $(LD_TAIL_OF) $(EXTRA_OBJS_LIST) $(ARCHIVES) &: vsrc
 	EXTRA_OBJS_LIST=$(EXTRA_OBJS_LIST)
 
 TB_SRCS := $(shell find src/testbench -name "*.cpp")
-TB_CFLAGS    += -I$(HITD_HOME)/include $(CFLAGS_BUILD) $(CFLAGS_PATH) -I$(HITD_HOME)/obj_dir
+TB_CFLAGS    += -I$(HITD_HOME)/include $(CFLAGS_BUILD) -D__GUEST_ISA__=$(GUEST_ISA) $(CFLAGS_PATH) -I$(HITD_HOME)/obj_dir
 
 LDFLAGS += $(CFLAGS_BUILD)
 

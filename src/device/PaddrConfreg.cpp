@@ -23,7 +23,8 @@
 #define SIMU_FLAG_ADDR      0xfff4  //32'hbfaf_fff4 
 #define OPEN_TRACE_ADDR     0xfff8  //32'hbfaf_fff8
 #define NUM_MONITOR_ADDR    0xfffc  //32'hbfaf_fffc
-PaddrConfreg::PaddrConfreg(bool simulation) {
+PaddrConfreg::PaddrConfreg(std::shared_ptr<spdlog::logger> input_logger, bool simulation):
+    PaddrInterface(input_logger) {
     timer = 0;
     memset(cr,0,sizeof(cr));
     led = 0;
@@ -110,7 +111,7 @@ bool PaddrConfreg::do_read (word_t addr, wen_t info, word_t* data) {
             break;
         default:
             *(uint32_t *)data = 0;
-            Warn("read confreg not exist address: " FMT_WORD_X ,addr);
+            log_pt->warn("read confreg not exist address: {}",addr);
             break;
     }
     return true;
@@ -163,7 +164,7 @@ bool PaddrConfreg::do_write(word_t addr, wen_t info, const word_t data){
             num = data;
             break;
         default:
-            Warn("write confreg not exist address: " FMT_WORD_X ,addr);
+            log_pt->warn("write confreg not exist address: {}" ,addr);
             break;
     }
     return true;

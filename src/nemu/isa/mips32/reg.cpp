@@ -24,37 +24,38 @@ const char *regs[] = {
   "t8", "t9", "k0", "k1", "gp", "sp", "s8", "ra"
 };
 
-void isa_reg_display() {
+
+void CPU_state::isa_reg_display() {
     uint8_t regs_len = ARRLEN(regs);
     for (int i = 0; i < regs_len; i++) {
-        word_t value = gpr(i);
+        word_t value = arch_state.gpr[i];
         char name[8];
         sprintf(name, "$%-2d(%s)",i,regs[i]);
         printf(FMT_REG,name,value,value);
     }
-    printf(FMT_REG,"pc",cpu.pc,cpu.pc);
+    printf(FMT_REG,"pc",arch_state.pc,arch_state.pc);
 }
 
 #define __cp0_name_read__(regname,rd,sel,...) \
     if (*success==false && strcmp(#regname,s)==0){ \
-        res = cp0_read(&(cpu.cp0),rd<<3|sel);\
+        res = cp0_read(&(cp0),rd<<3|sel);\
         *success = true; \
     }
 
-word_t isa_reg_str2val(const char *s, bool *success) {
+word_t CPU_state::isa_reg_str2val(const char *s, bool *success) {
     word_t res = 0;
     *success = false;
     uint8_t regs_len = ARRLEN(regs);
     for (uint8_t i = 0; i < regs_len; i++) {
         if (strcmp(regs[i], s)==0){
-            res = gpr(i);
+            res = arch_state.gpr[i];
             *success = true;
             break;
         }
     }
     if (*success==false && strcmp("pc",s)==0){
         if (strcmp("pc", s)==0){
-            res = cpu.pc;
+            res = arch_state.pc;
             *success = true;
         }
     }

@@ -14,7 +14,7 @@
 ***************************************************************************************/
 
 #include "nemu/isa.hpp"
-#include "nemu/memory/paddr.hpp"
+#include <memory>
 
 // this is not consistent with uint8_t
 // but it is ok since we do not access the array directly
@@ -26,23 +26,23 @@ static const uint32_t img [] = {
   0x7000003f,  // sdbbp (used as nemu_trap)
 };
 #endif /* !CONFIG_NSC_DIFF */
+std::unique_ptr<CPU_state> nemu;
+void CPU_state::reset() {/*{{{*/
+    arch_state.pc = 0xbfc00000;
+    arch_state.gpr[0] = 0;
+    cp0_init(&cp0);
+}/*}}}*/
 
-static void restart() {
-  /* Set the initial program counter. */
-  cpu.pc = RESET_VECTOR;
+CPU_state::mips32_CPU_state(std::shared_ptr<PaddrTop> ptop_input): 
+    log_pt(ptop_input->log_pt), 
+    paddr_top(ptop_input) {
+        extern void init_disasm(const char *triple);
+        IFDEF(CONFIG_ITRACE, init_disasm("mipsel-pc-linux-gnu"));
+    };
 
-  /* The zero register is always 0. */
-  cpu.gpr[0] = 0;
-
-  /* assign cp0 initial value*/
-  cp0_init(&cpu.cp0);
-
-}
-
-void init_isa() {
-  /* Load built-in image. */
-  IFNDEF(CONFIG_NSC_DIFF,memcpy(guest_to_host(RESET_VECTOR), img, sizeof(img)));
-
-  /* Initialize this virtual computer system. */
-  restart();
+void init_isa(std::shared_ptr<PaddrTop> ptop_input) {
+    nemu.reset(new CPU_state(ptop_input));
+    /* Load built-in image. */
+    IFNDEF(CONFIG_NSC_DIFF,memcpy(guest_to_host(RESET_VECTOR), img, sizeof(img)));
+    /* Initialize this virtual computer system. */
 }

@@ -14,91 +14,83 @@
  ***************************************************************************************/
 
 #include <clocale>
+#include <memory>
 #include "common.hpp"
 #include "nemu/cpu/cpu.hpp"
+#include "nemu/isa.hpp"
 #include "nemu/cpu/decode.hpp"
-#include "nemu/cpu/difftest.hpp"
 #include "cp0.hpp"
 #include "macro.hpp"
 #include "nemu/mytrace.hpp"
 #include "nemu/deadloop.hpp"
+#include "isa-def.hpp"
+#include "spdlog/logger.h"
+#include "nemu/cpu/difftest.hpp"
 /* The assembly code of instructions executed is only output to the screen
  * when the number of instructions executed is less than this value.
  * This is useful when you use the `si' command.
  * You can modify this value as you want.
  */
 #define MAX_INST_TO_PRINT 10
-CPU_state cpu = {{0}};
 uint64_t g_nr_guest_inst = 0;
-static uint64_t g_timer = 0; // unit: us
-static bool g_print_step = false;
-void device_update();
+uint64_t g_timer = 0; // unit: us
+bool g_print_step = false;
 bool is_wp_change();
 
-void check_ftrace(const Decode * s){/*{{{*/
-    if (s->flag!=0){
-        int level = get_level();
-        vaddr_t now_pc = s->pc;
-        vaddr_t dest_pc = MUXDEF(CONFIG_ISA_mips32, cpu.delay_slot_npc, s->dnpc);
-        log_write(FMT_WORD ": ",now_pc);
-        if (IS_CALL(s->flag)) {
-            for (int i = 0; i < level; i++)
-                log_write("  ");
-            log_write("call [%s] -> [%s] (@" FMT_WORD ")\n",search_ftable(now_pc),search_ftable(dest_pc), dest_pc);
-            set_level(push);
-        }
-        if (IS_RET (s->flag)){
-            for (int i = 0; i < level-1; i++)
-                log_write("  ");
-            log_write("ret  [%s] <- [%s]\n", search_ftable(dest_pc), search_ftable(now_pc));
-            set_level(pop );
-        }
-    }
-}/*}}}*/
+// void check_ftrace(const Decode * s){/*{{{*/
+//     if (s->flag!=0){
+//         int level = get_level();
+//         vaddr_t now_pc = s->pc;
+//         vaddr_t dest_pc = MUXDEF(CONFIG_ISA_mips32, cpu.delay_slot_npc, s->dnpc);
+//         log_write(FMT_WORD ": ",now_pc);
+//         if (IS_CALL(s->flag)) {
+//             for (int i = 0; i < level; i++)
+//                 log_write("  ");
+//             log_write("call [%s] -> [%s] (@" FMT_WORD ")\n",search_ftable(now_pc),search_ftable(dest_pc), dest_pc);
+//             set_level(push);
+//         }
+//         if (IS_RET (s->flag)){
+//             for (int i = 0; i < level-1; i++)
+//                 log_write("  ");
+//             log_write("ret  [%s] <- [%s]\n", search_ftable(dest_pc), search_ftable(now_pc));
+//             set_level(pop );
+//         }
+//     }
+// }/*}}}*/
 void check_deadloop(word_t pc){
     if (detect_deadloop(pc)){
-        Log("nemu abort for detecting dead loop after pc:" FMT_WORD_X,get_pc_before_deadloop());
+        // Log("nemu abort for detecting dead loop after pc:" FMT_WORD_X,get_pc_before_deadloop());
+        // TODO:trace
         nemu_state.state = NEMU_ABORT;
         nemu_state.halt_pc = pc;
     }
 }
 
-static void trace_and_difftest(const Decode *_this, vaddr_t dnpc) {
-    IFDEF(CONFIG_ITRACE, log_write("%s", _this->logbuf)); 
-    IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
-    IFDEF(CONFIG_WATCH_POINT if(is_wp_change()) nemu_state.state=NEMU_STOP);
+void trace_and_difftest(Decode *_this) {
+    // IFDEF(CONFIG_ITRACE, log_pt->trace(inst_state.logbuf));
+    IFDEF(CONFIG_DIFFTEST, difftest_step(nemu->isa_diff_state(), _this->dnpc));
+    IFDEF(CONFIG_WATCH_POINT, if(is_wp_change()) nemu_state.state=NEMU_STOP); //TODO: make watch point a class with methor
     IFDEF(CONFIG_FTRACE, check_ftrace(_this));
     IFDEF(CONFIG_DEADLOOP, check_deadloop(_this->pc));
 }
 
-static void exec_once(Decode *s, vaddr_t pc) {/*{{{*/
-    s->pc = pc;
-    s->snpc = pc;
-    isa_exec_once(s);
-    cpu.pc = s->dnpc;
-    IFDEF(CONFIG_IRING_TRACE, add_iring(s->logbuf));
-}/*}}}*/
+static void statistic() { }
 
-static void execute(uint64_t n) {
-    Decode s;
+void mips32_CPU_state::execute(uint64_t n) {
     for (;n > 0; n --) {
-        exec_once(&s, cpu.pc);
-        g_nr_guest_inst ++;
-        trace_and_difftest(&s, cpu.pc);
+        inst_state.snpc = inst_state.pc = arch_state.pc;
+        isa_exec_once();
+        arch_state.pc = inst_state.dnpc;
         if (nemu_state.state != NEMU_RUNNING) {
-            IFDEF(CONFIG_ITRACE,printf("Completion of execution %s\n", s.logbuf));
+            // log_pt->error("Completion of execution {}", .logbuf);
             break;
         }
-        IFDEF(CONFIG_DEVICE, device_update());
+        else trace_and_difftest(&inst_state);
     }
 }
 
-static void statistic() {
-}
-
-
 /* Simulate how the CPU works. */
-void cpu_exec(uint64_t n) {
+void cpu_exec(uint64_t n) {/*{{{*/
     g_print_step = (n < MAX_INST_TO_PRINT);
     switch (nemu_state.state) {
         case NEMU_END: case NEMU_ABORT:
@@ -109,7 +101,7 @@ void cpu_exec(uint64_t n) {
 
     uint64_t timer_start = get_time();
 
-    execute(n);
+    nemu->execute(n);
 
     uint64_t timer_end = get_time();
     g_timer += timer_end - timer_start;
@@ -118,27 +110,8 @@ void cpu_exec(uint64_t n) {
         case NEMU_RUNNING: nemu_state.state = NEMU_STOP; break;
 
         case NEMU_END: case NEMU_ABORT:
-                           Log("nemu: %s at pc = " FMT_WORD_X,
-                                   (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
-                                    (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
-                                     ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
-                                   nemu_state.halt_pc);
+                           nemu->log_pt->info("nemu abort");
                            // fall through
         case NEMU_QUIT: statistic();
     }
-}
-#ifdef CONFIG_NSC_DIFF
-extern Decode last_inst;
-void assert_fail_msg() {
-    Error("Fail instruction is %s ", last_inst.logbuf);
-    isa_reg_display();
-}
-bool nsc_exec(bool except, Decode* s) {
-    if (except) cpu.pc = isa_raise_intr(Int, cpu.pc);
-    else exec_once(s, cpu.pc);
-    //TODO:interrupt too long not trigger will set nemu_state=ABORT;
-    bool res = nemu_state.state == NEMU_RUNNING;
-    if (res) trace_and_difftest(s, cpu.pc);
-    return res;
-}
-#endif /* CONFIG_NSC_DIFF */
+}/*}}}*/

@@ -4,9 +4,11 @@
 #include <cstdint>
 #include <cassert>
 #include <cstdio>
+#include <memory>
 #include <vector>
 #include <queue>
 #include "common.hpp"
+#include "spdlog/logger.h"
 #include "testbench/difftest/struct.hpp"
 
 
@@ -31,14 +33,16 @@ class PaddrInterface {/*{{{*/
         virtual bool do_read (word_t addr, wen_t info, word_t* data) = 0;
         virtual bool do_write(word_t addr, wen_t info, const word_t data) = 0;
         virtual PaddrInterface* deep_copy() = 0;
+        std::shared_ptr<spdlog::logger> log_pt;
+        PaddrInterface(std::shared_ptr<spdlog::logger> input_logger): log_pt(input_logger) {}
 };/*}}}*/
 
 class PaddrTop: public PaddrInterface{/*{{{*/
     private:
         std::vector<std::pair<AddrIntv, PaddrInterface*>> devices;
     public:
-        PaddrTop();
-        PaddrTop(PaddrTop& src);
+        PaddrTop(std::shared_ptr<spdlog::logger> input_logger);
+        PaddrTop(const PaddrTop& src);
         bool add_dev(AddrIntv &new_range, PaddrInterface *dev);
         bool do_read (word_t addr, wen_t info, word_t* data);
         bool do_write(word_t addr, wen_t info, const word_t data);
@@ -50,11 +54,11 @@ class Pmem : public PaddrInterface  {/*{{{*/
         unsigned char *mem;
         size_t mem_size;
     public:
-        Pmem(word_t size_bytes);
-        Pmem(const AddrIntv &_range);
-        Pmem(Pmem &src);
-        Pmem(const AddrIntv &_range, unsigned char *init_binary);
-        Pmem(size_t size_bytes, const char *init_file);
+        Pmem(word_t size_bytes,std::shared_ptr<spdlog::logger> input_logger);
+        Pmem(const AddrIntv &_range, std::shared_ptr<spdlog::logger> input_logger);
+        Pmem(const AddrIntv &_range, unsigned char *init_binary, std::shared_ptr<spdlog::logger> input_logger);
+        Pmem(size_t size_bytes, const char *init_file, std::shared_ptr<spdlog::logger> input_logger);
+        Pmem(const Pmem &src);
         PaddrInterface* deep_copy();
         ~Pmem() ;
         bool do_read (word_t addr, wen_t info, word_t* data);
@@ -84,7 +88,7 @@ class PaddrConfreg: public PaddrInterface {/*{{{*/
     public:
         uint32_t confreg_read = 0;
         uint32_t confreg_write = 0;
-        PaddrConfreg(bool simulation = false);
+        PaddrConfreg(std::shared_ptr<spdlog::logger> input_logger, bool simulation = false);
         void tick();
         bool do_read (word_t addr, wen_t info, word_t* data);
         bool do_write(word_t addr, wen_t info, const word_t data);

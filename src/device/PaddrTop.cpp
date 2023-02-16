@@ -3,7 +3,8 @@
 #include "debug.hpp"
 #include <utility>
 
-PaddrTop::PaddrTop(){ devices.clear(); };
+PaddrTop::PaddrTop(std::shared_ptr<spdlog::logger> input_logger):
+PaddrInterface(input_logger) { devices.clear(); };
 
 bool PaddrTop::add_dev(AddrIntv &new_range, PaddrInterface *dev) {
     // check overlap
@@ -34,7 +35,8 @@ bool PaddrTop::do_write(word_t addr, wen_t info, const word_t data){
     }
     return false;
 }
-PaddrTop::PaddrTop(PaddrTop &src){
+PaddrTop::PaddrTop(const PaddrTop &src):
+    PaddrInterface(src){
     for (auto element: src.devices) {
         PaddrInterface* new_dev = element.second->deep_copy();
         devices.push_back(std::make_pair(element.first, new_dev));

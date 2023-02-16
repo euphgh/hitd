@@ -18,7 +18,7 @@
 
 // macro stringizing
 #define str_temp(x) #x
-#define str(x) str_temp(x)
+#define nemu_str(x) str_temp(x)
 
 // strlen() for string constant
 #define STRLEN(CONST_STR) (sizeof(CONST_STR) - 1)
@@ -60,7 +60,7 @@
 // test if a macro of ANY type is defined
 // NOTE1: it ONLY works inside a function, since it calls `strcmp()`
 // NOTE2: macros defined to themselves (#define A A) will get wrong results
-#define isdef(macro) (strcmp("" #macro, "" str(macro)) != 0)
+#define isdef(macro) (strcmp("" #macro, "" nemu_str(macro)) != 0)
 
 // simplification for conditional compilation
 #define __IGNORE(...)

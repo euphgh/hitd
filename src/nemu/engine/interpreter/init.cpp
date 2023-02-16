@@ -15,13 +15,9 @@
 
 #include <nemu/cpu/cpu.hpp>
 
-IFNDEF(CONFIG_NSC_DIFF,void sdb_mainloop());
+extern void sdb_mainloop();
 
 void engine_start() {
-#ifdef CONFIG_TARGET_AM
-  cpu_exec(-1);
-#else
   /* Receive commands from user. */
-  IFNDEF(CONFIG_NSC_DIFF,sdb_mainloop());
-#endif
+  sdb_mainloop();
 }

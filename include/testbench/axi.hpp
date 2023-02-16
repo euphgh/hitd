@@ -6,6 +6,7 @@
 #include "generated/autoconf.h"
 #include <memory>
 #include "paddr/paddr_interface.hpp"
+#include "spdlog/spdlog.h"
 
 typedef enum {/*{{{*/
     BURST_FIXED = 0,
@@ -80,7 +81,8 @@ class axi_paddr{
     public:
         PaddrTop paddr_top;
         axi_paddr(Vmycpu_top *mycpu):
-            pins(axi_ref(mycpu)) {}
+            pins(axi_ref(mycpu)),
+            paddr_top(spdlog::default_logger()) {}
         bool calculate_output();
         void update_output();
         void reset();

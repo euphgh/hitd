@@ -3,33 +3,29 @@
 #include "testbench/sim_state.hpp"
 #include "paddr/paddr_interface.hpp"
 
-Pmem::Pmem(word_t size_bytes) {/*{{{*/
+Pmem::Pmem(word_t size_bytes, std::shared_ptr<spdlog::logger> input_logger): PaddrInterface(input_logger) {/*{{{*/
     Assert(IS_2_POW(size_bytes),"Pmem size is not 2 power: %x",size_bytes);
     mem = new unsigned char[size_bytes];
     mem_size = size_bytes;
 }/*}}}*/
-Pmem::Pmem(const AddrIntv &_range): Pmem(_range.mask+1) {}
-Pmem::Pmem(const AddrIntv &_range, unsigned char *init_binary){/*{{{*/
+
+Pmem::Pmem(const AddrIntv &_range, std::shared_ptr<spdlog::logger> input_logger): 
+    Pmem(_range.mask+1,input_logger) {}
+
+Pmem::Pmem(const AddrIntv &_range, unsigned char *init_binary, std::shared_ptr<spdlog::logger> input_logger): /*{{{*/
+    PaddrInterface(input_logger) {
     word_t size_bytes = _range.mask+1;
     Assert(IS_2_POW(size_bytes),"Pmem size is not 2 power: %x",size_bytes);
     mem = init_binary;
     mem_size = size_bytes;
 }/*}}}*/
-Pmem::Pmem(size_t size_bytes, const char *init_file): Pmem(size_bytes) {/*{{{*/
-    std::ifstream file(init_file,std::ios::in | std::ios::binary | std::ios::ate);
-    size_t file_size = file.tellg();
-    file.seekg(std::ios_base::beg);
-    if (file_size > mem_size) {
-        std::cerr << "mmio_mem size is not big enough for init file." << std::endl;
-        file_size = size_bytes;
-    }
-    file.read((char*)mem,file_size);
-}/*}}}*/
-Pmem::Pmem(Pmem &src){/*{{{*/
+
+Pmem::Pmem(const Pmem &src):PaddrInterface(src) {/*{{{*/
     mem_size = src.mem_size;
     mem = new unsigned char[mem_size];
-    memcpy(mem,src.get_mem_ptr(),mem_size);
+    memcpy(mem,src.mem,mem_size);
 }/*}}}*/
+
 Pmem::~Pmem() { delete [] mem; }
 
 bool Pmem::do_read (word_t addr, wen_t info, word_t* data){/*{{{*/

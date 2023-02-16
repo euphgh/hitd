@@ -17,21 +17,22 @@
 #define __ISA_H__
 
 // Located at src/isa/$(GUEST_ISA)/include/isa-def.h
-#include <isa-def.hpp>
+#include "common.hpp"
+#include "isa-def.hpp"
+#include <memory>
 
 // The macro `__GUEST_ISA__` is defined in $(CFLAGS).
 // It will be expanded as "x86" or "mips32" ...
 typedef concat(__GUEST_ISA__, _CPU_state) CPU_state;
-typedef concat(__GUEST_ISA__, _ISADecodeInfo) ISADecodeInfo;
+// typedef concat(__GUEST_ISA__, _ISADecodeInfo) ISADecodeInfo;
 
 // monitor
 extern char isa_logo[];
-void init_isa();
+void init_isa(std::shared_ptr<PaddrTop> ptop_input);
 
-// reg
-extern CPU_state cpu;
-void isa_reg_display();
-word_t isa_reg_str2val(const char *name, bool *success);
+extern std::unique_ptr<CPU_state> nemu;
+// void isa_reg_display();
+// word_t isa_reg_str2val(const char *name, bool *success);
 #define FMT_REG  "%-10s" FMT_WORD_X "\t\t" FMT_WORD_D "\n"
 
 
@@ -48,14 +49,10 @@ int isa_mmu_check(vaddr_t vaddr, int len, int type);
 #endif
 paddr_t isa_mmu_translate(vaddr_t vaddr, int len, int type);
 
-// interrupt/exception
-vaddr_t isa_raise_intr(word_t NO, vaddr_t epc);
-#define INTR_EMPTY ((word_t)-1)
-bool isa_query_intr();
-
 // difftest
 bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc);
 void isa_difftest_attach();
 void isa_difftest_log_error(CPU_state *ref_r);
+// diff_state isa_arch_state();
 
 #endif

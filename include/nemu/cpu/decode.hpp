@@ -16,7 +16,6 @@
 #ifndef __CPU_DECODE_H__
 #define __CPU_DECODE_H__
 
-#include "nemu/isa.hpp"
 #include "debug.hpp"
 #include "cassert"
 
@@ -31,9 +30,9 @@ typedef struct Decode {
     vaddr_t dnpc; // dynamic next pc
     IFDEF(CONFIG_NSC_DIFF,word_t wdata);
     IFDEF(CONFIG_NSC_DIFF,uint8_t wnum);
-    ISADecodeInfo isa;
+    char logbuf[128];
+    word_t inst;
     uint8_t flag;
-    IFDEF(CONFIG_ITRACE, char logbuf[128]);
 } Decode;
 
 // --- pattern matching mechanism ---

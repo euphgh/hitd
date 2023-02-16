@@ -14,14 +14,14 @@
 ***************************************************************************************/
 
 #include "common.h"
-#include <difftest-def.h>
+#include "nemu/difftest-def.hpp"
 #include <sys/prctl.h>
 #include <signal.h>
 
 bool gdb_connect_qemu(int);
 bool gdb_memcpy_to_qemu(uint32_t, void *, int);
-bool gdb_getregs(union isa_gdb_regs *);
-bool gdb_setregs(union isa_gdb_regs *);
+bool gdb_getregs(diff_state *r);
+bool gdb_setregs(diff_state *r);
 bool gdb_si();
 void gdb_exit();
 
@@ -36,7 +36,7 @@ void difftest_memcpy(paddr_t addr, void *buf, size_t n, bool direction) {
 }
 
 void difftest_regcpy(void *dut, bool direction) {
-  union isa_gdb_regs qemu_r;
+  diff_state qemu_r;
   gdb_getregs(&qemu_r);
   if (direction == DIFFTEST_TO_REF) {
     memcpy(&qemu_r, dut, DIFFTEST_REG_SIZE);
@@ -45,7 +45,6 @@ void difftest_regcpy(void *dut, bool direction) {
     memcpy(dut, &qemu_r, DIFFTEST_REG_SIZE);
   }
 }
-
 void difftest_exec(uint64_t n) {
   while (n --) gdb_si();
 }

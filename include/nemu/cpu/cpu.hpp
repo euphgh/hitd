@@ -16,7 +16,6 @@
 #ifndef __CPU_CPU_H__
 #define __CPU_CPU_H__
 
-#include "nemu/cpu/decode.hpp"
 #include "common.hpp"
 
 void cpu_exec(uint64_t n);
@@ -26,9 +25,5 @@ void invalid_inst(vaddr_t thispc);
 
 #define NEMUTRAP(thispc, code) set_nemu_state(NEMU_END, thispc, code)
 #define INV(thispc) invalid_inst(thispc)
-
-#ifdef CONFIG_NSC_DIFF
-bool nsc_exec(bool except, Decode* s);
-#endif /* CONFIG_NSC_DIFF */
 
 #endif
