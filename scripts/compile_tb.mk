@@ -5,10 +5,11 @@ OBJ_DIR  := $(BUILD_DIR)/obj-$(NAME)
 BINARY   := $(BUILD_DIR)/$(NAME)
 LD := $(CXX)
 LDFLAGS := $(LDFLAGS)
+COM_FLAG = -MMD -Wall
 
 # NEMU compile rule
 NEMU_INCLUDES = $(addprefix -I, $(NEMU_INC_PATH) $(WORK_DIR)/include)
-NEMU_CFLAGS  := -MMD -Wall -Werror $(NEMU_INCLUDES) $(NEMU_CFLAGS) -fexceptions
+NEMU_CFLAGS  := $(COM_FLAG) $(NEMU_INCLUDES) $(NEMU_CFLAGS)
 NEMU_OBJS = $(NEMU_SRCS:%.cpp=$(OBJ_DIR)/%.o)
 $(NEMU_OBJS): $(OBJ_DIR)/%.o: %.cpp
 	@echo + CXX $<
@@ -18,7 +19,7 @@ $(NEMU_OBJS): $(OBJ_DIR)/%.o: %.cpp
 
 # testbench compile rule
 TB_INCLUDES = $(addprefix -I, $(TB_INC_PATH) $(WORK_DIR)/include $(HITD_HOME)/src/nemu/isa/mips32/include)
-TB_CFLAGS  := -MMD -Wall -Werror $(TB_INCLUDES) $(TB_CFLAGS) -fexceptions
+TB_CFLAGS  := $(COM_FLAG) $(TB_INCLUDES) $(TB_CFLAGS) -fexceptions
 TB_OBJS = $(TB_SRCS:%.cpp=$(OBJ_DIR)/%.o)
 $(TB_OBJS): $(OBJ_DIR)/%.o: %.cpp $(CXX_CLOF)
 	@echo + CXX $<

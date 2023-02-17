@@ -3,7 +3,7 @@
 #include "debug.hpp"
 #include <utility>
 
-PaddrTop::PaddrTop(std::shared_ptr<spdlog::logger> input_logger):
+PaddrTop::PaddrTop(el::Logger* input_logger):
 PaddrInterface(input_logger) { devices.clear(); };
 
 bool PaddrTop::add_dev(AddrIntv &new_range, PaddrInterface *dev) {

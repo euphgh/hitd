@@ -18,11 +18,11 @@
 
 #include "nemu/cpu/decode.hpp"
 #include "common.hpp"
-#include "spdlog/logger.h"
 #include "cp0.hpp"
 #include "paddr/paddr_interface.hpp"
 #include "nemu/memory/vaddr.hpp"
 #include <memory>
+#include "easylogging++.h"
 
 class mips32_CPU_state{
     public:
@@ -33,7 +33,7 @@ class mips32_CPU_state{
         bool hilo_valid;
         word_t delay_slot_npc;
         bool is_delay_slot;
-        std::shared_ptr<spdlog::logger> log_pt;
+        el::Logger* log_pt;
         std::shared_ptr<PaddrTop> paddr_top;
         Decode inst_state;
 

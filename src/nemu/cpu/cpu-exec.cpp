@@ -24,7 +24,6 @@
 #include "nemu/mytrace.hpp"
 #include "nemu/deadloop.hpp"
 #include "isa-def.hpp"
-#include "spdlog/logger.h"
 #include "nemu/cpu/difftest.hpp"
 /* The assembly code of instructions executed is only output to the screen
  * when the number of instructions executed is less than this value.

@@ -1,5 +1,4 @@
 #include "nemu/isa.hpp"
-#include "spdlog/spdlog.h"
 #include "generated/autoconf.h"
 #include "testbench/sim_state.hpp"
 #include "testbench/difftest/api.hpp"
@@ -15,42 +14,54 @@
 #include __WAVE_INC__
 #endif
 
-using namespace std;
 sim_status_t sim_status = SIM_STOP;
 // const word_t end_pc = 0xbfc00100;
+INITIALIZE_EASYLOGGINGPP
+std::unique_ptr<CPU_state> nemu_cpu;
+uint64_t ticks = 0;
 uint64_t inst_count = 0;
+extern el::Logger* logger_init(std::string name);
 
-
+std::string now_pc(const el::LogMessage* msg){
+    std::stringstream res("0x");
+    res << std::hex << nemu_cpu->arch_state.pc;
+    return res.str();
+}
+std::string now_ticks(const el::LogMessage* msg){
+    return std::to_string(ticks);
+}
 
 int main (int argc, char *argv[]) {
 
     std::signal(SIGINT, [](int) {sim_status = SIM_ABORT;});
 
-    unique_ptr<Vmycpu_top> top(new Vmycpu_top());
-    unique_ptr<axi_paddr> axi(new axi_paddr(top.get()));
+    el::Logger* nemu_log = logger_init("Nemu ");
+    el::Logger* mycpu_log = logger_init("MyCPU");
+    std::unique_ptr<Vmycpu_top> top(new Vmycpu_top());
+    std::unique_ptr<axi_paddr> axi(new axi_paddr(top.get(), mycpu_log));
 
     AddrIntv inst_range = AddrIntv(0x1fc00000,(uint8_t)22);
     AddrIntv confreg_range = AddrIntv(0x1faf0000,(uint8_t)16);
 
-    Pmem* v_inst_mem = new Pmem(inst_range,spdlog::default_logger());
+    Pmem* v_inst_mem = new Pmem(inst_range,mycpu_log);
     v_inst_mem->load_binary(0,__FUNC_BIN__);
-    PaddrConfreg* v_confreg = new PaddrConfreg(spdlog::default_logger());
+    PaddrConfreg* v_confreg = new PaddrConfreg(mycpu_log);
     v_confreg->set_switch(0);
 
     axi->paddr_top.add_dev(inst_range, v_inst_mem);
     axi->paddr_top.add_dev(confreg_range, v_confreg);
 
-    shared_ptr<PaddrTop> nemu_paddr_top(new PaddrTop(axi->paddr_top));
+    std::shared_ptr<PaddrTop> nemu_paddr_top(new PaddrTop(axi->paddr_top));
+    nemu_paddr_top->log_pt = nemu_log;
 
-    unique_ptr<CPU_state> nemu_cpu(new CPU_state(nemu_paddr_top));
+    nemu_cpu.reset(new CPU_state(nemu_paddr_top));
     nemu_cpu->reset();
 
     Verilated::traceEverOn(CONFIG_TRACE_ON);
     IFDEF(CONFIG_TRACE_ON,wave_file_t tfp);
     IFDEF(CONFIG_TRACE_ON,top->trace(&tfp,0));
     IFDEF(CONFIG_TRACE_ON,tfp.open(__WAVE_DIR__ "func_test." CONFIG_WAVE_EXT));
-
-    uint64_t ticks = 0;
+    ticks = 0;
     uint64_t rst_ticks = 5;
     // uint64_t last_commit = ticks;
     // uint64_t commit_timeout = 1024;

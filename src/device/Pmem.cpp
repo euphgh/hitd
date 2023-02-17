@@ -3,16 +3,16 @@
 #include "testbench/sim_state.hpp"
 #include "paddr/paddr_interface.hpp"
 
-Pmem::Pmem(word_t size_bytes, std::shared_ptr<spdlog::logger> input_logger): PaddrInterface(input_logger) {/*{{{*/
+Pmem::Pmem(word_t size_bytes, el::Logger* input_logger): PaddrInterface(input_logger) {/*{{{*/
     Assert(IS_2_POW(size_bytes),"Pmem size is not 2 power: %x",size_bytes);
     mem = new unsigned char[size_bytes];
     mem_size = size_bytes;
 }/*}}}*/
 
-Pmem::Pmem(const AddrIntv &_range, std::shared_ptr<spdlog::logger> input_logger): 
+Pmem::Pmem(const AddrIntv &_range, el::Logger* input_logger): 
     Pmem(_range.mask+1,input_logger) {}
 
-Pmem::Pmem(const AddrIntv &_range, unsigned char *init_binary, std::shared_ptr<spdlog::logger> input_logger): /*{{{*/
+Pmem::Pmem(const AddrIntv &_range, unsigned char *init_binary, el::Logger* input_logger): /*{{{*/
     PaddrInterface(input_logger) {
     word_t size_bytes = _range.mask+1;
     Assert(IS_2_POW(size_bytes),"Pmem size is not 2 power: %x",size_bytes);

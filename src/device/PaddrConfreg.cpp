@@ -23,7 +23,7 @@
 #define SIMU_FLAG_ADDR      0xfff4  //32'hbfaf_fff4 
 #define OPEN_TRACE_ADDR     0xfff8  //32'hbfaf_fff8
 #define NUM_MONITOR_ADDR    0xfffc  //32'hbfaf_fffc
-PaddrConfreg::PaddrConfreg(std::shared_ptr<spdlog::logger> input_logger, bool simulation):
+PaddrConfreg::PaddrConfreg(el::Logger* input_logger, bool simulation):
     PaddrInterface(input_logger) {
     timer = 0;
     memset(cr,0,sizeof(cr));

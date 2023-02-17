@@ -92,7 +92,7 @@ void init_regex() {/*{{{*/
     ret = regcomp(&re[i], rules[i].regex, REG_EXTENDED);
     if (ret != 0) {
       regerror(ret, &re[i], error_msg, 128);
-      panic("regex compilation failed: %s\n%s", error_msg, rules[i].regex);
+      Assert(0,"regex compilation failed: %s\n%s", error_msg, rules[i].regex);
     }
   }
 }/*}}}*/

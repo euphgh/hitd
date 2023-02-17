@@ -1,0 +1,30 @@
+#include "easylogging++.h"
+#include "common.hpp"
+
+extern std::string now_pc(const el::LogMessage* msg);
+extern std::string now_ticks(const el::LogMessage* msg);
+
+static bool is_first = true;
+inline static void first_init(){
+    el::Helpers::installCustomFormatSpecifier(el::CustomFormatSpecifier("%pc", now_pc));
+    el::Helpers::installCustomFormatSpecifier(el::CustomFormatSpecifier("%ticks", now_ticks));
+    is_first = false;
+}
+
+el::Logger* logger_init(std::string name){
+    if (is_first) first_init();
+
+    el::Configurations log_conf;
+    log_conf.setToDefault();
+
+    log_conf.setGlobally(el::ConfigurationType::Format, "[" + name + "][%ticks][%pc][%levshort]:%msg");
+    log_conf.setGlobally(el::ConfigurationType::Filename, "test-log.txt");
+    log_conf.set(el::Level::Trace,   el::ConfigurationType::ToStandardOutput, "false");
+    log_conf.set(el::Level::Info,    el::ConfigurationType::ToStandardOutput, "true");
+    log_conf.set(el::Level::Error,   el::ConfigurationType::ToStandardOutput, "true");
+    log_conf.set(el::Level::Warning, el::ConfigurationType::ToStandardOutput, "true");
+
+    el::Logger* logger = el::Loggers::getLogger(name);
+    logger->configure(log_conf);
+    return logger;
+}
