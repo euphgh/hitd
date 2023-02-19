@@ -1,13 +1,22 @@
 #include "easylogging++.h"
 #include "common.hpp"
 
-extern std::string now_pc(const el::LogMessage* msg);
-extern std::string now_ticks(const el::LogMessage* msg);
-
+char* log_file_name;
+extern uint32_t log_pc;
+extern uint64_t ticks;
+static std::string now_pc(const el::LogMessage* msg){
+    std::stringstream res("0x");
+    res << std::hex << log_pc;
+    return res.str();
+}
+static std::string now_ticks(const el::LogMessage* msg){
+    return std::to_string(ticks);
+}
 static bool is_first = true;
 inline static void first_init(){
     el::Helpers::installCustomFormatSpecifier(el::CustomFormatSpecifier("%pc", now_pc));
     el::Helpers::installCustomFormatSpecifier(el::CustomFormatSpecifier("%ticks", now_ticks));
+    el::Loggers::addFlag(el::LoggingFlag::ColoredTerminalOutput);
     is_first = false;
 }
 
@@ -18,7 +27,8 @@ el::Logger* logger_init(std::string name){
     log_conf.setToDefault();
 
     log_conf.setGlobally(el::ConfigurationType::Format, "[" + name + "][%ticks][%pc][%levshort]:%msg");
-    log_conf.setGlobally(el::ConfigurationType::Filename, "test-log.txt");
+    log_conf.setGlobally(el::ConfigurationType::Filename, log_file_name);
+    log_conf.setGlobally(el::ConfigurationType::ToFile, "true");
     log_conf.set(el::Level::Trace,   el::ConfigurationType::ToStandardOutput, "false");
     log_conf.set(el::Level::Info,    el::ConfigurationType::ToStandardOutput, "true");
     log_conf.set(el::Level::Error,   el::ConfigurationType::ToStandardOutput, "true");
@@ -26,5 +36,6 @@ el::Logger* logger_init(std::string name){
 
     el::Logger* logger = el::Loggers::getLogger(name);
     logger->configure(log_conf);
+    LOG(INFO) << "Init logger with name:" << name;
     return logger;
 }

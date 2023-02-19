@@ -29,25 +29,27 @@ bool CPU_state::isa_difftest_checkregs(diff_state *ref_r) {
     return ans;
 }
 
-static inline void log_reg(word_t ref, word_t my_ans, const char* name){
+void CPU_state::isa_log_reg(word_t ref, word_t my_ans, const char* name){
     bool error = ref!=my_ans;
     const char *my_fmt = error ? ANSI_FMT(FMT_REG, ANSI_FG_RED) : FMT_REG;
-    printf(my_fmt, name, my_ans,my_ans);
-    if (error) printf(ANSI_FMT(FMT_REG, ANSI_FG_GREEN),
-            name,ref,ref);
+        printf(my_fmt, name, my_ans,my_ans);
+    if (error) {
+        printf(ANSI_FMT(FMT_REG, ANSI_FG_GREEN),
+                name,ref,ref);
+    }
 }
 
 void CPU_state::isa_difftest_log_error(diff_state *ref_r){
     for (uint8_t i = 0; i < 32; i++) {
         char tmp[10] = {0};
         sprintf(tmp, "%s($%d)", reg_name(i), i);
-        log_reg(ref_r->gpr[i], arch_state.gpr[i], tmp);
+        isa_log_reg(ref_r->gpr[i], arch_state.gpr[i], tmp);
     }
     if (hilo_valid){
-        log_reg(ref_r->hi, arch_state.hi, "$hi");
-        log_reg(ref_r->lo, arch_state.lo, "$lo");
+        isa_log_reg(ref_r->hi, arch_state.hi, "$hi");
+        isa_log_reg(ref_r->lo, arch_state.lo, "$lo");
     }
-    log_reg(ref_r->pc, arch_state.pc, "next-pc");
+    isa_log_reg(ref_r->pc, arch_state.pc, "next-pc");
 }
 void isa_difftest_attach() {
 }

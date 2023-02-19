@@ -12,7 +12,7 @@ typedef enum{
 #define __ASSERT_SIM__(cond,fmt,...) \
     do { \
         if (!(cond)) { \
-            printf(fmt, ## __VA_ARGS__);\
+            printf(ANSI_FMT(fmt, ANSI_FG_RED) "\n", ##  __VA_ARGS__); \
             sim_status = SIM_ABORT;\
         } \
     } while (0)

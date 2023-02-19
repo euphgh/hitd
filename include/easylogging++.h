@@ -13,6 +13,10 @@
 //  https://amrayn.com
 //  http://muflihun.com
 //
+// my def start
+#define ELPP_FRESH_LOG_FILE
+#define ELPP_NO_DEFAULT_LOG_FILE
+// mydef end
 
 #ifndef EASYLOGGINGPP_H
 #define EASYLOGGINGPP_H

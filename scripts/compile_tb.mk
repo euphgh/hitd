@@ -5,7 +5,7 @@ OBJ_DIR  := $(BUILD_DIR)/obj-$(NAME)
 BINARY   := $(BUILD_DIR)/$(NAME)
 LD := $(CXX)
 LDFLAGS := $(LDFLAGS)
-COM_FLAG = -MMD -Wall
+COM_FLAG = -MMD -Wall -std=gnu++20
 
 # NEMU compile rule
 NEMU_INCLUDES = $(addprefix -I, $(NEMU_INC_PATH) $(WORK_DIR)/include)
@@ -35,13 +35,15 @@ OBJS += $(TB_OBJS) $(NEMU_OBJS)
 # Some convenient rules
 .PHONY: tb gdb sim
 
+LOG_FILE = $(BUILD_DIR)/tb-log.txt
 EXTRA_OBJS = $(file < $(EXTRA_OBJS_LIST))
 $(BINARY): $(OBJS) $(OBJS_EXTRA) $(LD_HEAD_OF) $(LD_TAIL_OF) $(ARCHIVES)
 	@echo + LD $@
 	@$(LD) $(LDFLAGS) @$(LD_HEAD_OF) $(OBJS) $(EXTRA_OBJS) $(ARCHIVES) @$(LD_TAIL_OF) $(LIBS) -o $@ 
 
-override ARGS ?= --log=$(BUILD_DIR)/tb-log.txt
+override ARGS ?= --log=$(LOG_FILE)
 override ARGS += $(ARGS_DIFF)
+
 
 tb: $(BINARY)
 

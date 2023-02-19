@@ -64,9 +64,9 @@ void check_deadloop(word_t pc){
         nemu_state.halt_pc = pc;
     }
 }
-
 void trace_and_difftest(Decode *_this) {
-    // IFDEF(CONFIG_ITRACE, log_pt->trace(inst_state.logbuf));
+    extern std::string disassemble(uint64_t pc, uint8_t *code, int nbyte);
+    IFDEF(CONFIG_ITRACE, nemu->log_pt->trace("[I] %v", disassemble(_this->pc, (uint8_t*)&(_this->inst), 4).c_str()+1));
     IFDEF(CONFIG_DIFFTEST, difftest_step(nemu->isa_diff_state(), _this->dnpc));
     IFDEF(CONFIG_WATCH_POINT, if(is_wp_change()) nemu_state.state=NEMU_STOP); //TODO: make watch point a class with methor
     IFDEF(CONFIG_FTRACE, check_ftrace(_this));

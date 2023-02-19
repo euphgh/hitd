@@ -15,6 +15,7 @@ bool PaddrTop::add_dev(AddrIntv &new_range, PaddrInterface *dev) {
         if (l_max < r_min) return false; // overleap
     }
     devices.push_back(std::make_pair(new_range, dev));
+    dev->log_pt = log_pt;
     return true;
 }
 bool PaddrTop::do_read (word_t addr, wen_t info, word_t* data){
@@ -26,6 +27,14 @@ bool PaddrTop::do_read (word_t addr, wen_t info, word_t* data){
     }
     return false;
 }
+
+void PaddrTop::set_logger(el::Logger *input_logger){
+    log_pt = input_logger;
+    for (auto it: devices){
+        it.second->set_logger(input_logger);
+    }
+}
+
 bool PaddrTop::do_write(word_t addr, wen_t info, const word_t data){
     for (auto it: devices){
         AddrIntv dev_range = it.first;

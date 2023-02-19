@@ -47,10 +47,13 @@ class mips32_CPU_state{
         void ref_set_hilo(word_t hi, word_t lo);
         void ref_set_gpr(word_t data, uint8_t wnum);
         void ref_get_state(diff_state *dut);
+        bool ref_checkregs(diff_state *mycpu);
+        void ref_log_error(diff_state *mycpu);
         void ref_get_debug_info(debug_info_t *ref);
         // }}}
 
         // nemu difftest{{{
+        void isa_log_reg(word_t ref, word_t my_ans, const char* name);
         bool isa_difftest_checkregs(diff_state *ref_r);
         void isa_difftest_log_error(diff_state *ref_r);/*}}}*/
 

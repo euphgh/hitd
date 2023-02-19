@@ -1,9 +1,10 @@
+#include "easylogging++.h"
 #include "nemu/isa.hpp"
 #include "generated/autoconf.h"
 #include "testbench/sim_state.hpp"
-#include "testbench/difftest/api.hpp"
 #include "testbench/axi.hpp"
 #include "testbench/dpic.hpp"
+#include "utils.hpp"
 #include <getopt.h>
 #include <memory>
 #include <csignal>
@@ -14,48 +15,60 @@
 #include __WAVE_INC__
 #endif
 
-sim_status_t sim_status = SIM_STOP;
 // const word_t end_pc = 0xbfc00100;
-INITIALIZE_EASYLOGGINGPP
-std::unique_ptr<CPU_state> nemu_cpu;
 uint64_t ticks = 0;
-uint64_t inst_count = 0;
+uint32_t log_pc = 0xbfc00000;
+sim_status_t sim_status = SIM_RUN;
 extern el::Logger* logger_init(std::string name);
-
-std::string now_pc(const el::LogMessage* msg){
-    std::stringstream res("0x");
-    res << std::hex << nemu_cpu->arch_state.pc;
-    return res.str();
+extern char* log_file_name;
+static int parse_args(int argc, char *argv[]) {
+  const struct option table[] = {
+    {"log"      , required_argument, NULL, 'l'},
+    {"help"     , no_argument      , NULL, 'h'},
+  };
+  int o;
+  while ( (o = getopt_long(argc, argv, "l::", table, NULL)) != -1) {
+    switch (o) {
+      case 'l': log_file_name = optarg; break;
+      default:
+        printf("Usage: %s [OPTION...] [args]\n\n", argv[0]);
+        printf("\t-l,--log=FILE           output log to FILE\n");
+        printf("\n");
+        exit(0);
+    }
+  }
+  return 0;
 }
-std::string now_ticks(const el::LogMessage* msg){
-    return std::to_string(ticks);
-}
+INITIALIZE_EASYLOGGINGPP
 
 int main (int argc, char *argv[]) {
+    parse_args(argc, argv);
 
     std::signal(SIGINT, [](int) {sim_status = SIM_ABORT;});
 
-    el::Logger* nemu_log = logger_init("Nemu ");
-    el::Logger* mycpu_log = logger_init("MyCPU");
     std::unique_ptr<Vmycpu_top> top(new Vmycpu_top());
-    std::unique_ptr<axi_paddr> axi(new axi_paddr(top.get(), mycpu_log));
+    std::unique_ptr<axi_paddr> axi(new axi_paddr(top.get()));
 
     AddrIntv inst_range = AddrIntv(0x1fc00000,(uint8_t)22);
     AddrIntv confreg_range = AddrIntv(0x1faf0000,(uint8_t)16);
 
-    Pmem* v_inst_mem = new Pmem(inst_range,mycpu_log);
+    Pmem* v_inst_mem = new Pmem(inst_range);
     v_inst_mem->load_binary(0,__FUNC_BIN__);
-    PaddrConfreg* v_confreg = new PaddrConfreg(mycpu_log);
+    PaddrConfreg* v_confreg = new PaddrConfreg();
     v_confreg->set_switch(0);
 
     axi->paddr_top.add_dev(inst_range, v_inst_mem);
     axi->paddr_top.add_dev(confreg_range, v_confreg);
 
     std::shared_ptr<PaddrTop> nemu_paddr_top(new PaddrTop(axi->paddr_top));
-    nemu_paddr_top->log_pt = nemu_log;
+    init_isa(nemu_paddr_top);
+    el::Logger* nemu_log = logger_init("Nemu");
+    nemu_paddr_top->set_logger(nemu_log);
+    nemu->log_pt = nemu_log;
+    nemu->reset();
 
-    nemu_cpu.reset(new CPU_state(nemu_paddr_top));
-    nemu_cpu->reset();
+    el::Logger* mycpu_log = logger_init("MyCPU");
+    axi->paddr_top.set_logger(mycpu_log);
 
     Verilated::traceEverOn(CONFIG_TRACE_ON);
     IFDEF(CONFIG_TRACE_ON,wave_file_t tfp);
@@ -65,7 +78,6 @@ int main (int argc, char *argv[]) {
     uint64_t rst_ticks = 5;
     // uint64_t last_commit = ticks;
     // uint64_t commit_timeout = 1024;
-    sim_status = SIM_RUN;
 
     top->aclk = 0;
     top->aresetn = 0;
@@ -88,20 +100,18 @@ int main (int argc, char *argv[]) {
             axi->update_output();
             IFDEF(CONFIG_TRACE_ON,tfp.dump(ticks));
             if (sim_status!=SIM_RUN) break;
-            nemu_cpu->ref_tick_and_int(0);
+            nemu->ref_tick_and_int(0);
             uint8_t commit_num =dpi_retire();
             if (commit_num>0){
                 for (size_t i = 0; i < commit_num; i++) {
-                    nemu_cpu->ref_exec_once(false);
+                    nemu->ref_exec_once(false);
                 }
                 diff_state mycpu;
-                diff_state *ref_r;
-                dut_get_state(&mycpu);
-                ref_r = nemu->isa_diff_state();
-                bool res = difftest_check(&mycpu, ref_r);
+                dpi_api_get_state(&mycpu);
+                bool res = nemu->ref_checkregs(&mycpu);
                 if (!res){
-                    __ASSERT_SIM__(0, "DIFFTEST ERROR!");
-                    difftest_show_error(&mycpu, ref_r);
+                    __ASSERT_SIM__(0, ANSI_FMT("DIFFTEST ERROR!", ANSI_FG_RED));
+                    nemu->ref_log_error(&mycpu);
                 }
             }
         }

@@ -215,28 +215,13 @@ int mips32_CPU_state::decode_exec() {
 int mips32_CPU_state::isa_exec_once() {
     inst_state.wnum = 0;
     inst_state.flag = 0;
-#ifdef CONFIG_ITRACE
-    char *p = inst_state.logbuf;
-    p += snprintf(p, sizeof(inst_state.logbuf), FMT_WORD_X ":", inst_state.pc);
-#endif
     word_t this_pc = inst_state.snpc;
-    // if (this_pc==0xbfc4c9c4) raise(SIGINT);
     if (unlikely(this_pc & 0x3)){
         inst_state.dnpc = isa_raise_intr(AdEL,this_pc); 
         cp0.badvaddr.all = this_pc;
     }
     else {
         inst_state.inst = inst_fetch(&inst_state.snpc, 4);
-#ifdef CONFIG_ITRACE
-        int ilen = 4;
-        int i;
-        uint8_t *inst = (uint8_t *)&inst_state.inst;
-        for (i = ilen - 1; i >= 0; i --) {
-            p += snprintf(p, 4, " %02x", inst[i]);
-        }
-        extern void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
-        disassemble(p, inst_state.logbuf + sizeof(inst_state.logbuf) - p, inst_state.pc, (uint8_t *)&inst_state.inst, ilen);
-#endif
         // if (inst_state.pc==0xbfc4c9c4){
         //     raise(SIGTRAP);
         // }
@@ -244,5 +229,7 @@ int mips32_CPU_state::isa_exec_once() {
         if (isa_query_intr()) inst_state.dnpc = isa_raise_intr(Int, inst_state.pc);
         else decode_exec();
     }
+    extern uint32_t log_pc;
+    log_pc = this_pc;
     return 0 ;
 }

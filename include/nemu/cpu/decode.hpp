@@ -30,7 +30,6 @@ typedef struct Decode {
     vaddr_t dnpc; // dynamic next pc
     IFDEF(CONFIG_NSC_DIFF,word_t wdata);
     IFDEF(CONFIG_NSC_DIFF,uint8_t wnum);
-    char logbuf[128];
     word_t inst;
     uint8_t flag;
 } Decode;

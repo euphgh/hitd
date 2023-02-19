@@ -14,6 +14,7 @@
 ***************************************************************************************/
 
 #include "nemu/isa.hpp"
+#include "utils.hpp"
 #include <memory>
 
 // this is not consistent with uint8_t
@@ -29,7 +30,9 @@ static const uint32_t img [] = {
 std::unique_ptr<CPU_state> nemu;
 void CPU_state::reset() {/*{{{*/
     arch_state.pc = 0xbfc00000;
-    arch_state.gpr[0] = 0;
+    for (int i = 0; i < 32; i++) {
+        arch_state.gpr[i] = 0;
+    }
     cp0_init(&cp0);
 }/*}}}*/
 
@@ -42,7 +45,5 @@ CPU_state::mips32_CPU_state(std::shared_ptr<PaddrTop> ptop_input):
 
 void init_isa(std::shared_ptr<PaddrTop> ptop_input) {
     nemu.reset(new CPU_state(ptop_input));
-    /* Load built-in image. */
-    IFNDEF(CONFIG_NSC_DIFF,memcpy(guest_to_host(RESET_VECTOR), img, sizeof(img)));
-    /* Initialize this virtual computer system. */
+    nemu_state.state = NEMU_RUNNING;
 }

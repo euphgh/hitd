@@ -1145,6 +1145,7 @@ std::string OS::currentHost(void) {
 bool OS::termSupportsColor(void) {
   std::string term = getEnvironmentVariable("TERM", "");
   return term == "xterm" || term == "xterm-color" || term == "xterm-256color"
+         || term == "tmux-256color"
          || term == "screen" || term == "linux" || term == "cygwin"
          || term == "screen-256color";
 }
