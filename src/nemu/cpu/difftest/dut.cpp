@@ -93,7 +93,6 @@ void init_difftest(char *ref_so_file, long img_size, int port) {
 static void checkregs(diff_state *ref, vaddr_t pc) {
   if (!nemu->isa_difftest_checkregs(ref)) {
     nemu_state.state = NEMU_ABORT;
-    nemu_state.halt_pc = pc;
     nemu->isa_reg_display();
   }
 }

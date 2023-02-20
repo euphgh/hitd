@@ -1,5 +1,7 @@
 #include "nemu/mytrace.hpp"
 #include <cassert>
+#include "fmt/core.h"
+#include "easylogging++.h"
 #ifdef CONFIG_ISA64
 #define Elf_Ehdr Elf64_Ehdr
 #define Elf_Ehdr Elf64_Ehdr 

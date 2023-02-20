@@ -16,12 +16,14 @@
 #ifndef __DEBUG_H__
 #define __DEBUG_H__
 
+#include <cassert>
 #include <utils.hpp>
 
-#define __ASSERT_NEMU__(cond, format, ...) \
+#define __ASSERT_NEMU__(cond, str, ...) \
     do { \
         if (!(cond)) { \
-            printf(ANSI_FMT(format, ANSI_FG_RED) "\n", ##  __VA_ARGS__); \
+            extern el::Logger *nemu_log; \
+            nemu_log->error(fmt::format(str, ## __VA_ARGS__));\
             nemu_state.state = NEMU_ABORT; \
         } \
   } while (0)
@@ -29,12 +31,11 @@
 #define Assert(cond, format, ...) \
     do { \
         if (!(cond)) { \
-            fflush(stdout);\
-            fprintf(stderr, ANSI_FMT(format, ANSI_FG_RED) "\n", ##  __VA_ARGS__);\
+            fflush(stdout); \
+            fprintf(stderr, ANSI_FMT("[" __FILE__ ":%d]" format, ANSI_FG_RED) "\n", __LINE__, ##__VA_ARGS__);\
             assert(cond);\
         } \
     } while (0)
-
-#define TODO() Assert(0,"please implement me")
+#define TODO() Assert(0,"please implement first")
 
 #endif

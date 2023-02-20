@@ -1,6 +1,7 @@
 #include "nemu/isa.hpp"
 #include "nemu/mytrace.hpp"
 #include <csignal>
+#include <fmt/core.h>
 #include <ios>
 #include <sstream>
 
@@ -18,19 +19,11 @@ void hex_display(int len, word_t data, char* buf){/*{{{*/
 void read_mtrace(int len, paddr_t addr, word_t value){/*{{{*/
     char buf[44];
     hex_display(len, value, buf);
-    std::stringstream info;
-    info << "[M] read  "<< len
-        <<" bytes at [0x"
-        << std::hex << addr << "] = " << buf;
-    nemu->log_pt->trace(info.str());
+    nemu->log_pt->trace(fmt::format("[M] read  bytes at [" HEX_WORD "] = {:s}", addr, buf));
 }/*}}}*/
 void write_mtrace(int len, paddr_t addr, word_t value){/*{{{*/
     if (len>4) raise(SIGINT);
     char buf[44];
     hex_display(len, value, buf);
-    std::stringstream info;
-    info << "[M] write "<< len
-        <<" bytes at [0x"
-        << std::hex << addr << "] = " << buf;
-    nemu->log_pt->trace("[M] write %v bytes at [0x%v] = %v", len, addr, buf);
+    nemu->log_pt->trace(fmt::format("[M] write bytes at [" HEX_WORD "] = {:s}", addr, buf));
 }/*}}}*/

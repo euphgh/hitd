@@ -137,18 +137,18 @@ static int cmd_x(char *args) {/*{{{*/
 
 static int cmd_q(char *args) {/*{{{*/
   int res = 0;
-  if (nemu_state.state==NEMU_STOP) {
+  if (nemu_state.state == NEMU_STOP) {
       char input='\0';
       do {
           printf("program is not end, do you want to quit(input \"y\" to quit):");
       } while(scanf(" %c",&input)==0);
           if (input=='y') {
-          nemu_state.state=NEMU_QUIT;
+          nemu_state.state = NEMU_QUIT;
           res = -1;
       }
   }
   else {
-      nemu_state.state=NEMU_QUIT;
+      nemu_state.state = NEMU_QUIT;
       res = -1;
   }
   return res;

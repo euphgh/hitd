@@ -1,13 +1,12 @@
 #include "easylogging++.h"
 #include "common.hpp"
+#include <fmt/core.h>
 
 char* log_file_name;
 extern uint32_t log_pc;
 extern uint64_t ticks;
 static std::string now_pc(const el::LogMessage* msg){
-    std::stringstream res("0x");
-    res << std::hex << log_pc;
-    return res.str();
+    return fmt::format(HEX_WORD, log_pc);
 }
 static std::string now_ticks(const el::LogMessage* msg){
     return std::to_string(ticks);

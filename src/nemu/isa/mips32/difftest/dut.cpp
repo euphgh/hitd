@@ -32,8 +32,8 @@ bool CPU_state::isa_difftest_checkregs(diff_state *ref_r) {
 void CPU_state::isa_log_reg(word_t ref, word_t my_ans, const char* name){
     bool error = ref!=my_ans;
     const char *my_fmt = error ? ANSI_FMT(FMT_REG, ANSI_FG_RED) : FMT_REG;
-        printf(my_fmt, name, my_ans,my_ans);
     if (error) {
+        printf(my_fmt, name, my_ans,my_ans);
         printf(ANSI_FMT(FMT_REG, ANSI_FG_GREEN),
                 name,ref,ref);
     }

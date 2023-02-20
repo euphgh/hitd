@@ -1,5 +1,8 @@
 #include "testbench/sim_state.hpp"
 #include "paddr/paddr_interface.hpp"
+#include <cstdio>
+#include <fmt/core.h>
+#include <string>
 
 #define CR0_ADDR            0x8000  //32'hbfaf_8000 
 #define CR1_ADDR            0x8004  //32'hbfaf_8004 
@@ -111,7 +114,7 @@ bool PaddrConfreg::do_read (word_t addr, wen_t info, word_t* data) {
             break;
         default:
             *(uint32_t *)data = 0;
-            log_pt->warn("read confreg not exist address: {}",addr);
+            log_pt->warn(fmt::format("read confreg not exist address: " HEX_WORD, addr));
             break;
     }
     return true;
@@ -164,7 +167,7 @@ bool PaddrConfreg::do_write(word_t addr, wen_t info, const word_t data){
             num = data;
             break;
         default:
-            log_pt->warn("write confreg not exist address: {}" ,addr);
+            log_pt->warn(fmt::format("write confreg not exist address: " HEX_WORD, addr));
             break;
     }
     return true;

@@ -55,7 +55,7 @@ bool cp0_write(CP0_t* cp0, uint8_t rd_sel, word_t data){/*{{{*/
         __cp0_info__(__cp0_reg_write__,__cp0_field_write__)
         default: 
             res = false;
-            __ASSERT_NEMU__(0,"Write not exist CP0 register with rd:%u\tsel%u",rd_sel>>3,rd_sel&0x7);break;
+            __ASSERT_NEMU__(0,"Write not exist CP0 register with rd:%u\tsel%u",rd_sel>>3,rd_sel&0x7);
             break;
     }
     return res;

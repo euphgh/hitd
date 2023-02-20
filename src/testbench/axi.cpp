@@ -1,5 +1,7 @@
 #include "testbench/sim_state.hpp"
 #include "testbench/axi.hpp"
+#include "fmt/core.h"
+#include "testbench/sim_state.hpp"
 bool axi_paddr::calculate_output(){
     bool res = read_eval();
     res &= write_eval();
@@ -15,10 +17,11 @@ void axi_paddr::reset(){
 void axi_paddr::update_output(){
     AXI_BUNDLE(__my_axi_out_ref__)
 }
+extern el::Logger* mycpu_log;
 bool axi_paddr::check_axi_req(uint8_t num_bytes, burst_t burst_type, word_t start_addr, uint8_t burst_len){/*{{{*/
     bool res = true;
     __ASSERT_SIM__(num_bytes<=(CONFIG_AXI_DWID>>3), \
-            "32 AXI read bytes number not support %d",num_bytes);
+            fmt::format("32 AXI read bytes number not support {}",num_bytes));
     __ASSERT_SIM__(burst_type!=BURST_RESERVED, \
             "Arburst type is RESERVED");
 
@@ -28,7 +31,7 @@ bool axi_paddr::check_axi_req(uint8_t num_bytes, burst_t burst_type, word_t star
     if (burst_type==BURST_WRAP){
         __ASSERT_SIM__(aligned, "Arburst type is WRAP but not aligned");
         __ASSERT_SIM__((burst_len==2 || burst_len==4 || burst_len==8 || burst_len==16), \
-                "Arburst type is WRAP but arlen is %d", burst_len);
+                "Arburst type is WRAP but arlen is", burst_len);
         // NOTE:wrap type must not cross 4KB bound for wrapping at 4KB
     }
     else {
@@ -63,7 +66,7 @@ bool axi_paddr::accept_read_req(){/*{{{*/
 } // check axi, assign last_count, assign left_time, unset arready }}}
 bool axi_paddr::do_once_read(){/*{{{*/
     bool res = true;
-    res = paddr_top.do_read(r_cur_addr, r_cur_info, &s_rdata);
+    res = paddr_top->do_read(r_cur_addr, r_cur_info, &s_rdata);
     s_rvalid = 1;
     s_rlast = r_burst_count==0;
     s_rid = r_cur_id;
@@ -177,7 +180,7 @@ bool axi_paddr::accept_write_data(){/*{{{*/
 bool axi_paddr::do_all_write(){/*{{{*/
     bool res = true;
     for (size_t i = 0; i < w_burst_count; i++) {
-        res &= paddr_top.do_write(w_cur_addr[i], w_cur_info[i], w_cur_data[i]);
+        res &= paddr_top->do_write(w_cur_addr[i], w_cur_info[i], w_cur_data[i]);
     }
     s_bvalid = 1;
     s_bresp = res ? RESP_OKEY : RESP_DECERR;

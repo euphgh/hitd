@@ -14,4 +14,4 @@
 #**************************************************************************************/
 
 # NEMU_INC_PATH += $(HITD_HOME)/src/nemu/engine/$(ENGINE)
-SRCS-y = /home/hgh/code/hitvd/src/nemu/engine/interpreter/hostcall.cpp
+SRCS-y = src/nemu/engine/interpreter/hostcall.cpp

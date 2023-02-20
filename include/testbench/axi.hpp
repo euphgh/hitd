@@ -78,11 +78,11 @@ class axi_paddr{
         AXI_BUNDLE(__my_axi_out_def__)
             uint8_t delay;
     public:
-        PaddrTop paddr_top;
+        PaddrTop* paddr_top;
         axi_paddr(Vmycpu_top *mycpu, 
                 el::Logger* input_log = el::Loggers::getLogger("default")):
             pins(axi_ref(mycpu)),
-            paddr_top(input_log) {}
+            paddr_top(nullptr) {}
         bool calculate_output();
         void update_output();
         void reset();

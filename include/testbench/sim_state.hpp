@@ -1,6 +1,7 @@
 #ifndef __DIFF_SIM__
 #define __DIFF_SIM__
 
+#include <string>
 typedef enum{
     SIM_RUN,    // still run
     SIM_STOP,   // gdb breakpoint or watchpoint
@@ -8,16 +9,14 @@ typedef enum{
     SIM_END,    // finish run sim
     SIM_QUIT,   // wait to static
 }sim_status_t;
-
-#define __ASSERT_SIM__(cond,fmt,...) \
+extern sim_status_t sim_status;
+#define __ASSERT_SIM__(cond, str, ...) \
     do { \
         if (!(cond)) { \
-            printf(ANSI_FMT(fmt, ANSI_FG_RED) "\n", ##  __VA_ARGS__); \
-            sim_status = SIM_ABORT;\
+            extern el::Logger *mycpu_log; \
+            mycpu_log->error(fmt::format(str, ## __VA_ARGS__));\
+            sim_status = SIM_ABORT; \
         } \
-    } while (0)
-
-extern sim_status_t sim_status;
-#define __FUNC_BIN__ NSCSCC_HOME "/func_test_v0.01/soft/func/obj/main.bin"
+  } while (0)
 #define __WAVE_DIR__ HITD_HOME "/vlogs/wave/"
 #endif /* !__DIFF_SIM__ */

@@ -37,6 +37,7 @@ OBJS += $(TB_OBJS) $(NEMU_OBJS)
 
 LOG_FILE = $(BUILD_DIR)/tb-log.txt
 EXTRA_OBJS = $(file < $(EXTRA_OBJS_LIST))
+LIBS += -lfmt
 $(BINARY): $(OBJS) $(OBJS_EXTRA) $(LD_HEAD_OF) $(LD_TAIL_OF) $(ARCHIVES)
 	@echo + LD $@
 	@$(LD) $(LDFLAGS) @$(LD_HEAD_OF) $(OBJS) $(EXTRA_OBJS) $(ARCHIVES) @$(LD_TAIL_OF) $(LIBS) -o $@ 

@@ -8,20 +8,28 @@
 #include <vector>
 #include <queue>
 #include "common.hpp"
+#include "macro.hpp"
 #include "testbench/difftest/struct.hpp"
 #include "easylogging++.h"
 
-
+class bit_mask {
+    public:
+        int len;
+        word_t mask;
+        bit_mask(int _len):
+            len(_len),
+            mask(BITMASK(_len)) {}
+};
 class AddrIntv {// address interval{{{
     public:
     // example: [0x100,0x1ff]
     word_t start;   // include:0x01000
     word_t mask;
     AddrIntv(word_t _start, word_t _len): start(_start), mask(_len - 1){
-        Assert((start & mask) == 0,"AddrIntv parameter error: start:%x\tlen:\t%x\n",_start,_len);
+        Assert((start & mask) == 0, "AddrIntv parameter error: start:%x\tlen:\t%x\n",_start,_len);
     };
-    AddrIntv(word_t _start, uint8_t mask_bits):start (_start), mask(BITMASK(mask_bits)){
-        Assert((start & mask) == 0,"AddrIntv parameter error: start:%x\tmask_len:\t%x\n",_start,mask_bits);
+    AddrIntv(word_t _start, bit_mask mask_len):start (_start), mask(mask_len.mask){
+        Assert((start & mask) == 0,"AddrIntv parameter error: start:%x\tmask_len:\t%x\n",_start,mask_len.len);
     }
     word_t end(){
         return start + mask;

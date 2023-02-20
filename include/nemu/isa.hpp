@@ -28,7 +28,7 @@ typedef concat(__GUEST_ISA__, _CPU_state) CPU_state;
 
 // monitor
 extern char isa_logo[];
-void init_isa(std::shared_ptr<PaddrTop> ptop_input);
+void init_isa(PaddrTop* ptop_input);
 
 extern std::unique_ptr<CPU_state> nemu;
 #define FMT_REG  "%-8s" FMT_WORD "%20d\n"

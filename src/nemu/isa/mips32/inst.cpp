@@ -225,7 +225,6 @@ int mips32_CPU_state::isa_exec_once() {
         // if (inst_state.pc==0xbfc4c9c4){
         //     raise(SIGTRAP);
         // }
-
         if (isa_query_intr()) inst_state.dnpc = isa_raise_intr(Int, inst_state.pc);
         else decode_exec();
     }

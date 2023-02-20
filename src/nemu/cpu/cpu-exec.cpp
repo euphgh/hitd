@@ -35,6 +35,7 @@ uint64_t g_nr_guest_inst = 0;
 uint64_t g_timer = 0; // unit: us
 bool g_print_step = false;
 bool is_wp_change();
+extern std::string disassemble(uint64_t pc, uint8_t *code, int nbyte);
 
 // void check_ftrace(const Decode * s){/*{{{*/
 //     if (s->flag!=0){
@@ -58,14 +59,12 @@ bool is_wp_change();
 // }/*}}}*/
 void check_deadloop(word_t pc){
     if (detect_deadloop(pc)){
-        // Log("nemu abort for detecting dead loop after pc:" FMT_WORD_X,get_pc_before_deadloop());
-        // TODO:trace
+        __ASSERT_NEMU__(0, "detect dead loop after pc:" HEX_WORD, get_pc_before_deadloop());
         nemu_state.state = NEMU_ABORT;
         nemu_state.halt_pc = pc;
     }
 }
 void trace_and_difftest(Decode *_this) {
-    extern std::string disassemble(uint64_t pc, uint8_t *code, int nbyte);
     IFDEF(CONFIG_ITRACE, nemu->log_pt->trace("[I] %v", disassemble(_this->pc, (uint8_t*)&(_this->inst), 4).c_str()+1));
     IFDEF(CONFIG_DIFFTEST, difftest_step(nemu->isa_diff_state(), _this->dnpc));
     IFDEF(CONFIG_WATCH_POINT, if(is_wp_change()) nemu_state.state=NEMU_STOP); //TODO: make watch point a class with methor

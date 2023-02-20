@@ -2,8 +2,9 @@
 #include "paddr/nemu_paddr.hpp"
 #include "utils.hpp"
 #include "nemu/mytrace.hpp"
+#include "fmt/core.h"
 
-static void out_of_bound(paddr_t addr) { __ASSERT_NEMU__(0, "address = " FMT_PADDR " is out of bound of pmem", addr); }
+static void out_of_bound(paddr_t addr) { __ASSERT_NEMU__(0, "address " HEX_WORD " is out of bound!", addr); }
 word_t paddr_read(paddr_t addr, int len) {
     word_t data;
     wen_t info = {

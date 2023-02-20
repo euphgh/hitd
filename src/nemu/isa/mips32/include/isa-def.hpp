@@ -26,8 +26,8 @@
 
 class mips32_CPU_state{
     public:
-        diff_state arch_state;
         // Arch registers
+        diff_state arch_state; // pc in it is execute completed pc
         CP0_t cp0;
 
         bool hilo_valid;
@@ -37,7 +37,7 @@ class mips32_CPU_state{
         std::shared_ptr<PaddrTop> paddr_top;
         Decode inst_state;
 
-        mips32_CPU_state(std::shared_ptr<PaddrTop> ptop_input);
+        mips32_CPU_state(PaddrTop* ptop_input);
         void execute(uint64_t n);
         void reset();
 
@@ -55,7 +55,9 @@ class mips32_CPU_state{
         // nemu difftest{{{
         void isa_log_reg(word_t ref, word_t my_ans, const char* name);
         bool isa_difftest_checkregs(diff_state *ref_r);
-        void isa_difftest_log_error(diff_state *ref_r);/*}}}*/
+        void isa_difftest_log_error(diff_state *ref_r);
+        int isa_exec_once();
+        /*}}}*/
 
         // regs{{{
         void isa_reg_display();
@@ -63,14 +65,13 @@ class mips32_CPU_state{
         diff_state* isa_diff_state(){ return &arch_state;}
         // }}}
 
-    public:
+    private:
         // Instruct execute method{{{
 #define R(i) arch_state.gpr[i]
 #define Rw(i,value) do {inst_state.wnum = i; arch_state.gpr[i] = value;} while(0)
 #define Mr vaddr_read
 #define Mw vaddr_write
 #define __NOT_DELAY__ __ASSERT_NEMU__(!is_delay_slot,"this instr can not be delay slot")
-        int isa_exec_once();
         int decode_exec();
         void decode_operand(int *rd, word_t *src1, word_t *src2, word_t *imm, int type);
         word_t inst_lwl(word_t addr, word_t src2){/*{{{*/
@@ -140,6 +141,7 @@ class mips32_CPU_state{
         // }}}
 
         // Exception method{{{
+        uint32_t int_delay;
         vaddr_t isa_raise_intr(word_t NO, vaddr_t epc);
         bool isa_query_intr();
         // }}}

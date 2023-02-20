@@ -1,6 +1,8 @@
 #ifndef __CP0_H__
 #define __CP0_H__
 #include "common.hpp"
+#include "easylogging++.h"
+#include "fmt/core.h"
 #define __W__ 1
 #define __R__ 0
 #define __cp0_info__(f2,f1) \
