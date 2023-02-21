@@ -16,13 +16,19 @@ uint8_t dpi_retire(){
     const svScope u_WriteBack = svGetScopeFromName("TOP.mycpu_top.u_Main.u_WriteBack"); 
     svSetScope(u_WriteBack);
     bool up = commit1();
-    return up ? (down ? 2 : 1) : (down ? 1 : 0);
+    return up + down;
 }
 
 uint32_t dpi_retirePC(){
     const svScope u_WriteBack = svGetScopeFromName("TOP.mycpu_top.u_Main.u_WriteBack"); 
     svSetScope(u_WriteBack);
-    return commitPC1();
+    uint32_t last_pc = commitPC1();
+    if (!commit1()){
+        const svScope u_PrimaryBranchAmend = svGetScopeFromName("TOP.mycpu_top.u_Main.u_PrimaryBranchAmend"); 
+        svSetScope(u_PrimaryBranchAmend);
+        last_pc = commitPC0();
+    }
+    return last_pc;
 }
 
 uint32_t dpi_cp0_count(){
@@ -45,4 +51,15 @@ void dpi_get_debug_info1(debug_info_t & debug_info){
     debug_info.wen = commitWEN1();
     debug_info.wnum = commitWNUM1();
     debug_info.wdata = commitWDATA1();
+}
+uint8_t dpi_interrupt_seq(){
+    const svScope u_WriteBack = svGetScopeFromName("TOP.mycpu_top.u_Main.u_WriteBack"); 
+    svSetScope(u_WriteBack);
+    uint8_t res = 0;
+    if (is_interrupt()){
+        const svScope u_PrimaryBranchAmend = svGetScopeFromName("TOP.mycpu_top.u_Main.u_PrimaryBranchAmend"); 
+        svSetScope(u_PrimaryBranchAmend);
+        res = commit0() ? 2 : 1;
+    }
+    return res;
 }

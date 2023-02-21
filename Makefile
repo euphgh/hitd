@@ -61,3 +61,6 @@ TB_CFLAGS    += -I$(HITD_HOME)/include $(CFLAGS_BUILD) -D__GUEST_ISA__=$(GUEST_I
 LDFLAGS += $(CFLAGS_BUILD)
 
 include $(HITD_HOME)/scripts/compile_tb.mk
+
+wave:
+	gtkwave vlogs/wave/*.fst vlogs/wave/signals.sav 

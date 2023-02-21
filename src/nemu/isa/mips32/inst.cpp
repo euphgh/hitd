@@ -85,8 +85,6 @@ void mips32_CPU_state::decode_operand(int *rd, word_t *src1, word_t *src2, word_
 int mips32_CPU_state::decode_exec() {
   int rd = 0;
   word_t src1 = 0, src2 = 0, imm = 0;
-  bool this_is_delay = is_delay_slot;
-  inst_state.dnpc = this_is_delay ? delay_slot_npc : inst_state.snpc;
 
 #define INSTPAT_INST(s) ((inst_state).inst)
 #define INSTPAT_MATCH(s, name, type, ... /* execute body */ ) { \
@@ -195,7 +193,7 @@ int mips32_CPU_state::decode_exec() {
 #endif /* CONFIG_MIPS_RLS1 */
   INSTPAT("011??? ?????   ?????   ?????   ?????  ??????", ri_011 , N, inst_state.dnpc = isa_raise_intr(RI, inst_state.pc));
   INSTPAT("0101?? ?????   ?????   ?????   ?????  ??????", ri_bl  , N, inst_state.dnpc = isa_raise_intr(RI, inst_state.pc));
-  INSTPAT("010001 01110   11111   00000   00011  100000", ri_ft  , N, inst_state.dnpc = isa_raise_intr(MUXDEF(CONFIG_NSC_FUNC,RI,CpU), inst_state.pc));// only func test need RI else is 
+  INSTPAT("010001 01110   11111   00000   00011  100000", ri_ft  , N, inst_state.dnpc = isa_raise_intr(MUXDEF(CONFIG_MIPS_RLS1,CpU,RI), inst_state.pc));// only func test need RI else is 
   INSTPAT("010??? ?????   ?????   ?????   ?????  ??????", ri_cop , N, inst_state.dnpc = isa_raise_intr(RI, inst_state.pc));
   INSTPAT("100111 ?????   ?????   ?????   ?????  ??????", ri_47  , N, inst_state.dnpc = isa_raise_intr(RI, inst_state.pc));
   INSTPAT("10110? ?????   ?????   ?????   ?????  ??????", ri_101 , N, inst_state.dnpc = isa_raise_intr(RI, inst_state.pc));
@@ -207,26 +205,28 @@ int mips32_CPU_state::decode_exec() {
 
   R(0) = 0; // reset $zero to 0
   inst_state.wdata = R(inst_state.wnum);
-  if (this_is_delay) is_delay_slot = false;
   return 0;
 }
 
 #include <signal.h>
-int mips32_CPU_state::isa_exec_once() {
+int mips32_CPU_state::isa_exec_once(bool has_int) {
     inst_state.wnum = 0;
     inst_state.flag = 0;
     word_t this_pc = inst_state.snpc;
-    if (unlikely(this_pc & 0x3)){
+    if (unlikely(this_pc & 0x3)) {
         inst_state.dnpc = isa_raise_intr(AdEL,this_pc); 
         cp0.badvaddr.all = this_pc;
     }
     else {
         inst_state.inst = inst_fetch(&inst_state.snpc, 4);
-        // if (inst_state.pc==0xbfc4c9c4){
-        //     raise(SIGTRAP);
-        // }
-        if (isa_query_intr()) inst_state.dnpc = isa_raise_intr(Int, inst_state.pc);
+
+        bool this_is_delay = is_delay_slot;
+        inst_state.dnpc = this_is_delay ? delay_slot_npc : inst_state.snpc;
+
+        if (has_int) inst_state.dnpc = isa_raise_intr(Int, arch_state.pc); 
         else decode_exec();
+
+        if (this_is_delay) is_delay_slot = false;
     }
     extern uint32_t log_pc;
     log_pc = this_pc;

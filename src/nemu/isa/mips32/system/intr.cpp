@@ -30,14 +30,14 @@
                 "(Sys:0x8)",
                 "(Bp:0x9)",
                 "(RI:0xa)",
-                "(0xb)",
+                "(CpU:0xb)",
                 "(Ov:0xc)",
                 "(0xd)", "(0xe)", "(0xf)"
             };
 #endif
-#define EXPT_VECTOR MUXDEF(CONFIG_NSC_MODE,0xbfc00380,0x80000180)
+#define EXPT_VECTOR 0xbfc00380
 word_t mips32_CPU_state::isa_raise_intr(word_t NO, vaddr_t epc) {/*{{{*/
-            IFDEF(CONFIG_ETRACE,log_pt->trace("[E]:\texception {} trigger",e_msg[NO]));
+            IFDEF(CONFIG_ETRACE,log_pt->trace("[E] exception %v trigger",e_msg[NO]));
             __ASSERT_NEMU__(cp0.status.exl==0, "exception can not raise at " FMT_WORD_X "for Status.EXL is set",epc);
             bool bd = is_delay_slot;
             cp0.epc.all = bd ? epc-4 : epc;

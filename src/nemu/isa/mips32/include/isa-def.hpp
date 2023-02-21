@@ -34,6 +34,7 @@ class mips32_CPU_state{
         word_t delay_slot_npc;
         bool is_delay_slot;
         el::Logger* log_pt;
+        bool raise_ex;
         std::shared_ptr<PaddrTop> paddr_top;
         Decode inst_state;
 
@@ -56,7 +57,7 @@ class mips32_CPU_state{
         void isa_log_reg(word_t ref, word_t my_ans, const char* name);
         bool isa_difftest_checkregs(diff_state *ref_r);
         void isa_difftest_log_error(diff_state *ref_r);
-        int isa_exec_once();
+        int isa_exec_once(bool has_int);
         /*}}}*/
 
         // regs{{{

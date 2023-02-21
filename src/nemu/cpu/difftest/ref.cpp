@@ -33,18 +33,18 @@ void CPU_state::ref_tick_and_int(uint8_t ext_int){/*{{{*/
 #include <csignal>
 bool mips32_CPU_state::ref_exec_once(bool mycpu_int) {/*{{{*/
     bool nemu_int = isa_query_intr();
+    inst_state.snpc = inst_state.pc = arch_state.pc;
+    isa_exec_once(mycpu_int);
+    arch_state.pc = inst_state.dnpc;
     if (mycpu_int == false) {
-        inst_state.snpc = inst_state.pc = arch_state.pc;
-        isa_exec_once();
-        arch_state.pc = inst_state.dnpc;
         int_delay += nemu_int;
         __ASSERT_SIM__(int_delay < 32, "MyCPU not trigger interrupt too long!");
     }
     else {
-        if(nemu_int) arch_state.pc = isa_raise_intr(Int, arch_state.pc); 
-        else __ASSERT_SIM__(0, "MyCPU trigger interrupt but nemu not find");
+        int_delay = 0;
+        __ASSERT_SIM__(nemu_int, "MyCPU trigger interrupt but nemu not find");
     }
-    // if (arch_state.pc == 0xbfc7d7d8) std::raise(SIGINT);
+    // if (arch_state.pc == 0xbfc4c9c4) std::raise(SIGINT);
     bool normal = nemu_state.state == NEMU_RUNNING;
     if (normal==false) {log_pt->error("Fail to execute " + disassemble(inst_state.pc, (uint8_t*)&(inst_state.inst), 4));}
     else trace_and_difftest(&inst_state);

@@ -69,8 +69,8 @@ int main (int argc, char *argv[]) {
     IFDEF(CONFIG_TRACE_ON,tfp.open(__WAVE_DIR__ "func_test." CONFIG_WAVE_EXT));
     ticks = 0;
     uint64_t rst_ticks = 5;
-    // uint64_t last_commit = ticks;
-    // uint64_t commit_timeout = 1024;
+    uint64_t last_commit = ticks;
+    const uint64_t commit_timeout = 512;
 
     top->aclk = 0;
     top->aresetn = 0;
@@ -86,7 +86,7 @@ int main (int argc, char *argv[]) {
         top->aclk = !top->aclk;
 
         if (top->aclk && top->aresetn) {/*{{{*/
-
+            // TIMED_SCOPE(posedgeBlk, "posBlk");
             axi->calculate_output();
             top->eval();
 
@@ -100,9 +100,12 @@ int main (int argc, char *argv[]) {
             nemu->ref_tick_and_int(0);
             uint8_t commit_num = dpi_retire();
             if (commit_num > 0) {
+                // TIMED_SCOPE(diffBlk, "diffBlk");
+                last_commit = ticks;
                 bool nemu_normal = true;
+                uint8_t mycpu_int = dpi_interrupt_seq();
                 for (size_t i = 0; i < commit_num; i++) {
-                    nemu_normal = nemu->ref_exec_once(false);
+                    nemu_normal = nemu->ref_exec_once(i+1 == mycpu_int);
                     if (nemu_normal==false) {
                         __ASSERT_SIM__(0, "detect Nemu execution failure");
                         break;
@@ -113,7 +116,11 @@ int main (int argc, char *argv[]) {
                     dpi_api_get_state(&mycpu);
                     bool res = nemu->ref_checkregs(&mycpu);
                     if (!res){
-                        __ASSERT_SIM__(0, "difftest find MyCPU error!");
+                        extern std::string disassemble(uint64_t pc, uint8_t *code, int nbyte);
+                        __ASSERT_SIM__(0, "MyCPU execution{} error!",
+                                disassemble(nemu->inst_state.pc, 
+                                    (uint8_t*)&nemu->inst_state.inst, 
+                                    4));
                         nemu->ref_log_error(&mycpu);
                     }
                 }
@@ -124,6 +131,7 @@ int main (int argc, char *argv[]) {
             IFDEF(CONFIG_TRACE_ON,tfp.dump(ticks));
         }/*}}}*/
         ticks ++;
+        if (ticks - last_commit > commit_timeout) __ASSERT_SIM__(0, "{} ticks not commit inst", commit_timeout);
     }
     IFDEF(CONFIG_TRACE_ON,tfp.close());
     top->final();

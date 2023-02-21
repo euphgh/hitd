@@ -15,7 +15,9 @@
 //
 // my def start
 #define ELPP_FRESH_LOG_FILE
-#define ELPP_NO_DEFAULT_LOG_FILE
+// #define ELPP_NO_DEFAULT_LOG_FILE
+// #define ELPP_PERFORMANCE_MICROSECONDS
+// #define ELPP_FEATURE_PERFORMANCE_TRACKING
 // mydef end
 
 #ifndef EASYLOGGINGPP_H

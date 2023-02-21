@@ -114,7 +114,7 @@ bool PaddrConfreg::do_read (word_t addr, wen_t info, word_t* data) {
             break;
         default:
             *(uint32_t *)data = 0;
-            log_pt->warn(fmt::format("read confreg not exist address: " HEX_WORD, addr));
+            log_pt->warn(fmt::format("read  confreg not exist address: " HEX_WORD, addr));
             break;
     }
     return true;

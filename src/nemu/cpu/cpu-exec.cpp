@@ -77,7 +77,7 @@ static void statistic() { }
 void mips32_CPU_state::execute(uint64_t n) {
     for (;n > 0; n --) {
         inst_state.snpc = inst_state.pc = arch_state.pc;
-        isa_exec_once();
+        isa_exec_once(false);
         arch_state.pc = inst_state.dnpc;
         if (nemu_state.state != NEMU_RUNNING) {
             // log_pt->error("Completion of execution {}", .logbuf);
