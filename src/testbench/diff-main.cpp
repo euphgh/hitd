@@ -13,12 +13,12 @@
 
 #define wave_file_t MUXDEF(CONFIG_EXT_FST,VerilatedFstC,VerilatedVcdC)
 #define __WAVE_INC__ MUXDEF(CONFIG_EXT_FST,"verilated_fst_c.h","verilated_vcd_c.h")
-#ifdef CONFIG_TRACE_ON
+#ifdef CONFIG_WAVE_ON
 #include __WAVE_INC__
 #endif
 
 INITIALIZE_EASYLOGGINGPP
-// const word_t end_pc = 0xbfc00100;
+#define SIM_END_PC 0xbfc00100
 extern el::Logger* logger_init(std::string name);
 extern char* log_file_name;
 el::Logger* nemu_log;
@@ -46,12 +46,29 @@ static int parse_args(int argc, char *argv[]) {
   return 0;
 }
 
+void log_end_info(){
+    switch (sim_status) {
+        case SIM_ABORT:
+            mycpu_log->info("mycpu has error and quit");
+            break;
+        case SIM_END:
+            mycpu_log->info("mycpu pass test");
+            break;
+        case SIM_INT:
+            mycpu_log->info("mycpu stop test for key board interrupt");
+            break;
+        default:
+            mycpu_log->info("mycpu quit with not defined state %v", sim_status);
+            break;
+    }
+}
+
 int main (int argc, char *argv[]) {
     parse_args(argc, argv);
     nemu_log = logger_init("NJemu");
     mycpu_log = logger_init("MyCPU");
 
-    std::signal(SIGINT, [](int) {sim_status = SIM_ABORT;});
+    std::signal(SIGINT, [](int) {sim_status = SIM_INT;});
 
     std::unique_ptr<Vmycpu_top> top(new Vmycpu_top());
     std::unique_ptr<axi_paddr> axi(new axi_paddr(top.get()));
@@ -63,10 +80,10 @@ int main (int argc, char *argv[]) {
     init_isa(nemu_paddr_top);
     nemu->reset();
 
-    IFDEF(CONFIG_TRACE_ON,Verilated::traceEverOn(true));
-    IFDEF(CONFIG_TRACE_ON,wave_file_t tfp);
-    IFDEF(CONFIG_TRACE_ON,top->trace(&tfp,0));
-    IFDEF(CONFIG_TRACE_ON,tfp.open(__WAVE_DIR__ "func_test." CONFIG_WAVE_EXT));
+    IFDEF(CONFIG_WAVE_ON,Verilated::traceEverOn(true));
+    IFDEF(CONFIG_WAVE_ON,wave_file_t tfp);
+    IFDEF(CONFIG_WAVE_ON,top->trace(&tfp,0));
+    IFDEF(CONFIG_WAVE_ON,tfp.open(__WAVE_DIR__ "func_test." CONFIG_WAVE_EXT));
     ticks = 0;
     uint64_t rst_ticks = 5;
     uint64_t last_commit = ticks;
@@ -93,7 +110,7 @@ int main (int argc, char *argv[]) {
             func_confreg_ticks();
 
             axi->update_output();
-            IFDEF(CONFIG_TRACE_ON,tfp.dump(ticks));
+            IFDEF(CONFIG_WAVE_ON,tfp.dump(ticks));
 
             if (sim_status!=SIM_RUN) break;
 
@@ -109,6 +126,10 @@ int main (int argc, char *argv[]) {
                     if (nemu_normal==false) {
                         __ASSERT_SIM__(0, "detect Nemu execution failure");
                         break;
+                    }
+                    if (nemu->inst_state.pc==SIM_END_PC) {
+                        nemu_log->info("execute inst at end pc");
+                        sim_status = SIM_END;
                     }
                 }
                 if (nemu_normal) {
@@ -128,13 +149,14 @@ int main (int argc, char *argv[]) {
         }/*}}}*/
         else {/*{{{*/
             top->eval();
-            IFDEF(CONFIG_TRACE_ON,tfp.dump(ticks));
+            IFDEF(CONFIG_WAVE_ON,tfp.dump(ticks));
         }/*}}}*/
+
         ticks ++;
         if (ticks - last_commit > commit_timeout) __ASSERT_SIM__(0, "{} ticks not commit inst", commit_timeout);
     }
-    IFDEF(CONFIG_TRACE_ON,tfp.close());
+    IFDEF(CONFIG_WAVE_ON,tfp.close());
     top->final();
-    printf("total ticks = %lu\n", ticks);
+    log_end_info();
     return 0;
 }

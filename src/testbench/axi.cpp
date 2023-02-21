@@ -1,7 +1,9 @@
 #include "testbench/sim_state.hpp"
+#include "common.hpp"
 #include "testbench/axi.hpp"
 #include "fmt/core.h"
 #include "testbench/sim_state.hpp"
+#include <vector>
 bool axi_paddr::calculate_output(){
     bool res = read_eval();
     res &= write_eval();
@@ -42,6 +44,17 @@ bool axi_paddr::check_axi_req(uint8_t num_bytes, burst_t burst_type, word_t star
     return res;
 }/*}}}*/
 
+const char* burst_str(burst_t num){
+    const char* res;
+    switch (num) {
+        case BURST_WRAP:        res = "WRAP "; break;
+        case BURST_INCR:        res = "INCR "; break;
+        case BURST_FIXED:       res = "FIXED"; break;
+        case BURST_RESERVED:    res = "RESER"; break;
+    }
+    return res;
+}
+
 bool axi_paddr::accept_read_req(){/*{{{*/
     bool res = true;
     uint8_t num_bytes = 1 << pins.arsize;
@@ -55,23 +68,30 @@ bool axi_paddr::accept_read_req(){/*{{{*/
     if (r_burst_type==BURST_WRAP){
         r_wrap_off_mask = ((r_burst_count)<<pins.arsize)-1;
         r_wrap_bound = start_addr & ~r_wrap_off_mask;
+        r_wrap_offset = (start_addr & r_wrap_off_mask) >> pins.arsize;
     }
+    else r_wrap_offset = 0;
+
     r_cur_id = pins.arid;
     r_cur_addr = start_addr;
     r_cur_info.size = num_bytes;
+    r_cur_info.wstrb = 0xf;
+    r_cur_NO = 0;
 
     r_left_time = rand_delay();
     s_arready = 0;
+    paddr_top->log_pt->trace(fmt::format("[T] read  req [" HEX_WORD "], size={}, len={}, burst={}, id={}", 
+                start_addr, num_bytes, r_burst_count, burst_str(r_burst_type), r_cur_id));
     return res;
 } // check axi, assign last_count, assign left_time, unset arready }}}
 bool axi_paddr::do_once_read(){/*{{{*/
     bool res = true;
     res = paddr_top->do_read(r_cur_addr, r_cur_info, &s_rdata);
+    r_cur_data[r_cur_NO++] = s_rdata;
     s_rvalid = 1;
-    s_rlast = r_burst_count==0;
+    s_rlast = r_burst_count==r_cur_NO;
     s_rid = r_cur_id;
     s_rresp = res ? RESP_OKEY : RESP_DECERR;
-    r_burst_count--;
 
     switch (r_burst_type) {
         case BURST_FIXED:
@@ -112,11 +132,14 @@ bool axi_paddr::read_eval(){/*{{{*/
             }
             break;
         case r_wait_last:
-            if (pins.rready && pins.rlast) {
-                r_status = r_idel;
-                idel_wait_read();
+            if (pins.rready){
+                if (pins.rlast){
+                    r_status = r_idel;
+                    idel_wait_read();
+                    read_data_trace();
+                }
+                else res &= do_once_read();
             }
-            else res &= do_once_read();
             break;
     }
     return res;
@@ -135,7 +158,9 @@ bool axi_paddr::accept_write_req(){/*{{{*/
     if (w_burst_type==BURST_WRAP){
         w_wrap_off_mask = ((w_burst_count)<<pins.awsize)-1;
         w_wrap_bound = start_addr & ~w_wrap_off_mask;
+        w_wrap_offset = (start_addr & w_wrap_off_mask) >> pins.awsize;
     }
+    else w_wrap_offset = 0;
 
     w_cur_NO = 0;
     w_cur_id = pins.awid;
@@ -143,6 +168,9 @@ bool axi_paddr::accept_write_req(){/*{{{*/
     w_cur_info[w_cur_NO].size = num_bytes;
     s_awready = 0;
     s_wready = 1;
+
+    paddr_top->log_pt->trace(fmt::format("[T] write req [" HEX_WORD "] size={}, len={}, burst={}, id={}", 
+                start_addr, num_bytes, w_burst_count, burst_str(w_burst_type), w_cur_id));
     return res;
 };/*}}}*/
 bool axi_paddr::accept_write_data(){/*{{{*/
@@ -155,6 +183,7 @@ bool axi_paddr::accept_write_data(){/*{{{*/
         __ASSERT_SIM__(pins.wlast==1, "Write data %x wlast != 1 when the last wdata arrive",pins.wdata);
         s_wready = 0;
         w_left_time = rand_delay();
+        write_data_trace();
     }
     else {
         __ASSERT_SIM__(pins.wlast==0, "Write data %x wlast is set but not the last transition",pins.wdata);
@@ -220,8 +249,50 @@ bool axi_paddr::write_eval(){/*{{{*/
             if (pins.bready){
                 w_status = w_idel;
                 idel_wait_write();
+                paddr_top->log_pt->trace(fmt::format("[T] write finish id={}",w_cur_id));
             }
             break;
     }
     return res;
 }/*}}}*/
+
+void my_word_fmt(uint32_t data, wen_t info, std::stringstream &out){/*{{{*/
+    int width = info.size << 1;
+    char res[8] = {0};
+    for (size_t i = 0; i < width; i++) {
+        char tmp =  '\0';
+        if (info.wstrb & 0x1) {
+            char seg = data & 0xf;
+            if (seg < 10) tmp = 48 + seg;
+            else tmp = 87 + seg;
+        }
+        else tmp = '?';
+        res[width-1-i] = tmp;
+        info.wstrb = info.wstrb >> (i & 0x1);
+        data  = data  >> 4;
+    }
+    out << res;
+}/*}}}*/
+void axi_paddr::read_data_trace(){/*{{{*/
+    std::stringstream res;
+    res << "[T] read  data ";
+    for (int i = 0; i < r_burst_count; i++) {
+        int index = (i + r_burst_count - r_wrap_offset) & (r_burst_count-1);
+        my_word_fmt(r_cur_data[index], r_cur_info, res);
+        res <<" ";
+    }
+    res << "id=" << std::to_string(r_cur_id);
+    paddr_top->log_pt->trace(res.str());
+}/*}}}*/
+void axi_paddr::write_data_trace(){/*{{{*/
+    std::stringstream res;
+    res << "[T] write data ";
+    for (int i = 0; i < w_burst_count; i++) {
+        int index = (i + w_burst_count - w_wrap_offset) & (w_burst_count-1);
+        my_word_fmt(w_cur_data[index], w_cur_info[index], res);
+        res <<" ";
+    }
+    res << "id=" << std::to_string(w_cur_id);
+    paddr_top->log_pt->trace(res.str());
+}/*}}}*/
+

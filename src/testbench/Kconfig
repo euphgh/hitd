@@ -26,14 +26,16 @@ default 1
 
 endmenu# }}}
 
-menu "Wave Options"# {{{
-config TRACE_ON
-bool "log wave by file"
+
+menu "Log Options"
+
+config WAVE_ON
+bool "trace wave file"
 default y
 
 choice
   prompt "Wave file extension"
-  depends on TRACE_ON
+  depends on WAVE_ON
   default EXT_FST
 config EXT_VCD
   bool "vcd"
@@ -47,4 +49,8 @@ config WAVE_EXT
   default "fst" if EXT_FST
   default "none"
 
-endmenu# }}}
+config TTRACE_ON
+    bool "trace all AXI transition"
+    default yes
+
+endmenu

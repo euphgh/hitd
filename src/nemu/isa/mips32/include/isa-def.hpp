@@ -89,25 +89,25 @@ class mips32_CPU_state{
         }/*}}}*/
         void inst_swl(word_t addr, word_t src2){/*{{{*/
             const int swl_len[8] = {
-                0x13,
-                0x33,
-                0x73,
-                0xf3,
+                0x14,
+                0x34,
+                0x74,
+                0xf4,
             };
             uint8_t byte = addr & 0x3;
             word_t data = BITS(src2, 31, 24-8*byte);
-            Mw(addr & ~(0x3),swl_len[byte],data);
+            Mw(addr & ~(0x3), swl_len[byte], data);
         }/*}}}*/
         void inst_swr(word_t addr, word_t src2){/*{{{*/
             const int swr_len[8] = {
-                0xf3,
-                0xe3,
-                0xc3,
-                0x83,
+                0xf4,
+                0xe4,
+                0xc4,
+                0x84,
             };
             uint8_t byte = addr & 0x3;
             word_t data = BITS(src2, 31-8*byte,0)<<(8*byte);
-            Mw(addr & ~(0x3),swr_len[byte],data);
+            Mw(addr & ~(0x3), swr_len[byte], data);
         }/*}}}*/
         inline void inst_jump(word_t dest){/*{{{*/
             is_delay_slot = true;

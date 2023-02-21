@@ -107,22 +107,32 @@ class axi_paddr{
         uint8_t r_left_time;
         word_t r_wrap_off_mask;
         word_t r_wrap_bound;
+        uint8_t r_wrap_offset;
         burst_t r_burst_type;
 
         word_t r_cur_addr;
         wen_t r_cur_info;
+        word_t r_cur_data[16];
+        uint8_t r_cur_NO;
         uint8_t r_cur_id;
 
         bool accept_read_req();
         bool do_once_read();
         void idel_wait_read();
         bool read_eval();
+
+        void read_require_trace();
+        void read_data_trace();
+        void write_require_trace();
+        void write_data_trace();
+        void back_trace();
         
         wstatus_t w_status;
         uint8_t w_burst_count;
         uint8_t w_left_time;
         word_t w_wrap_off_mask;
         word_t w_wrap_bound;
+        uint8_t w_wrap_offset;
         burst_t w_burst_type;
 
         word_t w_cur_addr[16];
@@ -136,6 +146,8 @@ class axi_paddr{
         bool do_all_write();
         void idel_wait_write();
         bool write_eval();
+
+
         inline int rand_delay() {return rand()%16+16;}
 };
 

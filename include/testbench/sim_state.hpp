@@ -7,7 +7,7 @@ typedef enum{
     SIM_STOP,   // gdb breakpoint or watchpoint
     SIM_ABORT,  // difftest error or mem check error
     SIM_END,    // finish run sim
-    SIM_QUIT,   // wait to static
+    SIM_INT,   // wait to static
 }sim_status_t;
 extern sim_status_t sim_status;
 #define __ASSERT_SIM__(cond, str, ...) \

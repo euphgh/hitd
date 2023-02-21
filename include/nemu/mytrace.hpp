@@ -3,6 +3,7 @@
 
 #include <elf.h>
 #include <common.hpp>
+#include "testbench/difftest/struct.hpp"
 char* search_ftable(uint64_t addr);
 void print_ftable();
 typedef enum {
@@ -19,6 +20,6 @@ void hex_display(int len, word_t data, char* buf);
 void read_dtrace(int len, paddr_t addr, const char* name, word_t value);
 void write_dtrace(int len, paddr_t addr, const char* name, word_t value);
 
-void read_mtrace(int len, paddr_t addr, word_t value);
-void write_mtrace(int len, paddr_t addr, word_t value);
+void read_mtrace(wen_t info, paddr_t addr, word_t value);
+void write_mtrace(wen_t info, paddr_t addr, word_t value);
 #endif

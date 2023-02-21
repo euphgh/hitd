@@ -9,10 +9,10 @@ word_t paddr_read(paddr_t addr, int len) {
     word_t data;
     wen_t info = {
         .size = static_cast<unsigned char>(len & 0xf),
-        .wstrb = static_cast<unsigned char>(len>>4),
+        .wstrb = 0xf
     };
     bool res = nemu->paddr_top->do_read(addr, info, &data);
-    IFDEF(CONFIG_MTRACE,read_mtrace(info.size,addr,data));
+    IFDEF(CONFIG_MTRACE, read_mtrace(info,addr,data));
     if (!res) out_of_bound(addr);
     return data;
 }
@@ -23,7 +23,7 @@ void paddr_write(paddr_t addr, int len, word_t data) {
         .wstrb = static_cast<unsigned char>(len >>4),
     };
     bool res = nemu->paddr_top->do_write(addr, info, data);
-    IFDEF(CONFIG_MTRACE,write_mtrace(info.size,addr,data));
+    IFDEF(CONFIG_MTRACE,write_mtrace(info,addr,data));
     if (!res) out_of_bound(addr);
     return;
 }
