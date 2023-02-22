@@ -88,85 +88,93 @@ int main (int argc, char *argv[]) {
     IFDEF(CONFIG_WAVE_ON,top->trace(&tfp,0));
     IFDEF(CONFIG_WAVE_ON,tfp.open(__WAVE_DIR__ "func_test." CONFIG_WAVE_EXT));
 
+
     ticks = 0;
-    uint64_t rst_ticks = 5;
-    IFDEF(CONFIG_COMMIT_WAIT, uint64_t last_commit = ticks;)
-    IFDEF(CONFIG_CP0_DIFF, cp0_checker cp0_checker;)
-
     top->aclk = 0;
-    top->aresetn = 0;
+    IFDEF(CONFIG_COMMIT_WAIT, uint64_t last_commit = ticks);
+    IFDEF(CONFIG_CP0_DIFF, cp0_checker cp0_checker);
+    for (size_t i = 0; i < 2; i++) {
 
-    while (!Verilated::gotFinish()) {
-        if (rst_ticks  > 0) {
-            top->aresetn = 0;
-            rst_ticks --;
-            axi->reset();
-        }
-        else top->aresetn = 1;
+        sim_status = SIM_RUN;
+        uint64_t rst_ticks = 5;
+        top->aresetn = 0;
 
-        top->aclk = !top->aclk;
-
-        if (top->aclk && top->aresetn) {/*{{{*/
-            axi->calculate_output();
-            top->eval();
-
-            func_confreg_ticks();
-
-            axi->update_output();
-            IFDEF(CONFIG_WAVE_ON,tfp.dump(ticks));
-
-            if (sim_status!=SIM_RUN) break;
-
-            IFDEF(CONFIG_CP0_DIFF, cp0_checker.check_change();)
-
-            nemu->ref_tick_and_int(0);
-
-            uint8_t commit_num = dpi_retire();
-            if (commit_num > 0) {
-                IFDEF(CONFIG_COMMIT_WAIT, last_commit = ticks;)
-                bool nemu_normal = true;
-                uint8_t mycpu_int = dpi_interrupt_seq();
-                for (size_t i = 0; i < commit_num; i++) {
-                    nemu_normal = nemu->ref_exec_once(i+1 == mycpu_int);
-                    if (nemu_normal==false) {
-                        __ASSERT_SIM__(0, "detect Nemu execution failure");
-                        break;
-                    }
-                    if (nemu->inst_state.pc==SIM_END_PC) {
-                        nemu_log->info("execute inst at end pc");
-                        sim_status = SIM_END;
-                    }
-                    IFDEF(CONFIG_CP0_DIFF, cp0_checker.check_value(nemu->inst_state.pc, nemu->cp0);)
-                    
-                }
-                if (nemu_normal) {
-                    diff_state mycpu;
-                    dpi_api_get_state(&mycpu);
-                    bool res = nemu->ref_checkregs(&mycpu);
-                    if (!res){
-                        extern std::string disassemble(uint64_t pc, uint8_t *code, int nbyte);
-                        __ASSERT_SIM__(0, "MyCPU execution{} error !!!",
-                                disassemble(nemu->inst_state.pc, 
-                                    (uint8_t*)&nemu->inst_state.inst, 
-                                    4));
-                        nemu->ref_log_error(&mycpu);
-                    }
-                }
+        while (!Verilated::gotFinish()) {/*{{{*/
+            ticks ++;
+            if (rst_ticks  > 0) {
+                top->aresetn = 0;
+                rst_ticks --;
+                axi->reset();
+                nemu->reset();
             }
+            else top->aresetn = 1;
+
+            top->aclk = !top->aclk;
+
+            if (top->aclk && top->aresetn) {/*{{{*/
+                axi->calculate_output();
+                top->eval();
+
+                func_confreg_ticks();
+
+                axi->update_output();
+                IFDEF(CONFIG_WAVE_ON,tfp.dump(ticks));
+
+                if (sim_status!=SIM_RUN) break;
+
+                IFDEF(CONFIG_CP0_DIFF, cp0_checker.check_change();)
+
+                    nemu->ref_tick_and_int(0);
+
+                uint8_t commit_num = dpi_retire();
+                if (commit_num > 0) {
+                    IFDEF(CONFIG_COMMIT_WAIT, last_commit = ticks;)
+                        bool nemu_normal = true;
+                    uint8_t mycpu_int = dpi_interrupt_seq();
+                    for (size_t i = 0; i < commit_num; i++) {
+                        nemu_normal = nemu->ref_exec_once(i+1 == mycpu_int);
+                        if (nemu_normal==false) {
+                            __ASSERT_SIM__(0, "detect Nemu execution failure");
+                            break;
+                        }
+                        if (nemu->inst_state.pc==SIM_END_PC) {
+                            nemu_log->info("execute inst at end pc");
+                            sim_status = SIM_END;
+                        }
+                        IFDEF(CONFIG_CP0_DIFF, cp0_checker.check_value(nemu->inst_state.pc, nemu->cp0);)
+
+                    }
+                    if (nemu_normal) {
+                        diff_state mycpu;
+                        dpi_api_get_state(&mycpu);
+                        bool res = nemu->ref_checkregs(&mycpu);
+                        if (!res){
+                            extern std::string disassemble(uint64_t pc, uint8_t *code, int nbyte);
+                            __ASSERT_SIM__(0, "MyCPU execution{} error !!!",
+                                    disassemble(nemu->inst_state.pc, 
+                                        (uint8_t*)&nemu->inst_state.inst, 
+                                        4));
+                            nemu->ref_log_error(&mycpu);
+                        }
+                    }
+                }
+            }/*}}}*/
+
+            else {/*{{{*/
+                top->eval();
+                IFDEF(CONFIG_WAVE_ON,tfp.dump(ticks));
+            }/*}}}*/
+
+            IFDEF(CONFIG_COMMIT_WAIT, __ASSERT_SIM__(ticks-last_commit<CONFIG_COMMIT_TIME_LIMIT, \
+                        "{} ticks not commit inst", \
+                        CONFIG_COMMIT_TIME_LIMIT);)
         }/*}}}*/
 
-        else {/*{{{*/
-            top->eval();
-            IFDEF(CONFIG_WAVE_ON,tfp.dump(ticks));
-        }/*}}}*/
+        log_end_info();
 
-        ticks ++;
-        IFDEF(CONFIG_COMMIT_WAIT, __ASSERT_SIM__(ticks-last_commit<CONFIG_COMMIT_TIME_LIMIT, \
-                "{} ticks not commit inst", \
-                CONFIG_COMMIT_TIME_LIMIT);)
     }
+
     IFDEF(CONFIG_WAVE_ON,tfp.close());
     top->final();
-    log_end_info();
     return 0;
 }
