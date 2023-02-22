@@ -154,13 +154,14 @@ int main (int argc, char *argv[]) {
                 }
             }
         }/*}}}*/
+
         else {/*{{{*/
             top->eval();
             IFDEF(CONFIG_WAVE_ON,tfp.dump(ticks));
         }/*}}}*/
 
         ticks ++;
-        IFDEF(CONFIG_COMMIT_WAIT, __ASSERT_SIM__(ticks-last_commit>CONFIG_COMMIT_TIME_LIMIT, \
+        IFDEF(CONFIG_COMMIT_WAIT, __ASSERT_SIM__(ticks-last_commit<CONFIG_COMMIT_TIME_LIMIT, \
                 "{} ticks not commit inst", \
                 CONFIG_COMMIT_TIME_LIMIT);)
     }

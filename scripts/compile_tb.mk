@@ -35,7 +35,7 @@ OBJS += $(TB_OBJS) $(NEMU_OBJS)
 # Some convenient rules
 .PHONY: tb gdb sim
 
-LOG_FILE = $(BUILD_DIR)/tb-log.txt
+LOG_FILE = $(call remove_quote, $(CONFIG_TRACE_FILE))
 EXTRA_OBJS = $(file < $(EXTRA_OBJS_LIST))
 LIBS += -lfmt
 $(BINARY): $(OBJS) $(OBJS_EXTRA) $(LD_HEAD_OF) $(LD_TAIL_OF) $(ARCHIVES)
@@ -45,10 +45,12 @@ $(BINARY): $(OBJS) $(OBJS_EXTRA) $(LD_HEAD_OF) $(LD_TAIL_OF) $(ARCHIVES)
 override ARGS ?= --log=$(LOG_FILE)
 override ARGS += $(ARGS_DIFF)
 
+dirs:
+	mkdir -p $(dir $(LOG_FILE))
 
 tb: $(BINARY)
 
-sim: tb
+sim: tb dirs
 	$(TB_EXEC)
 
 TB_EXEC := $(BINARY) $(ARGS)
@@ -56,7 +58,7 @@ gdb: tb
 	gdb -s $(BINARY) --args $(TB_EXEC)
 
 log:
-	cat $(BUILD_DIR)/tb-log.txt
+	cat $(LOG_FILE)
 
 clean:
 	rm -rf $(BUILD_DIR)

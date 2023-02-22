@@ -68,8 +68,10 @@ endmenu# }}}
 menu "Log Options"# {{{
 
 config TRACE
-    bool "Enable tracer, save testbench output in file"
+    bool "Enable tracer"
     default y
+    help 
+        save testbench output in file
 
 config TRACE_FILE
     depends on TRACE
@@ -78,8 +80,11 @@ config TRACE_FILE
 
 config TRACE_FILE_SIZE
     depends on TRACE
-    string "truncate file when trace file reaches the specified size(uint bytes, 0 is not truncate)"
-    default "1024*1024"
+    int "truncate file when trace file reaches the specified size"
+    default 512
+    help 
+        the uint of trace file is KB
+        close truncation by setting the value zero
 
 config ITRACE
   depends on TRACE
@@ -93,7 +98,7 @@ config MTRACE
 
 config FTRACE
   depends on TRACE
-  bool "Trace Nemu all Function call"
+  bool "Trace Nemu all Function call(not support now)"
   default n
 
 config ETRACE
