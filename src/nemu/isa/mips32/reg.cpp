@@ -36,11 +36,6 @@ void CPU_state::isa_reg_display() {
     printf(FMT_REG,"pc",arch_state.pc,arch_state.pc);
 }
 
-#define __cp0_name_read__(regname,rd,sel,...) \
-    if (*success==false && strcmp(#regname,s)==0){ \
-        res = cp0_read(&(cp0),rd<<3|sel);\
-        *success = true; \
-    }
 
 word_t CPU_state::isa_reg_str2val(const char *s, bool *success) {
     word_t res = 0;
@@ -58,6 +53,10 @@ word_t CPU_state::isa_reg_str2val(const char *s, bool *success) {
             res = arch_state.pc;
             *success = true;
         }
+    }
+#define __cp0_name_read__(regname,rd,sel,...) \
+    if (*success==false && strcmp(#regname,s)==0){ \
+        *success = cp0.read(rd<<3|sel, res);\
     }
     __cp0_info__(__cp0_name_read__,)
     return res;

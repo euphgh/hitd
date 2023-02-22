@@ -27,7 +27,7 @@ default 1
 endmenu# }}}
 
 
-menu "Log Options"
+menu "Wave and Debugging"
 
 config WAVE_ON
 bool "trace wave file"
@@ -49,8 +49,24 @@ config WAVE_EXT
   default "fst" if EXT_FST
   default "none"
 
-config TTRACE_ON
-    bool "trace all AXI transition"
+config MEM_DIFF
+    bool "Enable memory check when read by AXI"
     default yes
+
+config CP0_DIFF
+    bool "Enable coprocessor register 0 check"
+    default no
+
+config HILO_DIFF
+    bool "Enable hi lo register check"
+    default no
+
+config COMMIT_WAIT
+    bool "Automatic exit after waiting a while without instruction commit"
+    default yes
+config COMMIT_TIME_LIMIT
+    depends on COMMIT_WAIT
+    int "Wait how many clock cycles"
+    default 512
 
 endmenu

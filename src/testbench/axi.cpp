@@ -4,22 +4,28 @@
 #include "fmt/core.h"
 #include "testbench/sim_state.hpp"
 #include <vector>
-bool axi_paddr::calculate_output(){
+extern el::Logger* mycpu_log;
+
+void axi_paddr::update_output(){
+#define __my_axi_out_ref__(width,name,masterIn) IFONE(masterIn, pins.name = s_##name;)
+    AXI_BUNDLE(__my_axi_out_ref__)
+}
+
+bool axi_paddr::calculate_output(){/*{{{*/
     bool res = read_eval();
     res &= write_eval();
     return res;
-}
-void axi_paddr::reset(){
+}/*}}}*/
+
+void axi_paddr::reset(){/*{{{*/
     r_status = r_idel;
     idel_wait_read();
     w_status = w_idel;
     idel_wait_write();
-}
-#define __my_axi_out_ref__(width,name,masterIn) IFONE(masterIn, pins.name = s_##name;)
-void axi_paddr::update_output(){
-    AXI_BUNDLE(__my_axi_out_ref__)
-}
-extern el::Logger* mycpu_log;
+}/*}}}*/
+
+void axi_paddr::set_diff_mem(PaddrTop* diff_mem){ check_paddr_top = diff_mem; }
+
 bool axi_paddr::check_axi_req(uint8_t num_bytes, burst_t burst_type, word_t start_addr, uint8_t burst_len){/*{{{*/
     bool res = true;
     __ASSERT_SIM__(num_bytes<=(CONFIG_AXI_DWID>>3), \
@@ -43,8 +49,15 @@ bool axi_paddr::check_axi_req(uint8_t num_bytes, burst_t burst_type, word_t star
     }//NOTE: FIX must not cross 4KB address bound
     return res;
 }/*}}}*/
+void axi_paddr::read_difftest(){/*{{{*/
+    word_t check_data;
+    check_paddr_top->do_read(r_cur_addr, r_cur_info, &check_data);
+    __ASSERT_SIM__(check_data==s_rdata, "read {} bytes at [" HEX_WORD "] is error !!!", (uint8_t)r_cur_info.size, r_cur_addr);
+    extern void print_reg_diff(word_t ref, word_t my_ans, const char* name);
+    print_reg_diff(check_data, s_rdata, "mem");
+}/*}}}*/
 
-const char* burst_str(burst_t num){
+const char* burst_str(burst_t num){/*{{{*/
     const char* res;
     switch (num) {
         case BURST_WRAP:        res = "WRAP "; break;
@@ -53,7 +66,7 @@ const char* burst_str(burst_t num){
         case BURST_RESERVED:    res = "RESER"; break;
     }
     return res;
-}
+}/*}}}*/
 
 bool axi_paddr::accept_read_req(){/*{{{*/
     bool res = true;
@@ -87,6 +100,7 @@ bool axi_paddr::accept_read_req(){/*{{{*/
 bool axi_paddr::do_once_read(){/*{{{*/
     bool res = true;
     res = paddr_top->do_read(r_cur_addr, r_cur_info, &s_rdata);
+    IFDEF(CONFIG_MEM_DIFF, read_difftest();)
     r_cur_data[r_cur_NO++] = s_rdata;
     s_rvalid = 1;
     s_rlast = r_burst_count==r_cur_NO;

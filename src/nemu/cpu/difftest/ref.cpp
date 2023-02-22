@@ -19,6 +19,7 @@
 #include "nemu/cpu/decode.hpp"
 #include "../local-include/reg.hpp"
 #include "testbench/sim_state.hpp"
+#include "fmt/core.h"
 
 extern void trace_and_difftest(Decode *_this);
 extern std::string disassemble(uint64_t pc, uint8_t *code, int nbyte);
@@ -26,8 +27,8 @@ extern std::string disassemble(uint64_t pc, uint8_t *code, int nbyte);
 void CPU_state::ref_tick_and_int(uint8_t ext_int){/*{{{*/
     // only ext_int[5:0] is valid
     cp0.cause.ip_h = ext_int | (cp0.cause.ti<<5);
-    clock_tick = 1 - clock_tick;
-    cp0.count.all += clock_tick;
+    cp0.count.all += cp0.clock_tick;
+    cp0.clock_tick = 1 - cp0.clock_tick;
     if (cp0.count.all==cp0.compare.all) cp0.cause.ti = 1;
 }/*}}}*/
 #include <csignal>
@@ -44,7 +45,7 @@ bool mips32_CPU_state::ref_exec_once(bool mycpu_int) {/*{{{*/
         int_delay = 0;
         __ASSERT_SIM__(nemu_int, "MyCPU trigger interrupt but nemu not find");
     }
-    // if (arch_state.pc == 0xbfc4c9c4) std::raise(SIGINT);
+    // if (arch_state.pc == 0xbfc00414) std::raise(SIGINT);
     bool normal = nemu_state.state == NEMU_RUNNING;
     if (normal==false) {log_pt->error("Fail to execute " + disassemble(inst_state.pc, (uint8_t*)&(inst_state.inst), 4));}
     else trace_and_difftest(&inst_state);
@@ -60,24 +61,29 @@ bool CPU_state::ref_checkregs(diff_state *mycpu){/*{{{*/
     for (size_t i = 0; i < ARRLEN(mycpu->gpr); i++) {
         ans &= (mycpu->gpr[i]==arch_state.gpr[i]);
     }
-    // if (hilo_valid){
-    //     ans &= mycpu->hi==arch_state.hi;
-    //     ans &= mycpu->lo==arch_state.lo;
-    // }
+#ifdef CONFIG_HILO_DIFF/*{{{*/
+    if (hilo_valid){
+        ans &= mycpu->hi==arch_state.hi;
+        ans &= mycpu->lo==arch_state.lo;
+    }
+#endif/*}}}*/
     return ans;
 }/*}}}*/
 
+extern void print_reg_diff(word_t ref, word_t my_ans, const char* name);
 void mips32_CPU_state::ref_log_error(diff_state *mycpu){/*{{{*/
     for (uint8_t i = 0; i < 32; i++) {
         char tmp[10] = {0};
         sprintf(tmp, "%s($%d)", reg_name(i), i);
-        isa_log_reg(arch_state.gpr[i], mycpu->gpr[i], tmp);
+        print_reg_diff(arch_state.gpr[i], mycpu->gpr[i], tmp);
     }
-    // if (hilo_valid){
-    //     isa_log_reg(arch_state.hi, mycpu->hi, "$hi");
-    //     isa_log_reg(arch_state.lo, mycpu->lo, "$lo");
-    // }
-    isa_log_reg(inst_state.pc, mycpu->pc, "last-pc");
+#ifdef CONFIG_HILO_DIFF/*{{{*/
+    if (hilo_valid){
+        print_reg_diff(arch_state.hi, mycpu->hi, "$hi");
+        print_reg_diff(arch_state.lo, mycpu->lo, "$lo");
+    }
+#endif/*}}}*/
+    print_reg_diff(inst_state.pc, mycpu->pc, "last-pc");
 }/*}}}*/
 
 void CPU_state::ref_get_debug_info(debug_info_t *ref){/*{{{*/

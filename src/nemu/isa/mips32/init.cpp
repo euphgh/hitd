@@ -37,9 +37,8 @@ void CPU_state::reset() {/*{{{*/
     for (int i = 0; i < 32; i++) {
         arch_state.gpr[i] = 0;
     }
-    cp0_init(&cp0);
+    cp0.reset();
 }/*}}}*/
-
 CPU_state::mips32_CPU_state(PaddrTop* ptop_input): 
     log_pt(ptop_input->log_pt), 
     paddr_top(ptop_input) {

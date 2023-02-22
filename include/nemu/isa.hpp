@@ -31,7 +31,7 @@ extern char isa_logo[];
 void init_isa(PaddrTop* ptop_input);
 
 extern std::unique_ptr<CPU_state> nemu;
-#define FMT_REG  "%-8s" FMT_WORD "%20d\n"
+#define FMT_REG  "%-12s" FMT_WORD "%20d\n"
 // void isa_reg_display();
 // word_t isa_reg_str2val(const char *name, bool *success);
 

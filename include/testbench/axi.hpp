@@ -79,10 +79,12 @@ class axi_paddr{
             uint8_t delay;
     public:
         PaddrTop* paddr_top;
+        PaddrTop* check_paddr_top;
         axi_paddr(Vmycpu_top *mycpu, 
                 el::Logger* input_log = el::Loggers::getLogger("default")):
             pins(axi_ref(mycpu)),
             paddr_top(nullptr) {}
+        void set_diff_mem(PaddrTop* diff_mem);
         bool calculate_output();
         void update_output();
         void reset();
@@ -120,6 +122,7 @@ class axi_paddr{
         bool do_once_read();
         void idel_wait_read();
         bool read_eval();
+        void read_difftest();
 
         void read_require_trace();
         void read_data_trace();

@@ -19,6 +19,7 @@
 #include "nemu/cpu/cpu.hpp"
 #include "nemu/isa.hpp"
 #include "nemu/cpu/decode.hpp"
+#include "fmt/core.h"
 #include "cp0.hpp"
 #include "macro.hpp"
 #include "nemu/mytrace.hpp"

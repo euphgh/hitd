@@ -63,4 +63,4 @@ LDFLAGS += $(CFLAGS_BUILD)
 include $(HITD_HOME)/scripts/compile_tb.mk
 
 wave:
-	gtkwave vlogs/wave/*.fst vlogs/wave/signals.sav 
+	gtkwave vlogs/wave/*.fst vlogs/wave/signals.sav &

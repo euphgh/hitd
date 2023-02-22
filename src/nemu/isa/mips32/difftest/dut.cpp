@@ -29,7 +29,7 @@ bool CPU_state::isa_difftest_checkregs(diff_state *ref_r) {
     return ans;
 }
 
-void CPU_state::isa_log_reg(word_t ref, word_t my_ans, const char* name){
+void print_reg_diff(word_t ref, word_t my_ans, const char* name){
     bool error = ref!=my_ans;
     const char *my_fmt = error ? ANSI_FMT(FMT_REG, ANSI_FG_RED) : FMT_REG;
     if (error) {
@@ -43,13 +43,13 @@ void CPU_state::isa_difftest_log_error(diff_state *ref_r){
     for (uint8_t i = 0; i < 32; i++) {
         char tmp[10] = {0};
         sprintf(tmp, "%s($%d)", reg_name(i), i);
-        isa_log_reg(ref_r->gpr[i], arch_state.gpr[i], tmp);
+        print_reg_diff(ref_r->gpr[i], arch_state.gpr[i], tmp);
     }
     if (hilo_valid){
-        isa_log_reg(ref_r->hi, arch_state.hi, "$hi");
-        isa_log_reg(ref_r->lo, arch_state.lo, "$lo");
+        print_reg_diff(ref_r->hi, arch_state.hi, "$hi");
+        print_reg_diff(ref_r->lo, arch_state.lo, "$lo");
     }
-    isa_log_reg(ref_r->pc, arch_state.pc, "next-pc");
+    print_reg_diff(ref_r->pc, arch_state.pc, "next-pc");
 }
 void isa_difftest_attach() {
 }

@@ -67,29 +67,44 @@ endmenu# }}}
 
 menu "Log Options"# {{{
 
-config LOG_ENABLE
-    bool "Save difftest output in a file"
+config TRACE
+    bool "Enable tracer, save testbench output in file"
     default y
 
-config LOG_FILE
-    depends on LOG_ENABLE
+config TRACE_FILE
+    depends on TRACE
     string "log file absolutely path"
-    default "$(DIFF_HOME)/vlogs/difftest-log.txt"
+    default "$(HITD_HOME)/vlogs/tb-trace.log"
 
-config LRING_ENABLE
-    depends on LOG_ENABLE
-    bool "Only save the last n log in file"
-    default n
+config TRACE_FILE_SIZE
+    depends on TRACE
+    string "truncate file when trace file reaches the specified size(uint bytes, 0 is not truncate)"
+    default "1024*1024"
 
-config LRING_NR 
-    depends on LRING_ENABLE
-    int "Save the last n log"
-    default 1024
+config ITRACE
+  depends on TRACE
+  bool "Trace Nemu all executed Instructions"
+  default y
 
-config LRING_LEN 
-    depends on LRING_ENABLE
-    int "Log max length per line"
-    default 128
+config MTRACE
+  depends on TRACE
+  bool "Trace Nemu all access to Memory"
+  default y
+
+config FTRACE
+  depends on TRACE
+  bool "Trace Nemu all Function call"
+  default n
+
+config ETRACE
+  depends on TRACE
+  bool "Trace Nemu all Exception trigger and return"
+  default y
+
+config TTRACE
+  depends on TRACE
+  bool "Trace MyCPU all AXI Transition"
+  default y
 
 endmenu# }}}
 

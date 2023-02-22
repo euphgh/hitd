@@ -1,62 +1,84 @@
 #include "cp0.hpp"
 
-#define __cp0_field_init__(name,msb,lsb,reset,writable) \
-    .name = reset,
-#define __cp0_reg_init__(regname,rd,sel,...) \
-    regname##_t regname##_tmp = { \
-        __VA_ARGS__ \
-    }; \
-    cp0->regname = regname##_tmp;
+#define __cp0_compare_wcfun__ 1
 
+bool CP0_t::read (uint8_t rd_sel, word_t& data) const{/*{{{*/
+    bool res = true;
+    switch (rd_sel) {
 #define __cp0_reg_read__(regname,rd,sel,...) \
     case (rd<<3|sel):{ \
-                         regname##_t tmp = cp0->regname;\
-                         res = (__VA_ARGS__ 0); \
+                         const regname##_t& tmp = regname;\
+                         data = (__VA_ARGS__ 0); \
                          break; \
-                     } 
-#define __cp0_field_read__(name,msb,lsb,reset,writable) \
+                     }
+#define __cp0_field_read__(name,msb,lsb,reset,writable,check) \
     (tmp.name << lsb) |
-
-#define __cp0_reg_write__(regname,rd,sel,...) \
-    case (rd<<3|sel):{ \
-                         regname##_t *old = &(cp0->regname); \
-                         regname##_t new_value = { \
-                             __VA_ARGS__ \
-                         }; \
-                         cp0->regname = new_value; \
-                         IFDEF(__cp0_##regname##_wfunc__, regname##_wfunc(cp0)); \
-                         break; \
-                     } 
-#define __cp0_field_write__(name,msb,lsb,reset,writable) \
-    .name = static_cast<unsigned int>(writable ? ((data & BITMASK(msb+1)) >> lsb) : old->name),
-
-#define __cp0_compare_wfunc__ 1
-inline void compare_wfunc(CP0_t* cp0){
-    cp0->cause.ti = 0;
-}
-
-uint8_t clock_tick = 0;
-
-void cp0_init(CP0_t* cp0){/*{{{*/
-    clock_tick = false;
-    __cp0_info__(__cp0_reg_init__, __cp0_field_init__)
-}/*}}}*/
-word_t cp0_read(CP0_t* cp0, uint8_t rd_sel){/*{{{*/
-    word_t res = 0;
-    switch (rd_sel) {
         __cp0_info__(__cp0_reg_read__, __cp0_field_read__)
-        default: __ASSERT_NEMU__(0,"Read not exist CP0 register with rd:%u\tsel%u",rd_sel>>3,rd_sel&0x7);break;
+        default:res = false;
     }
     return res;
 }/*}}}*/
-bool cp0_write(CP0_t* cp0, uint8_t rd_sel, word_t data){/*{{{*/
+
+bool CP0_t::write(uint8_t rd_sel, word_t data){/*{{{*/
     bool res = true;
     switch (rd_sel) {
+#define __cp0_reg_write__(regname,rd,sel,...) \
+    case (rd<<3|sel):{ \
+                         regname##_t *old = &(regname); \
+                         regname = { \
+                             __VA_ARGS__ \
+                         }; \
+                         IFDEF(__cp0_##regname##_wcfun__, regname##_wfunc();) \
+                         break; \
+                     } 
+#define __cp0_field_write__(name,msb,lsb,reset,writable,check) \
+    .name = static_cast<unsigned int>(writable ? ((data & BITMASK(msb+1)) >> lsb) : old->name),
         __cp0_info__(__cp0_reg_write__,__cp0_field_write__)
         default: 
             res = false;
-            __ASSERT_NEMU__(0,"Write not exist CP0 register with rd:%u\tsel%u",rd_sel>>3,rd_sel&0x7);
             break;
     }
     return res;
+}/*}}}*/
+
+bool CP0_t::check(const CP0_t &ref){/*{{{*/
+    bool res = true;
+#define __cp0_reg_check__(regname,rd,sel,...) \
+    res &= regname.equals(ref.regname);
+    __cp0_info__(__cp0_reg_check__,)
+    return res;
+}/*}}}*/
+
+#define __cp0_reg_equals__(regname,rd,sel,...) \
+    bool regname##_t::equals(const regname##_t obj){ \
+        bool res = true; \
+        __VA_ARGS__ \
+        return res; \
+    }
+#define __cp0_field_equals__(name,msb,lsb,reset,writable,check) \
+    res &= check ? (name==obj.name) : 1;
+__cp0_info__(__cp0_reg_equals__, __cp0_field_equals__)
+
+
+void CP0_t::log_error(const CP0_t& ref) {/*{{{*/
+    extern void print_reg_diff(word_t ref, word_t my_ans, const char* name);
+    word_t the_value, ref_value;
+#define __cp0_reg_log__(regname,rd,sel,...) \
+    if (!regname.equals(ref.regname)){ \
+        read((rd<<3|sel), the_value); \
+        ref.read((rd<<3|sel), ref_value); \
+        print_reg_diff(ref_value, the_value, #regname); \
+    }
+    __cp0_info__(__cp0_reg_log__,)
+}/*}}}*/
+
+void CP0_t::reset(){/*{{{*/
+#define __cp0_reg_init__(regname,rd,sel,...) \
+    regname = { \
+        __VA_ARGS__ \
+    };
+    clock_tick = false;
+#define __cp0_field_init__(name,msb,lsb,reset,writable,check) .name = reset,
+    clock_tick = 0;
+    __cp0_info__(__cp0_reg_init__, __cp0_field_init__)
 }/*}}}*/

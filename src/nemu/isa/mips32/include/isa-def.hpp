@@ -54,7 +54,6 @@ class mips32_CPU_state{
         // }}}
 
         // nemu difftest{{{
-        void isa_log_reg(word_t ref, word_t my_ans, const char* name);
         bool isa_difftest_checkregs(diff_state *ref_r);
         void isa_difftest_log_error(diff_state *ref_r);
         int isa_exec_once(bool has_int);

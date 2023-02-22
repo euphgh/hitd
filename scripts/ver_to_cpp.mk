@@ -20,7 +20,7 @@ VXXFLAG += --relative-includes
 VXXFLAG += $(VINCLUDE)
 VXXFLAG += -j $(NPROC)
 
-ifdef CONFIG_TRACE_ON
+ifdef CONFIG_WAVE_ON
 	VXXFLAG += --trace$(if $(CONFIG_EXT_FST),-fst)
 endif
 

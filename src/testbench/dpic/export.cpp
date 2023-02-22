@@ -1,65 +1,94 @@
 #include "testbench/dpic.hpp"
-#include <cstdint>
 #include "Vmycpu_top__Dpi.h"
+#include "debug.hpp"
 #include "testbench/dpic.hpp"
+#include "cp0.hpp"
+
+static svScope RegFile_u ; 
+static svScope u_PrimaryBranchAmend ; 
+static svScope u_WriteBack ; 
+static svScope u_PrimaryExceptionProcessor ; 
+void dpi_init(){
+    RegFile_u = svGetScopeFromName("TOP.mycpu_top.u_Main.u_ID.RegFile_u"); 
+    u_PrimaryBranchAmend = svGetScopeFromName("TOP.mycpu_top.u_Main.u_PrimaryBranchAmend"); 
+    u_WriteBack = svGetScopeFromName("TOP.mycpu_top.u_Main.u_WriteBack"); 
+    u_PrimaryExceptionProcessor = svGetScopeFromName("TOP.mycpu_top.u_Main.u_PrimaryExceptionProcessor"); 
+}
+uint64_t dpi_get_hilo(){
+    TODO();
+}
 uint32_t dpi_regfile(uint8_t num){
-    const svScope scope = svGetScopeFromName("TOP.mycpu_top.u_Main.u_ID.RegFile_u"); 
-    svSetScope(scope);
+    svSetScope(RegFile_u);
     return get_regfile(num);
 }
 
 uint8_t dpi_retire(){
-    const svScope u_PrimaryBranchAmend = svGetScopeFromName("TOP.mycpu_top.u_Main.u_PrimaryBranchAmend"); 
     svSetScope(u_PrimaryBranchAmend);
     bool down = commit0();
 
-    const svScope u_WriteBack = svGetScopeFromName("TOP.mycpu_top.u_Main.u_WriteBack"); 
     svSetScope(u_WriteBack);
     bool up = commit1();
     return up + down;
 }
 
 uint32_t dpi_retirePC(){
-    const svScope u_WriteBack = svGetScopeFromName("TOP.mycpu_top.u_Main.u_WriteBack"); 
     svSetScope(u_WriteBack);
     uint32_t last_pc = commitPC1();
     if (!commit1()){
-        const svScope u_PrimaryBranchAmend = svGetScopeFromName("TOP.mycpu_top.u_Main.u_PrimaryBranchAmend"); 
         svSetScope(u_PrimaryBranchAmend);
         last_pc = commitPC0();
     }
     return last_pc;
 }
 
-uint32_t dpi_cp0_count(){
-    const svScope u_PrimaryExceptionProcessor = svGetScopeFromName("TOP.mycpu_top.u_Main.u_PrimaryExceptionProcessor"); 
-    svSetScope(u_PrimaryExceptionProcessor);
-    return get_cp0_count();
-}
 void dpi_get_debug_info0(debug_info_t & debug_info){
-    const svScope u_PrimaryBranchAmend = svGetScopeFromName("TOP.mycpu_top.u_Main.u_PrimaryBranchAmend"); 
     svSetScope(u_PrimaryBranchAmend);
     debug_info.pc = commitPC0();
     debug_info.wen = commitWEN0();
     debug_info.wnum = commitWNUM0();
     debug_info.wdata = commitWDATA0();
 }
+
 void dpi_get_debug_info1(debug_info_t & debug_info){
-    const svScope u_WriteBack = svGetScopeFromName("TOP.mycpu_top.u_Main.u_WriteBack"); 
     svSetScope(u_WriteBack);
     debug_info.pc = commitPC1();
     debug_info.wen = commitWEN1();
     debug_info.wnum = commitWNUM1();
     debug_info.wdata = commitWDATA1();
 }
+
 uint8_t dpi_interrupt_seq(){
-    const svScope u_WriteBack = svGetScopeFromName("TOP.mycpu_top.u_Main.u_WriteBack"); 
     svSetScope(u_WriteBack);
     uint8_t res = 0;
     if (is_interrupt()){
-        const svScope u_PrimaryBranchAmend = svGetScopeFromName("TOP.mycpu_top.u_Main.u_PrimaryBranchAmend"); 
         svSetScope(u_PrimaryBranchAmend);
         res = commit0() ? 2 : 1;
     }
     return res;
 }
+uint32_t dpi_get_cp0(int rd, int sel){
+    svSetScope(u_PrimaryExceptionProcessor);
+    return get_cp0_value(rd<<3|sel);
+}
+
+bool dpi_is_cp0_change(uint32_t* changed_pc){
+    svSetScope(u_PrimaryExceptionProcessor);
+    bool changed = cp0_change();
+    if (changed) {
+        *changed_pc = cp0_change_pc();
+    }
+    return changed;
+}
+
+CP0_t::CP0_t(bool dpic){/*{{{*/
+  if (!dpic) return;
+  uint32_t data;
+ #define __cp0_reg_load__(regname,rd,sel,...) \
+        data = get_cp0_value(rd<<3|sel); \
+        regname = { \
+            __VA_ARGS__ \
+        };
+#define __cp0_field_load__(name,msb,lsb,reset,writable,check) \
+        .name = static_cast<unsigned int>((data & BITMASK(msb+1)) >> lsb),
+  __cp0_info__(__cp0_reg_load__, __cp0_field_load__);
+}/*}}}*/
