@@ -98,8 +98,10 @@ class PaddrConfreg: public PaddrInterface {/*{{{*/
         uint8_t virtual_uart;
         uint32_t open_trace;
         uint32_t num_monitor;
-        std::queue <uint8_t> uart_queue;
+        int diff_mode; // not a physical register, using as uart difftest
+        std::queue<uint8_t>* diff_queue; // not a physical register, using as uart difftest
     public:
+        std::queue <uint8_t> uart_queue;
         uint32_t confreg_read = 0;
         uint32_t confreg_write = 0;
         PaddrConfreg(bool simulation = false,
@@ -108,10 +110,13 @@ class PaddrConfreg: public PaddrInterface {/*{{{*/
         bool do_read (word_t addr, wen_t info, word_t* data);
         bool do_write(word_t addr, wen_t info, const word_t data);
         void set_switch(uint8_t value);
-        bool has_uart();
-        char get_uart();
         uint32_t get_num();
+        void set_difftest_mode(int mode, std::queue<uint8_t>* negtive_queue);
         PaddrInterface* deep_copy();
 };/*}}}*/
 
+enum {
+    CONFREG_POSTIVE, // when uart has output read negtive queue and check
+    CONFREG_NEGTIVE,
+};
 #endif

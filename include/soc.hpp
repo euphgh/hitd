@@ -1,11 +1,14 @@
 #include "paddr/paddr_interface.hpp"
 #ifndef __SOC_HPP__
 #define __SOC_HPP__
-enum { func, perf };
 class basic_soc {
     public:
-        basic_soc(int number, int bin);
-        PaddrTop* get_paddr(int number);
+        enum { BIN_FUNC, BIN_PERF };
+        basic_soc(int bin);
+
+        enum { SOC_REF = 0, SOC_MYCPU = 1};
+        PaddrTop* get_paddr(int who);
+
         void set_switch(uint8_t value);
         void tick();
     private:

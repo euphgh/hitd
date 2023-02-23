@@ -20,9 +20,8 @@
 #include "../local-include/reg.hpp"
 #include "testbench/sim_state.hpp"
 #include "fmt/core.h"
+#include "testbench/dpic.hpp"
 
-extern void trace_and_difftest(Decode *_this);
-extern std::string disassemble(uint64_t pc, uint8_t *code, int nbyte);
 
 void CPU_state::ref_tick_and_int(uint8_t ext_int){/*{{{*/
     // only ext_int[5:0] is valid
@@ -32,25 +31,42 @@ void CPU_state::ref_tick_and_int(uint8_t ext_int){/*{{{*/
     if (cp0.count.all==cp0.compare.all) cp0.cause.ti = 1;
 }/*}}}*/
 #include <csignal>
+void nemu_ref_end_statistics(int state, el::Logger* log_pt){
+    extern std::string disassemble(uint64_t pc, uint8_t *code, int nbyte);
+    switch (state) {
+        case NEMU_END: 
+            log_pt->info("run to end pc");
+            break;
+        case NEMU_ABORT: 
+            log_pt->error("Fail to execute " + disassemble(nemu->inst_state.pc, (uint8_t*)&(nemu->inst_state.inst), 4));
+            break;
+        default:
+            __ASSERT_NEMU__(0, "unexpected quit state {}", state);
+            break;
+    }
+}
 bool mips32_CPU_state::ref_exec_once(bool mycpu_int) {/*{{{*/
     bool nemu_int = isa_query_intr();
     inst_state.snpc = inst_state.pc = arch_state.pc;
     isa_exec_once(mycpu_int);
+    if (inst_state.skip) arch_state.gpr[inst_state.wnum] = dpi_regfile(inst_state.wnum);
+    if (arch_state.pc == 0xbfc00100) nemu_state.state = NEMU_END;
     arch_state.pc = inst_state.dnpc;
-    if (arch_state.pc==0x9fc13170) std::raise(SIGTRAP);
+
     if (mycpu_int == false) {
         int_delay += nemu_int;
-        __ASSERT_SIM__(int_delay < 32, "MyCPU not trigger interrupt too long!");
+        __ASSERT_NEMU__(int_delay < 32, "interrupt wait trigger too long");
     }
     else {
         int_delay = 0;
-        __ASSERT_SIM__(nemu_int, "MyCPU trigger interrupt but nemu not find");
+        __ASSERT_NEMU__(nemu_int, "not find interrupt need be trigger");
     }
-    // if (arch_state.pc == 0xbfc00414) std::raise(SIGINT);
-    bool normal = nemu_state.state == NEMU_RUNNING;
-    if (normal==false) {log_pt->error("Fail to execute " + disassemble(inst_state.pc, (uint8_t*)&(inst_state.inst), 4));}
+
+    bool running = nemu_state.state == NEMU_RUNNING;
+    extern void trace_and_difftest(Decode *_this);
+    if (running==false) nemu_ref_end_statistics(nemu_state.state, log_pt);
     else trace_and_difftest(&inst_state);
-    return normal;
+    return running;
 }/*}}}*/
 
 void CPU_state::ref_set_hilo(word_t _hi, word_t _lo) { arch_state.hi = _hi; arch_state.lo = _lo; }
@@ -71,8 +87,8 @@ bool CPU_state::ref_checkregs(diff_state *mycpu){/*{{{*/
     return ans;
 }/*}}}*/
 
-extern void print_reg_diff(word_t ref, word_t my_ans, const char* name);
 void mips32_CPU_state::ref_log_error(diff_state *mycpu){/*{{{*/
+    extern void print_reg_diff(word_t ref, word_t my_ans, const char* name);
     for (uint8_t i = 0; i < 32; i++) {
         char tmp[10] = {0};
         sprintf(tmp, "%s($%d)", reg_name(i), i);

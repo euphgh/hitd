@@ -84,6 +84,7 @@ void mips32_CPU_state::decode_operand(int *rd, word_t *src1, word_t *src2, word_
 
 int mips32_CPU_state::decode_exec() {
   int rd = 0;
+  inst_state.skip = false;
   word_t src1 = 0, src2 = 0, imm = 0;
 
 #define INSTPAT_INST(s) ((inst_state).inst)
@@ -157,6 +158,7 @@ int mips32_CPU_state::decode_exec() {
   INSTPAT("001111 00000   ?????   ????? ????? ??????", lui    , U, Rw(rd, imm << 16)); 
   INSTPAT("000000 ?????   00000   00000 00000 010001", mthi   , U, hilo_valid=true;arch_state.hi = src1);
   INSTPAT("000000 ?????   00000   00000 00000 010011", mtlo   , U, hilo_valid=true;arch_state.lo = src1);
+  INSTPAT("010000 00000   ?????   01001 00000 000000", mfc0_count   , U, Rw(rd,0); inst_state.skip = true); 
   INSTPAT("010000 00000   ?????   ????? 00000 000???", mfc0   , U, word_t tmp; cp0.read(imm | imm>>8, tmp); Rw(rd,tmp)); 
   INSTPAT("010000 00100   ?????   ????? 00000 000???", mtc0   , U, cp0.write((imm | imm>>8), R(rd)));
 

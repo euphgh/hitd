@@ -32,6 +32,7 @@ typedef struct Decode {
     IFDEF(CONFIG_NSC_DIFF,uint8_t wnum);
     word_t inst;
     uint8_t flag;
+    bool skip;
 } Decode;
 
 // --- pattern matching mechanism ---
