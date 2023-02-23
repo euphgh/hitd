@@ -32,7 +32,7 @@
     do { \
         if (!(cond)) { \
             fflush(stdout); \
-            fprintf(stderr, ANSI_FMT("[" __FILE__ ":%d]" format, ANSI_FG_RED) "\n", __LINE__, ##__VA_ARGS__);\
+            fprintf(stderr, ANSI_FMT("[" __FILE__ ":%d]: " format, ANSI_FG_RED) "\n", __LINE__, ##__VA_ARGS__);\
             assert(cond);\
         } \
     } while (0)

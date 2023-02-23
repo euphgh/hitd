@@ -1,7 +1,9 @@
 #include <fstream>
 #include <iostream>
+#include "debug.hpp"
 #include "testbench/sim_state.hpp"
 #include "paddr/paddr_interface.hpp"
+#include "easylogging++.h"
 
 Pmem::Pmem(word_t size_bytes, el::Logger* input_logger): PaddrInterface(input_logger) {/*{{{*/
     Assert(IS_2_POW(size_bytes),"Pmem size is not 2 power: %x",size_bytes);
@@ -71,11 +73,12 @@ bool Pmem::do_write(word_t addr, wen_t info, const word_t data){/*{{{*/
     return res;
 }/*}}}*/
 void Pmem::load_binary(uint64_t offset, const char *init_file) {/*{{{*/
-    std::ifstream file(init_file,std::ios::in | std::ios::binary | std::ios::ate);
+    std::ifstream file (init_file, std::ios::in | std::ios::binary | std::ios::ate);
+    Assert(file, "file %s open error", init_file);
     size_t file_size = file.tellg();
     file.seekg(std::ios_base::beg);
     if (offset >= mem_size || file_size+offset > mem_size) {
-        std::cerr << "memory size is not big enough for init file." << std::endl;
+        LOG(ERROR) << "memory size is not big enough for init file.";
         file_size = mem_size;
     }
     file.read((char*)mem+offset,file_size);

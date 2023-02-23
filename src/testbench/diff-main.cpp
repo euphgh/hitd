@@ -70,18 +70,18 @@ int main (int argc, char *argv[]) {
     nemu_log = logger_init("NJemu");
     mycpu_log = logger_init("MyCPU");
 
+    basic_soc soc(2,perf);
     std::signal(SIGINT, [](int) {sim_status = SIM_INT;});
     std::unique_ptr<Vmycpu_top> top(new Vmycpu_top());
-    std::unique_ptr<axi_paddr> axi(new axi_paddr(top.get()));
-    axi->paddr_top = func_soc();
-    axi->paddr_top->set_logger(mycpu_log);
     dpi_init();
+    std::unique_ptr<axi_paddr> axi(new axi_paddr(top.get()));
+    axi->paddr_top = soc.get_paddr(0);
+    axi->paddr_top->set_logger(mycpu_log);
 
-    PaddrTop* nemu_paddr_top = func_soc();
-    IFDEF(CONFIG_MEM_DIFF, axi->set_diff_mem(nemu_paddr_top);)
+    PaddrTop* nemu_paddr_top = soc.get_paddr(1);
     nemu_paddr_top->set_logger(nemu_log);
+    IFDEF(CONFIG_MEM_DIFF, axi->set_diff_mem(nemu_paddr_top);)
     init_isa(nemu_paddr_top);
-    nemu->reset();
 
     IFDEF(CONFIG_WAVE_ON,Verilated::traceEverOn(true));
     IFDEF(CONFIG_WAVE_ON,wave_file_t tfp);
@@ -92,8 +92,8 @@ int main (int argc, char *argv[]) {
     ticks = 0;
     top->aclk = 0;
     IFDEF(CONFIG_COMMIT_WAIT, uint64_t last_commit = ticks);
-    IFDEF(CONFIG_CP0_DIFF, cp0_checker cp0_checker);
-    for (size_t i = 0; i < 2; i++) {
+    IFDEF(CONFIG_CP0_DIFF, cp0_checker mycpu_cp0_checker);
+    for (size_t i = 0; i < 1; i++) {
 
         sim_status = SIM_RUN;
         uint64_t rst_ticks = 5;
@@ -115,21 +115,21 @@ int main (int argc, char *argv[]) {
                 axi->calculate_output();
                 top->eval();
 
-                func_confreg_ticks();
+                soc.tick();
 
                 axi->update_output();
                 IFDEF(CONFIG_WAVE_ON,tfp.dump(ticks));
 
                 if (sim_status!=SIM_RUN) break;
 
-                IFDEF(CONFIG_CP0_DIFF, cp0_checker.check_change();)
+                IFDEF(CONFIG_CP0_DIFF, mycpu_cp0_checker.check_change();)
 
                     nemu->ref_tick_and_int(0);
 
                 uint8_t commit_num = dpi_retire();
                 if (commit_num > 0) {
-                    IFDEF(CONFIG_COMMIT_WAIT, last_commit = ticks;)
-                        bool nemu_normal = true;
+                    IFDEF(CONFIG_COMMIT_WAIT, last_commit = ticks);
+                    bool nemu_normal = true;
                     uint8_t mycpu_int = dpi_interrupt_seq();
                     for (size_t i = 0; i < commit_num; i++) {
                         nemu_normal = nemu->ref_exec_once(i+1 == mycpu_int);
@@ -141,7 +141,7 @@ int main (int argc, char *argv[]) {
                             nemu_log->info("execute inst at end pc");
                             sim_status = SIM_END;
                         }
-                        IFDEF(CONFIG_CP0_DIFF, cp0_checker.check_value(nemu->inst_state.pc, nemu->cp0);)
+                        IFDEF(CONFIG_CP0_DIFF, mycpu_cp0_checker.check_value(nemu->inst_state.pc, nemu->cp0);)
 
                     }
                     if (nemu_normal) {

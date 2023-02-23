@@ -1,5 +1,5 @@
 /***************************************************************************************
-* Copyright (c) 2014-2022 Zihao Yu, Nanjing University
+* Copyright (c) 2014-2022 Zihao Yu, Nanjing Universityref.cpp
 *
 * NEMU is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
@@ -37,6 +37,7 @@ bool mips32_CPU_state::ref_exec_once(bool mycpu_int) {/*{{{*/
     inst_state.snpc = inst_state.pc = arch_state.pc;
     isa_exec_once(mycpu_int);
     arch_state.pc = inst_state.dnpc;
+    if (arch_state.pc==0x9fc13170) std::raise(SIGTRAP);
     if (mycpu_int == false) {
         int_delay += nemu_int;
         __ASSERT_SIM__(int_delay < 32, "MyCPU not trigger interrupt too long!");

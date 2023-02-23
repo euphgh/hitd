@@ -23,7 +23,6 @@ void cp0_checker::check_value(word_t pc, const CP0_t& ref){
             saved_cp0.pop();
         }
         else {
-            std::raise(SIGTRAP);
             __ASSERT_SIM__(0, "CP0 value not correct");
             saved_cp0.front()->log_error(ref);
             pc_when_changed.pop();

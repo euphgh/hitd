@@ -21,7 +21,7 @@ bool PaddrTop::add_dev(AddrIntv &new_range, PaddrInterface *dev) {
 bool PaddrTop::do_read (word_t addr, wen_t info, word_t* data){
     for (auto it: devices){
         AddrIntv dev_range = it.first;
-        if (dev_range.start<=addr && addr+info.size<=dev_range.end()){
+        if (dev_range.start<=addr && (addr+info.size-1)<=dev_range.end()){
             return it.second->do_read(addr & dev_range.mask, info, data);
         }
     }
@@ -38,7 +38,7 @@ void PaddrTop::set_logger(el::Logger *input_logger){
 bool PaddrTop::do_write(word_t addr, wen_t info, const word_t data){
     for (auto it: devices){
         AddrIntv dev_range = it.first;
-        if (dev_range.start<=addr && addr+info.size<=dev_range.end()){
+        if (dev_range.start<=addr && (addr+info.size-1)<=dev_range.end()){
             return it.second->do_write(addr & dev_range.mask, info, data);
         }
     }
