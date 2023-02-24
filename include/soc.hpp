@@ -4,7 +4,7 @@
 class basic_soc {
     public:
         enum { BIN_FUNC, BIN_PERF };
-        basic_soc(int bin);
+        basic_soc(int test_code);
 
         enum { SOC_REF = 0, SOC_MYCPU = 1};
         PaddrTop* get_paddr(int who);

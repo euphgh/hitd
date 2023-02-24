@@ -1,3 +1,4 @@
+#include "debug.hpp"
 #include "testbench/axi.hpp"
 #include "nemu/isa.hpp"
 #include "Vmycpu_top.h"
@@ -14,7 +15,8 @@
 #include __WAVE_INC__
 #endif
 
-extern uint64_t ticks;
+extern int64_t ticks;
+extern uint64_t total_times;
 extern el::Logger* mycpu_log;
 #define RST_TIME 128
 
@@ -65,11 +67,10 @@ static void check_cpu_state(diff_state* mycpu){/*{{{*/
     }
 }/*}}}*/
 bool mainloop(
-         Vmycpu_top* top
-        ,axi_paddr* axi
-        ,std::string wave_name
-        ,basic_soc& soc
-        IFDEF(CONFIG_CP0_DIFF, ,cp0_checker& mycpu_cp0_checker)
+        Vmycpu_top* top,
+        axi_paddr* axi,
+        std::string wave_name,
+        basic_soc& soc
         ){/*{{{*/
 
     diff_state mycpu;
@@ -79,6 +80,7 @@ bool mainloop(
     IFDEF(CONFIG_WAVE_ON,wave_file_t tfp);
     IFDEF(CONFIG_WAVE_ON,top->trace(&tfp,0));
     IFDEF(CONFIG_WAVE_ON,tfp.open((__WAVE_DIR__ + wave_name + "." + CONFIG_WAVE_EXT).c_str()));
+    IFDEF(CONFIG_CP0_DIFF, cp0_checker mycpu_cp0_checker);
 
     ticks = 0;
     top->aclk = 0;

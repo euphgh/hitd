@@ -1,12 +1,22 @@
 #include "debug.hpp"
 #include "paddr/paddr_interface.hpp"
 #include "soc.hpp"
-#include <strings.h>
+#include "testbench/sim_state.hpp"
+#include <map>
+#include <string>
+#include <utility>
 #include <vector>
 #define __FUNC_BIN__ NSCSCC_HOME "/func_test_v0.01/soft/func/obj/main.bin"
 #define __PERF_BIN__ NSCSCC_HOME "/perf_test_v0.01/soft/perf_func/obj/allbench/inst_data.bin"
 
-basic_soc::basic_soc(int bin){/*{{{*/
+static std::map<int, int> name_to_int = {
+    std::make_pair(TEST_NAME_FUNC, basic_soc::BIN_FUNC),
+    std::make_pair(TEST_NAME_PERF, basic_soc::BIN_PERF),
+};
+
+basic_soc::basic_soc(int test_name){/*{{{*/
+    Assert(name_to_int.find(test_name)!=name_to_int.end(), "basic soc not support test code %d", test_name);
+    int bin = name_to_int.at(test_name);
     AddrIntv s0_24_range = AddrIntv(0x0,bit_mask(24));
     AddrIntv inst_range = AddrIntv(0x1fc00000,bit_mask(22));
     AddrIntv confreg_range = AddrIntv(0x1faf0000,bit_mask(16));

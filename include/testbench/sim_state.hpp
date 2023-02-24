@@ -1,7 +1,6 @@
 #ifndef __DIFF_SIM__
 #define __DIFF_SIM__
 
-#include <string>
 typedef enum{
     SIM_RUN,    // still run
     SIM_STOP,   // gdb breakpoint or watchpoint
@@ -20,4 +19,11 @@ extern sim_status_t sim_status;
         } \
   } while (0)
 #define __WAVE_DIR__ HITD_HOME "/vlogs/wave/"
+enum {
+    TEST_NAME_FUNC,
+    TEST_NAME_PERF,
+    TEST_NAME_SYST,
+    TEST_NAME_UCORE,
+    TEST_NAME_LINUX
+};
 #endif /* !__DIFF_SIM__ */

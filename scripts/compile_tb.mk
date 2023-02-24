@@ -42,8 +42,9 @@ $(BINARY): $(OBJS) $(OBJS_EXTRA) $(LD_HEAD_OF) $(LD_TAIL_OF) $(ARCHIVES)
 	@echo + LD $@
 	@$(LD) $(LDFLAGS) @$(LD_HEAD_OF) $(OBJS) $(EXTRA_OBJS) $(ARCHIVES) @$(LD_TAIL_OF) $(LIBS) -o $@ 
 
-override ARGS ?= --log=$(LOG_FILE)
-override ARGS += $(ARGS_DIFF)
+ARGS = --log=$(LOG_FILE)
+IMAGE ?= func
+ARGS += --test=$(IMAGE)
 
 dirs:
 	mkdir -p $(dir $(LOG_FILE))
