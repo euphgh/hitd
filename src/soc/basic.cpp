@@ -29,7 +29,7 @@ basic_soc::basic_soc(int test_name){/*{{{*/
 
         Pmem* inst_mem = new Pmem(inst_range, s0_mem->get_mem_ptr());
 
-        PaddrConfreg* confreg = new PaddrConfreg();
+        PaddrConfreg* confreg = new PaddrConfreg(true);
         confreg_vct.push_back(confreg);
 
         PaddrTop* top = new PaddrTop();

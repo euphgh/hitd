@@ -37,6 +37,7 @@ class mips32_CPU_state{
         bool raise_ex;
         std::shared_ptr<PaddrTop> paddr_top;
         Decode inst_state;
+        bool analysis;
 
         mips32_CPU_state(PaddrTop* ptop_input);
         void execute(uint64_t n);
@@ -119,6 +120,17 @@ class mips32_CPU_state{
             inst_state.dnpc = cp0.epc.all;
             cp0.status.exl = 0;
             IFDEF(CONFIG_ETRACE,log_pt->trace("[E] exception return"));
+        }/*}}}*/
+        inline void inst_mfc0(word_t imm, int rd){/*{{{*/
+            word_t tmp; 
+            uint8_t pos = imm | imm >>8;
+            cp0.read(pos, tmp); 
+            Rw(rd,tmp); 
+            if (pos==(9<<3)){
+                inst_state.skip = true;
+                if (inst_state.pc==0x9fc13170)
+                    analysis = !analysis;
+            }
         }/*}}}*/
         inline void inst_add(uint8_t rd, word_t src1, word_t src2){/*{{{*/
             word_t ans = src1 + src2;

@@ -23,8 +23,8 @@ class bit_mask {
 class AddrIntv {// address interval{{{
     public:
     // example: [0x100,0x1ff]
-    word_t start;   // include:0x01000
-    word_t mask;
+    word_t start;   // include: 0x01000
+    word_t mask;    //          0x00111
     AddrIntv(word_t _start, word_t _len): start(_start), mask(_len - 1){
         Assert((start & mask) == 0, "AddrIntv parameter error: start:%x\tlen:\t%x\n",_start,_len);
     };

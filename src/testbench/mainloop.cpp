@@ -4,6 +4,7 @@
 #include "Vmycpu_top.h"
 #include "soc.hpp"
 #include "generated/autoconf.h"
+#include "testbench/inst_timer.hpp"
 #include "testbench/sim_state.hpp"
 #include "testbench/dpic.hpp"
 #include "fmt/core.h"
@@ -15,7 +16,7 @@
 #include __WAVE_INC__
 #endif
 
-extern int64_t ticks;
+extern uint64_t ticks;
 extern uint64_t total_times;
 extern el::Logger* mycpu_log;
 #define RST_TIME 128
@@ -86,6 +87,7 @@ bool mainloop(
     top->aclk = 0;
     top->aresetn = 0;
     IFDEF(CONFIG_COMMIT_WAIT, uint64_t last_commit = ticks);
+    inst_timer perf_timer(AddrIntv(0x1fc00000,bit_mask(22)));
 
     while (ticks < (RST_TIME & ~0x1)) {
         ++ticks;
@@ -126,7 +128,6 @@ bool mainloop(
 
         /* run nemu and check difference {{{*/
         if (commit_num > 0) {
-            IFDEF(CONFIG_COMMIT_WAIT, last_commit = ticks);
             uint8_t mycpu_int = dpi_interrupt_seq();
             for (size_t i = 0; i < commit_num; i++) {
                 if (!nemu->ref_exec_once(i+1 == mycpu_int)) {
@@ -134,10 +135,12 @@ bool mainloop(
                     goto negtive_edge;
                 }
                 IFDEF(CONFIG_CP0_DIFF, mycpu_cp0_checker.check_value(nemu->inst_state.pc, nemu->cp0));
+                if (nemu->analysis) 
+                    perf_timer.add_inst(nemu->inst_state.pc, ((consume_t)(ticks-last_commit))/commit_num);
             }
-
             dpi_api_get_state(&mycpu);
             check_cpu_state(&mycpu);
+            IFDEF(CONFIG_COMMIT_WAIT, last_commit = ticks);
         }/*}}}*/
         /*}}}*/
         /* negtive edge comming *//*{{{*/
@@ -152,5 +155,6 @@ negtive_edge:
     }
 
     IFDEF(CONFIG_WAVE_ON,tfp.close());
+    perf_timer.save_date("perf_analysis.txt");
     return sim_end_statistics();
 }/*}}}*/

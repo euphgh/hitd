@@ -8,8 +8,10 @@
 #include "testbench/dpic.hpp"
 #include <cstdio>
 #include <getopt.h>
+#include <utility>
 #include "soc.hpp"
 #include "testbench/cp0_checker.hpp"
+#include "testbench/inst_timer.hpp"
 
 int64_t total_times = 0;
 el::Logger* nemu_log;
@@ -77,7 +79,7 @@ static void run_perf(
         axi_paddr* axi,
         basic_soc& soc
         ){/*{{{*/
-    for (size_t i = 1; i <= 10; i++) {
+    for (size_t i = 7; i <= 7; i++) {
         soc.set_switch(i);
         if (!mainloop(top, axi, "perf-"+std::to_string(i), soc)) break;
     }
@@ -113,5 +115,7 @@ int main (int argc, char *argv[]) {
             break;
     }
     top->final();
+    nemu_log->flush();
+    mycpu_log->flush();
     return 0;
 }
