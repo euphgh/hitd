@@ -88,7 +88,7 @@ bool mainloop(
     top->aclk = 0;
     top->aresetn = 0;
     IFDEF(CONFIG_COMMIT_WAIT, uint64_t last_commit = ticks);
-    inst_timer perf_timer(AddrIntv(0x1fc00000,bit_mask(22)), "block-table.txt");
+    inst_timer perf_timer(AddrIntv(0x1fc00000,bit_mask(22)));
 
     while (ticks < (RST_TIME & ~0x1)) {
         ++ticks;
@@ -157,6 +157,6 @@ negtive_edge:
     }
 
     IFDEF(CONFIG_WAVE_ON,tfp.close());
-    perf_timer.save_date("perf_analysis.txt");
+    perf_timer.save_date(wave_name+".bin");
     return sim_end_statistics();
 }/*}}}*/

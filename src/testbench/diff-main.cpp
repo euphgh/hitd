@@ -79,7 +79,7 @@ static void run_perf(
         axi_paddr* axi,
         basic_soc& soc
         ){/*{{{*/
-    for (size_t i = 7; i <= 7; i++) {
+    for (size_t i = 1; i <= 10; i++) {
         soc.set_switch(i);
         if (!mainloop(top, axi, "perf-"+std::to_string(i), soc)) break;
     }
