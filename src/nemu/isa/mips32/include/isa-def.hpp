@@ -128,8 +128,6 @@ class mips32_CPU_state{
             Rw(rd,tmp); 
             if (pos==(9<<3)){
                 inst_state.skip = true;
-                if (inst_state.pc==0x9fc13170)
-                    analysis = !analysis;
             }
         }/*}}}*/
         inline void inst_add(uint8_t rd, word_t src1, word_t src2){/*{{{*/

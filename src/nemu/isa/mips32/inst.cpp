@@ -228,6 +228,8 @@ int mips32_CPU_state::isa_exec_once(bool has_int) {
 
         if (inst_state.is_delay_slot) next_is_delay_slot = false;
     }
+    if (inst_state.pc==0x9fc13178)
+        analysis = !analysis;
     extern uint32_t log_pc;
     log_pc = this_pc;
     return 0 ;

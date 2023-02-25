@@ -1,4 +1,5 @@
 #include "debug.hpp"
+#include "paddr/paddr_interface.hpp"
 #include "testbench/axi.hpp"
 #include "nemu/isa.hpp"
 #include "Vmycpu_top.h"
@@ -87,7 +88,7 @@ bool mainloop(
     top->aclk = 0;
     top->aresetn = 0;
     IFDEF(CONFIG_COMMIT_WAIT, uint64_t last_commit = ticks);
-    inst_timer perf_timer;
+    inst_timer perf_timer(AddrIntv(0x1fc00000,bit_mask(22)), "block-table.txt");
 
     while (ticks < (RST_TIME & ~0x1)) {
         ++ticks;
@@ -136,10 +137,7 @@ bool mainloop(
                 }
                 IFDEF(CONFIG_CP0_DIFF, mycpu_cp0_checker.check_value(nemu->inst_state.pc, nemu->cp0));
                 if (nemu->analysis) {
-                    if (nemu->inst_state.pc==0x9fc0f320) {
-                        std::raise(SIGTRAP);
-                    }
-                    perf_timer.add_inst(nemu->inst_state.pc, ((consume_t)(ticks-last_commit))/commit_num, nemu->inst_state.is_delay_slot);
+                    perf_timer.add_inst(nemu->inst_state, ((consume_t)(ticks-last_commit))/commit_num, ticks);
                 }
             }
             dpi_api_get_state(&mycpu);

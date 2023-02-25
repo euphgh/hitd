@@ -68,5 +68,18 @@ config COMMIT_TIME_LIMIT
     depends on COMMIT_WAIT
     int "Wait how many clock cycles"
     default 512
+config INST_TIME
+    bool "Enable performance analysis per instruction"
+    default y
+choice
+    prompt "instruction analysis mode"
+    depends on INST_TIME
+    default INST_TIME_PRE
+
+config INST_TIME_PRE
+    bool "Generate basic block enterance and runtime table"
+config INST_TIME_ALS
+    bool "Record mycpu consume time for every instruction"
+endchoice
 
 endmenu
