@@ -214,20 +214,19 @@ int mips32_CPU_state::isa_exec_once(bool has_int) {
     inst_state.wnum = 0;
     inst_state.flag = 0;
     word_t this_pc = inst_state.snpc;
+    inst_state.is_delay_slot = next_is_delay_slot;
     if (unlikely(this_pc & 0x3)) {
         inst_state.dnpc = isa_raise_intr(AdEL,this_pc); 
         cp0.badvaddr.all = this_pc;
     }
     else {
         inst_state.inst = inst_fetch(&inst_state.snpc, 4);
-
-        bool this_is_delay = is_delay_slot;
-        inst_state.dnpc = this_is_delay ? delay_slot_npc : inst_state.snpc;
+        inst_state.dnpc = inst_state.is_delay_slot ? delay_slot_npc : inst_state.snpc;
 
         if (has_int) inst_state.dnpc = isa_raise_intr(Int, arch_state.pc); 
         else decode_exec();
 
-        if (this_is_delay) is_delay_slot = false;
+        if (inst_state.is_delay_slot) next_is_delay_slot = false;
     }
     extern uint32_t log_pc;
     log_pc = this_pc;

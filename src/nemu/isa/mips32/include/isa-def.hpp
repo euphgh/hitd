@@ -32,7 +32,7 @@ class mips32_CPU_state{
 
         bool hilo_valid;
         word_t delay_slot_npc;
-        bool is_delay_slot;
+        bool next_is_delay_slot;
         el::Logger* log_pt;
         bool raise_ex;
         std::shared_ptr<PaddrTop> paddr_top;
@@ -110,7 +110,7 @@ class mips32_CPU_state{
             Mw(addr & ~(0x3), swr_len[byte], data);
         }/*}}}*/
         inline void inst_jump(word_t dest){/*{{{*/
-            is_delay_slot = true;
+            next_is_delay_slot = true;
             delay_slot_npc = dest;
         }/*}}}*/
         inline void inst_branch(bool cond, word_t imm, word_t npc){/*{{{*/

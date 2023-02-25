@@ -33,6 +33,7 @@ typedef struct Decode {
     word_t inst;
     uint8_t flag;
     bool skip;
+    bool is_delay_slot;
 } Decode;
 
 // --- pattern matching mechanism ---

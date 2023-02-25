@@ -32,7 +32,7 @@ void CPU_state::reset() {/*{{{*/
     arch_state.pc = 0xbfc00000;
     raise_ex = false;
     nemu_state.state = NEMU_RUNNING;
-    is_delay_slot = false;
+    next_is_delay_slot = false;
     nemu->int_delay = 0;
     for (int i = 0; i < 32; i++) {
         arch_state.gpr[i] = 0;

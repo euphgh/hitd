@@ -87,7 +87,7 @@ bool mainloop(
     top->aclk = 0;
     top->aresetn = 0;
     IFDEF(CONFIG_COMMIT_WAIT, uint64_t last_commit = ticks);
-    inst_timer perf_timer(AddrIntv(0x1fc00000,bit_mask(22)));
+    inst_timer perf_timer;
 
     while (ticks < (RST_TIME & ~0x1)) {
         ++ticks;
@@ -135,8 +135,12 @@ bool mainloop(
                     goto negtive_edge;
                 }
                 IFDEF(CONFIG_CP0_DIFF, mycpu_cp0_checker.check_value(nemu->inst_state.pc, nemu->cp0));
-                if (nemu->analysis) 
-                    perf_timer.add_inst(nemu->inst_state.pc, ((consume_t)(ticks-last_commit))/commit_num);
+                if (nemu->analysis) {
+                    if (nemu->inst_state.pc==0x9fc0f320) {
+                        std::raise(SIGTRAP);
+                    }
+                    perf_timer.add_inst(nemu->inst_state.pc, ((consume_t)(ticks-last_commit))/commit_num, nemu->inst_state.is_delay_slot);
+                }
             }
             dpi_api_get_state(&mycpu);
             check_cpu_state(&mycpu);
