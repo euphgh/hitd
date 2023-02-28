@@ -15,14 +15,14 @@
 
 #include "nemu/isa.hpp"
 #include "soc.hpp"
+#include "utils.hpp"
 
 void init_rand();
 void init_sdb();
 
 static void welcome() {
-  printf("Build time: %s, %s", __TIME__, __DATE__);
-  printf("Welcome to %s-NEMU!\n", ANSI_FMT(nemu_str(__GUEST_ISA__), ANSI_FG_YELLOW ANSI_BG_RED));
-  printf("For help, type \"help\"\n");
+    printf(ANSI_FMT("Welcome to %s-NEMU!\n", ANSI_FG_BLUE), ANSI_FMT(nemu_str(__GUEST_ISA__), ANSI_FG_YELLOW ANSI_BG_RED));
+    printf(ANSI_FMT("For help, type \"help\"\n",ANSI_FG_BLUE));
 }
 
 uint64_t ticks = 0;

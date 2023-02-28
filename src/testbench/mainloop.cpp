@@ -156,7 +156,9 @@ bool mainloop(
                     sim_ending(nemu_state.state);
                     goto negtive_edge;
                 }
-                IFDEF(CONFIG_CP0_DIFF, mycpu_cp0_checker.check_value(nemu->inst_state.pc, nemu->cp0));
+                Decode& inst = nemu->inst_state;
+                if (inst.skip) nemu->arch_state.gpr[inst.wnum] = dpi_regfile(inst.wnum);
+                IFDEF(CONFIG_CP0_DIFF, mycpu_cp0_checker.check_value(inst.pc, nemu->cp0));
                 if (nemu->analysis) {
                     perf_timer.add_inst(nemu->inst_state, ((consume_t)(ticks-last_commit))/commit_num, ticks);
                 }

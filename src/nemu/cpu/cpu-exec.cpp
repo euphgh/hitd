@@ -26,6 +26,7 @@
 #include "nemu/deadloop.hpp"
 #include "isa-def.hpp"
 #include "nemu/cpu/difftest.hpp"
+#include "utils.hpp"
 /* The assembly code of instructions executed is only output to the screen
  * when the number of instructions executed is less than this value.
  * This is useful when you use the `si' command.
@@ -33,8 +34,7 @@
  */
 #define MAX_INST_TO_PRINT 10
 uint64_t g_nr_guest_inst = 0;
-uint64_t g_timer = 0; // unit: us
-bool g_print_step = false;
+bool g_si_print = false;
 bool is_wp_change();
 extern std::string disassemble(uint64_t pc, uint8_t *code, int nbyte);
 
@@ -73,24 +73,26 @@ void trace_and_difftest(Decode *_this) {
     IFDEF(CONFIG_DEADLOOP, check_deadloop(_this->pc));
 }
 
-static void statistic() { }
-
 void mips32_CPU_state::execute(uint64_t n) {
     for (;n > 0; n --) {
-        inst_state.snpc = inst_state.pc = arch_state.pc;
-        isa_exec_once(false);
-        arch_state.pc = inst_state.dnpc;
-        if (nemu_state.state != NEMU_RUNNING) {
-            // log_pt->error("Completion of execution {}", .logbuf);
+	    inst_state.snpc = inst_state.pc = arch_state.pc;
+	    isa_exec_once(isa_query_intr());
+	    arch_state.pc = inst_state.dnpc;
+	    if (arch_state.pc == 0xbfc00100) nemu_state.state = NEMU_END;
+	    if (nemu_state.state != NEMU_RUNNING) {
+            if (nemu_state.state==NEMU_ABORT) 
+                nemu->log_pt->error("Fail to execute" HEX_WORD ":{}\n",inst_state.pc, disassemble(inst_state.pc, (uint8_t*)&(inst_state.inst), 4));
             break;
         }
-        else trace_and_difftest(&inst_state);
+	    else trace_and_difftest(&inst_state);
+	    if (g_si_print) fmt::print(HEX_WORD ":{}\n",inst_state.pc, disassemble(inst_state.pc, (uint8_t*)&(inst_state.inst), 4));
+        extern uint64_t ticks;
+        ++ticks;
     }
 }
 
 /* Simulate how the CPU works. */
 void cpu_exec(uint64_t n) {/*{{{*/
-    g_print_step = (n < MAX_INST_TO_PRINT);
     switch (nemu_state.state) {
         case NEMU_END: case NEMU_ABORT:
             printf("Program execution has ended. To restart the program, exit NEMU and run again.\n");
@@ -98,19 +100,20 @@ void cpu_exec(uint64_t n) {/*{{{*/
         default: nemu_state.state = NEMU_RUNNING;
     }
 
-    uint64_t timer_start = get_time();
-
     nemu->execute(n);
 
-    uint64_t timer_end = get_time();
-    g_timer += timer_end - timer_start;
-
     switch (nemu_state.state) {
-        case NEMU_RUNNING: nemu_state.state = NEMU_STOP; break;
-
-        case NEMU_END: case NEMU_ABORT:
-                           nemu->log_pt->info("nemu abort");
-                           // fall through
-        case NEMU_QUIT: statistic();
+        case NEMU_RUNNING: 
+            nemu_state.state = NEMU_STOP; 
+            break;
+        case NEMU_END: 
+               nemu->log_pt->info("nemu run to end pc");
+               break;
+        case NEMU_ABORT:
+               nemu->log_pt->info("nemu abort");
+               break;
+        case NEMU_QUIT: 
+               nemu->log_pt->info("nemu finish cpu-exec with unexpected state quit");
+               break;
     }
 }/*}}}*/

@@ -49,10 +49,8 @@ bool mips32_CPU_state::ref_exec_once(bool mycpu_int) {/*{{{*/
     bool nemu_int = isa_query_intr();
     inst_state.snpc = inst_state.pc = arch_state.pc;
     isa_exec_once(mycpu_int);
-    if (inst_state.skip) arch_state.gpr[inst_state.wnum] = dpi_regfile(inst_state.wnum);
     if (arch_state.pc == 0xbfc00100) nemu_state.state = NEMU_END;
     arch_state.pc = inst_state.dnpc;
-
     if (mycpu_int == false) {
         int_delay += nemu_int;
         __ASSERT_NEMU__(int_delay < 32, "interrupt wait trigger too long");

@@ -15,8 +15,8 @@
 
 LIBS += $(if $(CONFIG_NSC_NEMU),-lreadline -ldl -pie,)
 
-SRCS-$(CONFIG_NSC_NEMU) += src/nemu/nemu-main.c
-DIRS-$(CONFIG_NSC_NEMU) += src/monitor 
+SRCS-$(CONFIG_NSC_NEMU) += src/nemu/nemu-main.cpp
+DIRS-$(CONFIG_NSC_NEMU) += src/nemu/monitor 
 DIRS-y += src/nemu/cpu 
 DIRS-y += src/nemu/utils
 DIRS-y += src/nemu/memory

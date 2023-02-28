@@ -28,8 +28,8 @@ typedef struct Decode {
     vaddr_t pc;
     vaddr_t snpc; // static next pc
     vaddr_t dnpc; // dynamic next pc
-    IFDEF(CONFIG_NSC_DIFF,word_t wdata);
-    IFDEF(CONFIG_NSC_DIFF,uint8_t wnum);
+    word_t wdata;
+    uint8_t wnum;
     word_t inst;
     uint8_t flag;
     bool skip;

@@ -62,8 +62,11 @@ static int cmd_si(char *args) {/*{{{*/
     if (args) legal_arg = sscanf(strtok(NULL, " "),"%d",&step)==1;
     // 除step无其他参数 and step>0
     legal_arg &= (strtok(NULL, " ")==NULL) && (step>0);     
+    extern bool g_si_print;
+    g_si_print = step < 8;
     if (legal_arg) cpu_exec(step);
     else print_description("si");
+    g_si_print = false;
     return 0;
 }/*}}}*/
 
@@ -93,8 +96,8 @@ static bool cal_addr(char *expressions, vaddr_t *addr){/*{{{*/
 }/*}}}*/
 
 static int cmd_x(char *args) {/*{{{*/
-    int size = 0, consumeNum = 0;
-    bool has_size = false; if (args) has_size = sscanf(args, "%d %n", &size, &consumeNum);
+    unsigned int size= 0, consumeNum = 0;
+    bool has_size = false; if (args) has_size = sscanf(args, "%x %n", &size, &consumeNum);
     bool has_expr = false; if (has_size) has_expr = strlen(args)>consumeNum;
     bool legalExpr = false;
     vaddr_t vAddr;

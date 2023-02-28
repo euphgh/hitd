@@ -16,19 +16,15 @@
 #include "common.hpp"
 #include "debug.hpp"
 #include "sdb.hpp"
-#include <stdbool.h>
-#include <stdint.h>
-#include <string.h>
+#include "fmt/core.h"
+#include "easylogging++.h"
 
 #define NR_WP 32
-
 typedef struct watchpoint {
     int NO;
     struct watchpoint *next;
     word_t last_value;
     char expression[64];
-    /* TODO: Add more members if necessary */
-
 } WP;
 
 static WP wp_pool[NR_WP] = {};

@@ -14,6 +14,9 @@
 ***************************************************************************************/
 #include "common.hpp"
 #include "debug.hpp"
+#include "easylogging++.h"
+INITIALIZE_EASYLOGGINGPP
+
 void init_monitor(int, char *[]);
 int is_exit_status_bad();
 extern void sdb_mainloop();

@@ -79,16 +79,3 @@ bool dpi_is_cp0_change(uint32_t* changed_pc){
     }
     return changed;
 }
-
-CP0_t::CP0_t(bool dpic){/*{{{*/
-  if (!dpic) return;
-  uint32_t data;
- #define __cp0_reg_load__(regname,rd,sel,...) \
-        data = get_cp0_value(rd<<3|sel); \
-        regname = { \
-            __VA_ARGS__ \
-        };
-#define __cp0_field_load__(name,msb,lsb,reset,writable,check) \
-        .name = static_cast<unsigned int>((data & BITMASK(msb+1)) >> lsb),
-  __cp0_info__(__cp0_reg_load__, __cp0_field_load__);
-}/*}}}*/

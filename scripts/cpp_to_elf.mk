@@ -34,6 +34,7 @@ $(NEMU_OBJS): $(OBJ_DIR)/%.o: %.cpp
 OBJS += $(NEMU_OBJS)# }}}
 
 # testbench compile rule{{{
+ifdef CONFIG_NSC_DIFF
 TB_SRCS     := $(shell find src/testbench -name "*.cpp")
 TB_CFLAGS   += $(CFLAGS_BUILD) -D__GUEST_ISA__=$(GUEST_ISA) -I$(HITD_HOME)/obj_dir
 TB_INCLUDES = $(addprefix -I, $(TB_INC_PATH) ./src/nemu/isa/mips32/include)
@@ -44,9 +45,11 @@ $(TB_OBJS): $(OBJ_DIR)/%.o: %.cpp $(CXX_CLOF)
 	@mkdir -p $(dir $@)
 	@$(CXX) $(TB_CFLAGS) @$(CXX_CLOF) -c -o $@ $<
 	$(call call_fixdep, $(@:.o=.d), $@)
-OBJS += $(TB_OBJS) # }}}
+OBJS += $(TB_OBJS) 
+endif
+# }}}
 
-SOC_SRCS    = $(shell find src/device ./src/soc -type f -name "*.cpp")#{{{
+SOC_SRCS    = $(shell find src/device src/soc -type f -name "*.cpp")#{{{
 SOC_CFLAGS  += $(COM_FLAG) $(CFLAGS_BUILD)
 SOC_OBJS = $(SOC_SRCS:%.cpp=$(OBJ_DIR)/%.o)
 $(SOC_OBJS): $(OBJ_DIR)/%.o: %.cpp $(CXX_CLOF)
