@@ -38,8 +38,8 @@ basic_soc::basic_soc(int test_name){/*{{{*/
         top->add_dev(confreg_range, confreg);
         paddr_top_vct.push_back(top);
     }
-    confreg_vct.at(SOC_REF)->set_difftest_mode(CONFREG_POSTIVE, &confreg_vct.at(SOC_MYCPU)->uart_queue);
-    confreg_vct.at(SOC_MYCPU)->set_difftest_mode(CONFREG_NEGTIVE, nullptr);
+    confreg_vct.at(SOC_REF)->set_difftest_mode(CONFREG_POSTIVE, &confreg_vct.at(SOC_DUT)->uart_queue);
+    confreg_vct.at(SOC_DUT)->set_difftest_mode(CONFREG_NEGTIVE, nullptr);
 }/*}}}*/
 
 PaddrTop* basic_soc::get_paddr(int who){ return paddr_top_vct.at(who); }

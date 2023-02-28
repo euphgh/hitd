@@ -26,10 +26,7 @@ endif
 
 VXXBIN := $(VXX_MDIR)/V$(TOPNAME)
 VSRC_TOP := $(VSRC_DIR)/$(TOPNAME).v
-VSRC_ALL := $(shell find $(VSRC_DIR) -type f -name "*.v")
-
-var:
+VSRC_ALL := $(shell find -L $(VSRC_DIR) -type f -name "*.v")
 
 vtoc: $(VSRC_ALL)
 	verilator $(VXXFLAG) $(VSRC_TOP) 
-

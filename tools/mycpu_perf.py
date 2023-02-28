@@ -22,7 +22,7 @@ class basic_block:
         return self.singleTimes.sum()
 
 
-filename = "./perf-9.bin"
+filename = "./perf-10.bin"
 headFmt = "=IcI"
 timeFmt = "=If"
 headSize = st.calcsize(headFmt)
@@ -101,7 +101,7 @@ ax2.plot(x_aix,y_time, '--', color="m")
 y_timeProp = [ blk.runTime for blk in hlist ]
 bar_width = [blk.instNum for blk in hlist]
 bar_start = np.cumsum(np.array([0] + bar_width[0:-1]))
-ax2.bar(bar_start,y_timeProp, width=bar_width, align='edge', edgecolor="c", alpha=0.3)
+ax2.bar(bar_start,y_timeProp, width=bar_width, align='edge', edgecolor="c", alpha=0.5)
 
 ax1.plot(x_aix,y_consProp, ".", color = "g")
 

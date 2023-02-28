@@ -13,23 +13,16 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include <nemu/isa.hpp>/*{{{*/
+#include <nemu/isa.hpp>
 #include <nemu/cpu/cpu.hpp>
 #include <macro.hpp>
 #include <readline/readline.h>
 #include <readline/history.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "common.hpp"
 #include "nemu/memory/vaddr.hpp"
 #include "sdb.hpp"
 #include "utils.hpp"
-/*}}}*/
 
-static int is_batch_mode = false;
 
 void init_regex();
 void init_wp_pool();
@@ -86,7 +79,7 @@ static int cmd_info(char *args) {/*{{{*/
         success = (is_reg || is_watch) && (strtok(NULL, " ")==NULL);
     }
     if (success){
-        if (is_reg) isa_reg_display();
+        if (is_reg) nemu->isa_reg_display();
         if (is_watch) print_wp_info();
     }
     else print_description("info");
@@ -236,46 +229,38 @@ static int cmd_help(char *args) {/*{{{*/
   return 0;
 }/*}}}*/
 
-void sdb_set_batch_mode() {
-  is_batch_mode = true;
-}
-
 void sdb_mainloop() {/*{{{*/
-  if (is_batch_mode) {
-    cmd_c(NULL);
-    return;
-  }
-  // dead loop
-  for (char *str; (str = rl_gets()) != NULL; ) {
-    char *str_end = str + strlen(str);
-
-    /* extract the first token as the command */
-    char *cmd = strtok(str, " ");
-    if (cmd == NULL) { continue; }
-
-    /* treat the remaining string as the arguments,
-     * which may need further parsing
-     */
-    char *args = cmd + strlen(cmd) + 1;
-    if (args >= str_end) {
-      args = NULL;
+    extern bool arg_batch_mode;
+    if (arg_batch_mode) {
+        cmd_c(NULL);
+        return;
     }
+    // dead loop
+    for (char *str; (str = rl_gets()) != NULL; ) {
+        char *str_end = str + strlen(str);
 
-#ifdef CONFIG_DEVICE
-    extern void sdl_clear_event_queue();
-    sdl_clear_event_queue();
-#endif
+        /* extract the first token as the command */
+        char *cmd = strtok(str, " ");
+        if (cmd == NULL) { continue; }
 
-    int i;
-    for (i = 0; i < NR_CMD; i ++) {
-      if (strcmp(cmd, cmd_table[i].name) == 0) {
-        if (cmd_table[i].handler(args) < 0) { return; }
-        break;
-      }
+        /* treat the remaining string as the arguments,
+         * which may need further parsing
+         */
+        char *args = cmd + strlen(cmd) + 1;
+        if (args >= str_end) {
+            args = NULL;
+        }
+
+        int i;
+        for (i = 0; i < NR_CMD; i ++) {
+            if (strcmp(cmd, cmd_table[i].name) == 0) {
+                if (cmd_table[i].handler(args) < 0) { return; }
+                break;
+            }
+        }
+
+        if (i == NR_CMD) { printf("Unknown command '%s'\n", cmd); }
     }
-
-    if (i == NR_CMD) { printf("Unknown command '%s'\n", cmd); }
-  }
 }/*}}}*/
 
 void init_sdb() {/*{{{*/

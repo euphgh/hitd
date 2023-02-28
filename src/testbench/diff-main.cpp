@@ -13,7 +13,6 @@
 #include "testbench/cp0_checker.hpp"
 #include "testbench/inst_timer.hpp"
 
-int64_t total_times = 0;
 el::Logger* nemu_log;
 el::Logger* mycpu_log;
 sim_status_t sim_status = SIM_RUN;
@@ -27,41 +26,6 @@ extern bool mainloop(
         );
 
 INITIALIZE_EASYLOGGINGPP
-
-static std::map<std::string, int> test_name_to_code{/*{{{*/
-    std::make_pair("func", TEST_NAME_FUNC),
-    std::make_pair("perf", TEST_NAME_PERF),
-};/*}}}*/
-static int test_code;
-static int parse_args(int argc, char *argv[]) {/*{{{*/
-  const struct option table[] = {
-    {"log"      , required_argument, NULL, 'l'},
-    {"test"     , required_argument, NULL, 't'},
-    {"help"     , no_argument      , NULL, 'h'},
-  };
-  int o;
-  extern char* log_file_name;
-  char* test_name;
-  while ( (o = getopt_long(argc, argv, "l:t:", table, NULL)) != -1) {
-    switch (o) {
-      case 'l': 
-          log_file_name = optarg; 
-          break;
-      case 't': 
-          test_name = optarg; 
-          Assert(test_name_to_code.find(std::string(test_name))!=test_name_to_code.end(), "not support test name %s", test_name);
-          test_code = test_name_to_code.at(test_name);
-          break;
-      default:
-          printf("Usage: %s [OPTION...] [args]\n\n", argv[0]);
-          printf("\t-l,--log=FILE             output log to FILE\n");
-          printf("\t-t,--test=TEST NAME       TEST NAME is in set {func, perf}");
-          printf("\n");
-          exit(0);
-    }
-  }
-  return 0;
-}/*}}}*/
 
 static void run_func(
         Vmycpu_top* top,
@@ -85,6 +49,8 @@ static void run_perf(
     }
 }/*}}}*/
 
+extern void parse_args(int argc, char *argv[]);
+extern int arg_img_code;
 int main (int argc, char *argv[]) {
     parse_args(argc, argv);
 
@@ -94,11 +60,11 @@ int main (int argc, char *argv[]) {
 
     std::signal(SIGINT, [](int) {sim_status = SIM_INT;});
 
-    basic_soc soc(test_code);
+    basic_soc soc(arg_img_code);
     Vmycpu_top* top = new Vmycpu_top();
     dpi_init();
     axi_paddr* axi = new axi_paddr(top);
-    axi->paddr_top = soc.get_paddr(basic_soc::SOC_MYCPU);
+    axi->paddr_top = soc.get_paddr(basic_soc::SOC_DUT);
     axi->paddr_top->set_logger(mycpu_log);
 
     PaddrTop* nemu_paddr_top = soc.get_paddr(basic_soc::SOC_REF);
@@ -106,7 +72,7 @@ int main (int argc, char *argv[]) {
     IFDEF(CONFIG_MEM_DIFF, axi->set_diff_mem(nemu_paddr_top));
     init_isa(nemu_paddr_top);
 
-    switch (test_code) {
+    switch (arg_img_code) {
         case TEST_NAME_FUNC:
             run_func(top, axi, soc);
             break;

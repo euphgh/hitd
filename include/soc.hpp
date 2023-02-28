@@ -6,7 +6,7 @@ class basic_soc {
         enum { BIN_FUNC, BIN_PERF };
         basic_soc(int test_code);
 
-        enum { SOC_REF = 0, SOC_MYCPU = 1};
+        enum { SOC_REF = 0, SOC_DUT = 1};
         PaddrTop* get_paddr(int who);
 
         void set_switch(uint8_t value);

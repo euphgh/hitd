@@ -4,6 +4,7 @@
 #include "nemu/isa.hpp"
 #include "Vmycpu_top.h"
 #include "soc.hpp"
+#include <cstdio>
 #include "generated/autoconf.h"
 #include "testbench/inst_timer.hpp"
 #include "testbench/sim_state.hpp"
@@ -20,6 +21,7 @@
 extern uint64_t ticks;
 extern uint64_t total_times;
 extern el::Logger* mycpu_log;
+extern FILE* golden_trace;
 #define RST_TIME 128
 
 inline static void sim_ending(int nemu_end_state){/*{{{*/
@@ -68,6 +70,25 @@ static void check_cpu_state(diff_state* mycpu){/*{{{*/
         nemu->ref_log_error(mycpu);
     }
 }/*}}}*/
+/* static void compare (debug_info_t *debug){
+    if (debug->wen != 0 && debug->wnum != 0) {
+        debug_info_t ref;
+        unsigned int check;
+        unsigned int wnum;
+        int res = fscanf(golden_trace, "%u %x %x %x",&check,&ref.pc,&wnum,&ref.wdata);
+        __ASSERT_NEMU__(res==4, "file read error");
+        if (!check) return;
+        ref.wnum = wnum;
+        if ((debug->pc != ref.pc) || (debug->wnum != ref.wnum) || (debug->wdata != ref.wdata)) {
+            __ASSERT_SIM__(((debug->pc == ref.pc) && (debug->wnum == ref.wnum) && (debug->wdata == ref.wdata)), \
+                    "Error!!!\n"  \
+                    "    mycpu    : PC = 0x%8x, wb_wnum = 0x%2x, wb_wdata = 0x%8x\n"  \
+                    "    reference: PC = 0x%8x, wb_wnum = 0x%2x, wb_wdata = 0x%8x\n", \
+                    debug->pc, debug->wnum, debug->wdata, ref.pc, ref.wnum, ref.wdata
+                    );
+        }
+    }
+r */
 bool mainloop(
         Vmycpu_top* top,
         axi_paddr* axi,

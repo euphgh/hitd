@@ -2,7 +2,7 @@
 #include "common.hpp"
 #include <fmt/core.h>
 
-char* log_file_name;
+extern char* arg_log_file;
 extern uint32_t log_pc;
 extern uint64_t ticks;
 static std::string now_pc(const el::LogMessage* msg){
@@ -32,7 +32,7 @@ el::Logger* logger_init(std::string name){
     log_conf.setToDefault();
 
     log_conf.setGlobally(el::ConfigurationType::Format, "[" + name + "][%ticks][%pc][%levshort]:%msg");
-    log_conf.setGlobally(el::ConfigurationType::Filename, log_file_name);
+    log_conf.setGlobally(el::ConfigurationType::Filename, arg_log_file);
     log_conf.setGlobally(el::ConfigurationType::MaxLogFileSize, std::to_string(CONFIG_TRACE_FILE_SIZE << 10));
     log_conf.setGlobally(el::ConfigurationType::ToFile, MUXDEF(CONFIG_TRACE,"true","false"));
     log_conf.set(el::Level::Trace,   el::ConfigurationType::ToStandardOutput, "false");
