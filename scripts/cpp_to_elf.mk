@@ -68,7 +68,7 @@ OBJS += $(CEMU_OBJS)
 endif
 # }}}
 
-SOC_SRCS    = $(shell find src/device src/soc -type f -name "*.cpp")#{{{
+SOC_SRCS    = $(shell find src/device src/soc.cpp -type f -name "*.cpp")#{{{
 SOC_CFLAGS  += $(COM_FLAG) $(CFLAGS_BUILD)
 SOC_OBJS = $(SOC_SRCS:%.cpp=$(OBJ_DIR)/%.o)
 $(SOC_OBJS): $(OBJ_DIR)/%.o: %.cpp $(CXX_CLOF)

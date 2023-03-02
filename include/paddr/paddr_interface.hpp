@@ -38,7 +38,6 @@ class PaddrInterface {/*{{{*/
     public:
         virtual bool do_read (word_t addr, wen_t info, word_t* data) = 0;
         virtual bool do_write(word_t addr, wen_t info, const word_t data) = 0;
-        virtual PaddrInterface* deep_copy() = 0;
         el::Logger* log_pt;
         virtual void set_logger(el::Logger* input_logger){ log_pt = input_logger; }
         PaddrInterface(el::Logger* input_logger = el::Loggers::getLogger("default")): log_pt(input_logger) {}
@@ -49,12 +48,10 @@ class PaddrTop: public PaddrInterface{/*{{{*/
         std::vector<std::pair<AddrIntv, PaddrInterface*>> devices;
     public:
         PaddrTop(el::Logger* input_logger = el::Loggers::getLogger("default"));
-        PaddrTop(const PaddrTop& src);
         bool add_dev(AddrIntv &new_range, PaddrInterface *dev);
         bool do_read (word_t addr, wen_t info, word_t* data);
         bool do_write(word_t addr, wen_t info, const word_t data);
         void set_logger(el::Logger* input_logger);
-        PaddrInterface* deep_copy();
 };/*}}}*/
 
 class Pmem : public PaddrInterface  {/*{{{*/
@@ -71,7 +68,6 @@ class Pmem : public PaddrInterface  {/*{{{*/
         Pmem(size_t size_bytes, const char *init_file, 
                 el::Logger* input_logger = el::Loggers::getLogger("default"));
         Pmem(const Pmem &src);
-        PaddrInterface* deep_copy();
         ~Pmem() ;
         bool do_read (word_t addr, wen_t info, word_t* data);
         bool do_write(word_t addr, wen_t info, const word_t data);
@@ -116,7 +112,6 @@ class PaddrConfreg: public PaddrInterface {/*{{{*/
     void set_switch(uint8_t value);
     uint32_t get_num();
     void set_difftest_mode(int mode, std::queue<uint8_t>* negtive_queue);
-    PaddrInterface* deep_copy();
 };/*}}}*/
 
 class Puart8250: public PaddrInterface {/*{{{*/

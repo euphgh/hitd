@@ -35,7 +35,7 @@ extern int parse_args(int argc, char *argv[]);
 extern el::Logger* logger_init(std::string name);
 extern int arg_img_code;
 extern bool arg_batch_mode;
-std::unique_ptr<basic_soc> soc;
+std::unique_ptr<dual_soc> soc;
 
 void init_monitor(int argc, char *argv[]) {
   /* Perform some global initialization. */
@@ -51,12 +51,12 @@ void init_monitor(int argc, char *argv[]) {
   cemu_log = logger_init("CHemu");
 
   /* Initialize memory. */
-  soc.reset(new basic_soc(arg_img_code));
-  soc->set_switch(3);
-  PaddrTop* nemu_paddr = soc->get_paddr(basic_soc::SOC_DUT);
-  PaddrTop* cemu_paddr = soc->get_paddr(basic_soc::SOC_REF);
+  soc.reset(new dual_soc(arg_img_code));
+  PaddrTop* nemu_paddr = soc->get_dut_soc();
+  PaddrTop* cemu_paddr = soc->get_ref_soc();
   nemu_paddr->set_logger(nemu_log);
   cemu_paddr->set_logger(cemu_log);
+  soc->set_switch(3);
 
 
   /* Perform ISA dependent initialization. */

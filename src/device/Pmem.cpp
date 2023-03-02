@@ -88,4 +88,3 @@ void Pmem::save_binary(const char *filename) {/*{{{*/
     file.write((char*)mem, mem_size);
 }/*}}}*/
 uint8_t* Pmem::get_mem_ptr() { return mem; }
-PaddrInterface* Pmem::deep_copy(){ return new Pmem(*this); }

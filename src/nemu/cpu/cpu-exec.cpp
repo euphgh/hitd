@@ -91,7 +91,7 @@ void mips32_CPU_state::execute(uint64_t n) {
 	    if (g_si_print) fmt::print(HEX_WORD ":{}\n",inst_state.pc, disassemble(inst_state.pc, (uint8_t*)&(inst_state.inst), 4));
         extern uint64_t ticks;
         ++ticks;
-        extern std::unique_ptr<basic_soc> soc;
+        extern std::unique_ptr<dual_soc> soc;
         soc->tick();
         nemu->ref_tick_and_int(0);
     }

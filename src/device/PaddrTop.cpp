@@ -44,11 +44,3 @@ bool PaddrTop::do_write(word_t addr, wen_t info, const word_t data){
     }
     return false;
 }
-PaddrTop::PaddrTop(const PaddrTop &src):
-    PaddrInterface(src){
-    for (auto element: src.devices) {
-        PaddrInterface* new_dev = element.second->deep_copy();
-        devices.push_back(std::make_pair(element.first, new_dev));
-    }
-}
-PaddrInterface* PaddrTop::deep_copy(){ return new PaddrTop(*this); }

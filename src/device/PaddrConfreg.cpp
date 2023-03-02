@@ -220,5 +220,4 @@ void PaddrConfreg::set_switch(uint8_t value) {/*{{{*/
 }/*}}}*/
 
 uint32_t PaddrConfreg::get_num() { return num; }
-PaddrInterface* PaddrConfreg::deep_copy(){ return new PaddrConfreg(*this); }
 
