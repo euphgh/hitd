@@ -81,9 +81,11 @@ class Pmem : public PaddrInterface  {/*{{{*/
 };/*}}}*/
 
 class PaddrConfreg: public PaddrInterface {/*{{{*/
+    public:
     enum {
-        CONFREG_POSTIVE, // when uart has output read negtive queue and check
-        CONFREG_NEGTIVE,
+        POS_MODE, // when uart has output read negtive queue and check
+        NEG_MODE,
+        NOR_MODE
     };
     // physical address = [0x1faf0000,0x1fafffff]
     private:

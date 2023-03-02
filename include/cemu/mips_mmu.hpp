@@ -8,7 +8,7 @@
 template <int nr_tlb_entry = 8>
 class mips_mmu {
 public:
-    mips_mmu(PaddrTop &bus):bus(bus) {
+    mips_mmu(PaddrTop *bus):bus(bus) {
         reset();
     }
     void reset() {
@@ -33,7 +33,7 @@ public:
                     .size = 4,
                     .wstrb = 0xf,
                 };
-                if (!bus.do_read(pa, info, (uint32_t*)buffer)) return EXC_IBE;
+                if (!bus->do_read(pa, info, (uint32_t*)buffer)) return EXC_IBE;
                 else return EXC_OK;
             }
         }
@@ -56,7 +56,7 @@ public:
                     .size = (uint8_t)size,
                     .wstrb = 0xf,
                 };
-                if (!bus.do_read(pa, info, (uint32_t*)buffer)) return EXC_DBE;
+                if (!bus->do_read(pa, info, (uint32_t*)buffer)) return EXC_DBE;
                 else return EXC_OK;
             }
         }
@@ -80,7 +80,7 @@ public:
                     .wstrb = 0xf,
                 };
                 word_t data = *(word_t*)buffer;
-                if (!bus.do_write(pa, info, data)) return EXC_DBE;
+                if (!bus->do_write(pa, info, data)) return EXC_DBE;
                 else return EXC_OK;
             }
         }
@@ -142,7 +142,7 @@ private:
         }
         return NULL;
     }
-    PaddrTop &bus;
+    PaddrTop *bus;
     mips_tlb tlb[nr_tlb_entry];
 };
 

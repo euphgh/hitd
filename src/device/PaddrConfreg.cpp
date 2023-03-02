@@ -127,7 +127,7 @@ bool PaddrConfreg::do_read (word_t addr, wen_t info, word_t* data) {/*{{{*/
 
 void PaddrConfreg::set_difftest_mode(int mode, std::queue<uint8_t>* negtive_queue){/*{{{*/
     diff_mode = mode;
-    if (diff_mode==CONFREG_POSTIVE){
+    if (diff_mode==POS_MODE){
         diff_queue = negtive_queue;
     }
 }/*}}}*/
@@ -148,9 +148,9 @@ static void check_uart(std::queue<uint8_t>* ref, std::queue<uint8_t>* mycpu){/*{
         }
         return;
     }
-    __ASSERT_NEMU__(res, "uart is different, nemu {}, mycpu is {}", 
+    IFNDEF(CONFIG_NSC_CEMU,__ASSERT_NEMU__(res, "uart is different, nemu {}, mycpu is {}", 
             ref->empty() ? "is empty" : "has data", 
-            mycpu->empty() ? "is empty" : "has data");
+            mycpu->empty() ? "is empty" : "has data"));
 }/*}}}*/
 
 bool PaddrConfreg::do_write(word_t addr, wen_t info, const word_t data){/*{{{*/
@@ -196,7 +196,8 @@ bool PaddrConfreg::do_write(word_t addr, wen_t info, const word_t data){/*{{{*/
         case VIRTUAL_UART_ADDR:
             virtual_uart = (data & 0xff);
             uart_queue.push(virtual_uart);
-            if (diff_mode==CONFREG_POSTIVE) check_uart(&uart_queue, diff_queue);
+            if (diff_mode==POS_MODE) check_uart(&uart_queue, diff_queue);
+            else if (diff_mode==NOR_MODE) putchar(virtual_uart);
             break;
         case NUM_ADDR:
             num = data;

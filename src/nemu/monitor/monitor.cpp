@@ -16,6 +16,8 @@
 #include "nemu/isa.hpp"
 #include "soc.hpp"
 #include "utils.hpp"
+#include "nemu/cpu/difftest.hpp"
+#include <memory>
 
 void init_rand();
 void init_sdb();
@@ -28,10 +30,12 @@ static void welcome() {
 uint64_t ticks = 0;
 uint32_t log_pc = 0xbfc00000;
 el::Logger* nemu_log = nullptr;
+el::Logger* cemu_log = nullptr;
 extern int parse_args(int argc, char *argv[]);
 extern el::Logger* logger_init(std::string name);
 extern int arg_img_code;
 extern bool arg_batch_mode;
+std::unique_ptr<basic_soc> soc;
 
 void init_monitor(int argc, char *argv[]) {
   /* Perform some global initialization. */
@@ -44,17 +48,22 @@ void init_monitor(int argc, char *argv[]) {
 
   /* Open the log file. */
   nemu_log = logger_init("NJemu");
+  cemu_log = logger_init("CHemu");
 
   /* Initialize memory. */
-  basic_soc soc(arg_img_code);
-  PaddrTop* nemu_paddr = soc.get_paddr(basic_soc::SOC_DUT);
+  soc.reset(new basic_soc(arg_img_code));
+  soc->set_switch(3);
+  PaddrTop* nemu_paddr = soc->get_paddr(basic_soc::SOC_DUT);
+  PaddrTop* cemu_paddr = soc->get_paddr(basic_soc::SOC_REF);
   nemu_paddr->set_logger(nemu_log);
+  cemu_paddr->set_logger(cemu_log);
+
 
   /* Perform ISA dependent initialization. */
   init_isa(nemu_paddr);
 
   /* Initialize differential testing. */
-  // init_difftest(diff_so_file, img_size, difftest_port);
+  init_difftest(cemu_paddr);
 
   /* Initialize the simple debugger. */
   init_sdb();

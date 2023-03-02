@@ -12,7 +12,10 @@
 template <int nr_tlb_entry = 8>
 class mips_cp0 {
 public:
-    mips_cp0(uint32_t &pc, bool &bd, mips_mmu<nr_tlb_entry> &mmu):pc(pc),bd(bd),mmu(mmu) {
+    mips_cp0(uint32_t &pc, bool &bd, mips_mmu<nr_tlb_entry> &mmu):
+        mmu(mmu),
+        pc(pc),
+        bd(bd){
         reset();
     }
     void difftest_preexec(uint32_t cp0_count_val, uint32_t cp0_random_val, uint32_t cp0_cause_val, bool interrupt_on) {
@@ -60,6 +63,7 @@ public:
         taghi = 0;
         errorepc = 0;
         cur_need_trap = false;
+        tick = 0;
     }
     uint32_t mfc0(uint32_t reg, uint32_t sel) {
         switch (reg) {
@@ -265,7 +269,8 @@ public:
     }
     void pre_exec(unsigned int ext_int) {
         cur_need_trap = false;
-        count = (count + 1llu) &0xfffffffflu;
+        tick = !tick;
+        count = (count + tick) & 0xfffffffflu;
         random = random == wired ? (nr_tlb_entry - 1) : random - 1;
         cp0_cause *cause_reg = (cp0_cause*)&cause;
         cause_reg->IP = (cause_reg->IP & 0b10000011u) | ( (ext_int & 0b11111u) << 2);
@@ -428,6 +433,8 @@ private:
     uint32_t taglo;
     uint32_t taghi;
     uint32_t errorepc;
+private:
+    bool tick;
 };
 
 #endif

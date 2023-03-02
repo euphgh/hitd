@@ -13,6 +13,11 @@ static std::map<int, int> name_to_int = {
     std::make_pair(TEST_NAME_FUNC, basic_soc::BIN_FUNC),
     std::make_pair(TEST_NAME_PERF, basic_soc::BIN_PERF),
 };
+static std::map<int,int> who_to_mode = {
+    std::make_pair(basic_soc::SOC_DUT, PaddrConfreg::NEG_MODE),
+    std::make_pair(basic_soc::SOC_REF, PaddrConfreg::POS_MODE),
+    std::make_pair(basic_soc::SOC_NOR, PaddrConfreg::NOR_MODE),
+};
 
 basic_soc::basic_soc(int test_name){/*{{{*/
     Assert(name_to_int.find(test_name)!=name_to_int.end(), "basic soc not support test code %d", test_name);
@@ -38,11 +43,30 @@ basic_soc::basic_soc(int test_name){/*{{{*/
         top->add_dev(confreg_range, confreg);
         paddr_top_vct.push_back(top);
     }
-    confreg_vct.at(SOC_REF)->set_difftest_mode(CONFREG_POSTIVE, &confreg_vct.at(SOC_DUT)->uart_queue);
-    confreg_vct.at(SOC_DUT)->set_difftest_mode(CONFREG_NEGTIVE, nullptr);
 }/*}}}*/
 
-PaddrTop* basic_soc::get_paddr(int who){ return paddr_top_vct.at(who); }
+PaddrTop* basic_soc::get_paddr(int who){ 
+    PaddrTop* res= nullptr;
+    PaddrConfreg* confreg = nullptr;
+    switch (who) {
+        case SOC_DUT: 
+            res = paddr_top_vct.at(SOC_DUT);
+            confreg = confreg_vct.at(SOC_DUT);
+            confreg->set_difftest_mode(PaddrConfreg::NEG_MODE,nullptr);
+            break;
+        case SOC_REF:
+            res = paddr_top_vct.at(SOC_REF);
+            confreg = confreg_vct.at(SOC_REF);
+            confreg->set_difftest_mode(PaddrConfreg::POS_MODE,&confreg_vct.at(SOC_DUT)->uart_queue);
+            break;
+        case SOC_NOR:
+            res = paddr_top_vct.at(SOC_REF);
+            confreg = confreg_vct.at(SOC_REF);
+            confreg->set_difftest_mode(PaddrConfreg::NOR_MODE,nullptr);
+            break;
+    };
+    return res;
+}
 
 void basic_soc::tick(){/*{{{*/
     for (auto confreg : confreg_vct) {

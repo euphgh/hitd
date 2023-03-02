@@ -11,6 +11,7 @@ BUILD_DIR := $(WORK_DIR)/build
 OBJ_DIR  := $(BUILD_DIR)/obj-$(NAME)
 
 # NEMU compile rule{{{
+ifndef CONFIG_NSC_CEMU
 # Include all filelist.mk to merge file lists
 FILELIST_MK = $(shell find ./src/nemu -name "filelist.mk")
 include $(FILELIST_MK)
@@ -31,7 +32,9 @@ $(NEMU_OBJS): $(OBJ_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	@$(CXX) $(NEMU_CFLAGS) -c -o $@ $<
 	$(call call_fixdep, $(@:.o=.d), $@)
-OBJS += $(NEMU_OBJS)# }}}
+OBJS += $(NEMU_OBJS)
+endif
+# }}}
 
 # testbench compile rule{{{
 ifdef CONFIG_NSC_DIFF
@@ -46,6 +49,22 @@ $(TB_OBJS): $(OBJ_DIR)/%.o: %.cpp $(CXX_CLOF)
 	@$(CXX) $(TB_CFLAGS) @$(CXX_CLOF) -c -o $@ $<
 	$(call call_fixdep, $(@:.o=.d), $@)
 OBJS += $(TB_OBJS) 
+endif
+# }}}
+
+# testbench compile rule{{{
+ifdef CONFIG_NSC_CEMU
+CEMU_SRCS     := $(shell find src/cemu -name "*.cpp")
+CEMU_CFLAGS   += $(CFLAGS_BUILD) -D__GUEST_ISA__=$(GUEST_ISA)
+CEMU_INCLUDES = $(addprefix -I, $(CEMU_INC_PATH))
+CEMU_CFLAGS   := $(COM_FLAG) $(CEMU_INCLUDES) $(CEMU_CFLAGS)
+CEMU_OBJS = $(CEMU_SRCS:%.cpp=$(OBJ_DIR)/%.o)
+$(CEMU_OBJS): $(OBJ_DIR)/%.o: %.cpp
+	@echo + CXX $<
+	@mkdir -p $(dir $@)
+	@$(CXX) $(CEMU_CFLAGS) -c -o $@ $<
+	$(call call_fixdep, $(@:.o=.d), $@)
+OBJS += $(CEMU_OBJS)
 endif
 # }}}
 
@@ -89,6 +108,7 @@ $(ARG_OBJS): $(OBJ_DIR)/%.o: %.cpp
 	@$(CXX) $(ARG_CFLAGS) -c -o $@ $<
 	$(call call_fixdep, $(@:.o=.d), $@)
 OBJS += $(ARG_OBJS) # }}}
+
 
 # Depencies
 -include $(OBJS:.o=.d)

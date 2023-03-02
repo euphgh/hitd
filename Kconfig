@@ -7,6 +7,8 @@ config NSC_DIFF
     bool "Use nemu as nscscc difftest emulator"
 config NSC_NEMU
     bool "Only run nemu with nscscc SoC"
+config NSC_CEMU
+    bool "Only run cemu with nscscc SoC"
 endchoice# }}}
 
 menu "Build Options"# {{{

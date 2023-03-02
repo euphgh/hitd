@@ -26,7 +26,7 @@
 #include "nemu/deadloop.hpp"
 #include "isa-def.hpp"
 #include "nemu/cpu/difftest.hpp"
-#include "utils.hpp"
+#include "soc.hpp"
 /* The assembly code of instructions executed is only output to the screen
  * when the number of instructions executed is less than this value.
  * This is useful when you use the `si' command.
@@ -65,9 +65,10 @@ void check_deadloop(word_t pc){
         nemu_state.halt_pc = pc;
     }
 }
+
 void trace_and_difftest(Decode *_this) {
     IFDEF(CONFIG_ITRACE, nemu->log_pt->trace("[I] %v", disassemble(_this->pc, (uint8_t*)&(_this->inst), 4).c_str()+1));
-    IFDEF(CONFIG_DIFFTEST, difftest_step(nemu->isa_diff_state(), _this->dnpc));
+    IFDEF(CONFIG_DIFFTEST, difftest_step(0));
     IFDEF(CONFIG_WATCH_POINT, if(is_wp_change()) nemu_state.state=NEMU_STOP); //TODO: make watch point a class with methor
     IFDEF(CONFIG_FTRACE, check_ftrace(_this));
     IFDEF(CONFIG_DEADLOOP, check_deadloop(_this->pc));
@@ -79,15 +80,20 @@ void mips32_CPU_state::execute(uint64_t n) {
 	    isa_exec_once(isa_query_intr());
 	    arch_state.pc = inst_state.dnpc;
 	    if (arch_state.pc == 0xbfc00100) nemu_state.state = NEMU_END;
+	    trace_and_difftest(&inst_state);
+
 	    if (nemu_state.state != NEMU_RUNNING) {
             if (nemu_state.state==NEMU_ABORT) 
-                nemu->log_pt->error("Fail to execute" HEX_WORD ":{}\n",inst_state.pc, disassemble(inst_state.pc, (uint8_t*)&(inst_state.inst), 4));
+                nemu->log_pt->error(fmt::format("Fail to execute:{}", disassemble(inst_state.pc, (uint8_t*)&(inst_state.inst), 4)));
             break;
         }
-	    else trace_and_difftest(&inst_state);
+
 	    if (g_si_print) fmt::print(HEX_WORD ":{}\n",inst_state.pc, disassemble(inst_state.pc, (uint8_t*)&(inst_state.inst), 4));
         extern uint64_t ticks;
         ++ticks;
+        extern std::unique_ptr<basic_soc> soc;
+        soc->tick();
+        nemu->ref_tick_and_int(0);
     }
 }
 

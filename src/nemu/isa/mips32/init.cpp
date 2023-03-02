@@ -24,6 +24,7 @@ void CPU_state::reset() {/*{{{*/
     nemu_state.state = NEMU_RUNNING;
     next_is_delay_slot = false;
     nemu->int_delay = 0;
+    nemu->hilo_valid = false;
     for (int i = 0; i < 32; i++) {
         arch_state.gpr[i] = 0;
     }

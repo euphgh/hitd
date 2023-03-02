@@ -12,7 +12,7 @@
 
 class mips_core {
 public:
-    mips_core(PaddrTop &bus):mmu(bus),cp0(pc,in_delay_slot,mmu) {
+    mips_core(PaddrTop *bus): mmu(bus),cp0(pc,in_delay_slot,mmu) {
         reset();
     }
     void step(uint8_t ext_int = 0) {
@@ -969,14 +969,16 @@ private:
             exit(1);
         }
     }/*}}}*/
+public:
     uint32_t pc;    
+    int32_t GPR[32];
+    uint32_t hi,lo;
+private:
     bool next_delay_slot = false;
     bool in_delay_slot = false;
     bool next_control_trans = false;
     bool cur_control_trans = false;
     uint32_t delay_npc;
-    int32_t GPR[32];
-    uint32_t hi,lo;
     mips_mmu<16> mmu;
     mips_cp0<16> cp0;
 };
