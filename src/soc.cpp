@@ -42,12 +42,12 @@ static std::tuple<PaddrTop*, PaddrConfreg*> basic_soc(int test_code){/*{{{*/
 }/*}}}*/
 static PaddrTop* boot_soc(int test_code) {/*{{{*/
     AddrIntv flash_range(0x1fc00000, bit_mask(20));
-    AddrIntv ddr_range  (0x80000000, bit_mask(27));
-    AddrIntv uart_range (0xbfe40000, bit_mask(14));
+    AddrIntv ddr_range  (0x00000000, bit_mask(27));
+    AddrIntv uart_range (0x1fe40000, bit_mask(14));
 
     Puart8250* uart = new Puart8250();
     Pmem* spi_flash = new Pmem(flash_range);
-    spi_flash->load_binary(0, "uboot or system test");
+    spi_flash->load_binary(0, name_to_bin[test_code]);
     Pmem* dram = new Pmem(ddr_range);
 
     PaddrTop* top = new PaddrTop();
@@ -57,12 +57,12 @@ static PaddrTop* boot_soc(int test_code) {/*{{{*/
     return top;
 }/*}}}*/
 static PaddrTop* kernel_soc(int test_code) {/*{{{*/
-    AddrIntv ddr_range  (0x80000000, bit_mask(27));
-    AddrIntv uart_range (0xbfe40000, bit_mask(14));
+    AddrIntv ddr_range  (0x00000000, bit_mask(27));
+    AddrIntv uart_range (0x1fe40000, bit_mask(14));
 
     Puart8250* uart = new Puart8250();
     Pmem* dram = new Pmem(ddr_range);
-    dram->load_binary(0, "ucore or linux");
+    dram->load_binary(0, name_to_bin[test_code]);
 
     PaddrTop* top = new PaddrTop();
     top->add_dev(ddr_range, dram);

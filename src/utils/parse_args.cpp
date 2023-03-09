@@ -8,16 +8,20 @@
 static std::map<std::string, int> img_str_to_code{
     std::make_pair("func", TEST_NAME_FUNC),
     std::make_pair("perf", TEST_NAME_PERF),
+    std::make_pair("sys",  TEST_NAME_SYST),
+    std::make_pair("uboot",TEST_NAME_UBOOT),
+    std::make_pair("ucore",TEST_NAME_UCORE),
+    std::make_pair("linux",TEST_NAME_LINUX),
 };
-const char* arg_log_file = "trace.log";
-int arg_img_code;
-bool arg_batch_mode = false;
 static const struct option table[] = {
     {"batch"    , no_argument      , NULL, 'b'},
     {"log"      , required_argument, NULL, 'l'},
     {"test"     , required_argument, NULL, 't'},
     {"help"     , no_argument      , NULL, 'h'},
 };
+const char* arg_log_file = "trace.log";
+int arg_img_code;
+bool arg_batch_mode = false;
 void parse_args(int argc, char *argv[]) {
     int o;
     while ( (o = getopt_long(argc, argv, "bl:i:", table, NULL)) != -1) {

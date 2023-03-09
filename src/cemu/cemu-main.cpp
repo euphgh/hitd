@@ -6,13 +6,18 @@ uint64_t ticks = 0;
 word_t log_pc = 0xbfc00000;
 bool cemu_run = true;
 el::Logger* cemu_log = nullptr;
+
+extern int arg_img_code;
+extern void parse_args(int argc, char *argv[]);
 int main (int argc, char *argv[]) {
-    basic_soc soc(basic_soc::BIN_PERF);
+    parse_args(argc, argv);
+
     extern el::Logger* logger_init(std::string name);
     cemu_log = logger_init("CHemu");
-    PaddrTop * cemu_paddr_top = soc.get_paddr(basic_soc::SOC_NOR);
+
+    single_soc soc(arg_img_code);
+    PaddrTop * cemu_paddr_top = soc.get_single_soc();
     cemu_paddr_top->set_logger(cemu_log);
-    soc.set_switch(3);
 
     mips_core cemu(cemu_paddr_top);
     std::signal(SIGINT, [](int) {cemu_run = false;});
@@ -20,9 +25,9 @@ int main (int argc, char *argv[]) {
         ticks++;
         cemu.step();
         log_pc = cemu.get_pc();
-        if (log_pc==0xbfc00100){
-            cemu_log->info("run to end pc");
-            cemu_run =false;
+        if (cemu_run==false) {
+            printf(FMT_WORD "\n", log_pc);
+            break;
         }
     }
     return 0;

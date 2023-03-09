@@ -93,7 +93,8 @@ bool Puart8250::do_write(word_t addr, wen_t info, const word_t data){/*{{{*/
                                          DLL = data;
                                      }
                                      else {
-                                         tx.push(static_cast<char>(data));
+                                         // tx.push(static_cast<char>(data));
+                                         putchar(data);
                                          thr_empty = false;
                                      }
                                      break;
@@ -139,6 +140,7 @@ void Puart8250::putc(char c) {
     std::unique_lock<std::mutex> lock(rx_lock);
     rx.push(c);
 }
+
 char Puart8250::getc() {
     std::unique_lock<std::mutex> lock(tx_lock);
     if (!tx.empty()) {
@@ -149,6 +151,7 @@ char Puart8250::getc() {
     }
     else return EOF;
 }
+
 bool Puart8250::irq() {
     update_IIR();
     return !(IIR & 1);

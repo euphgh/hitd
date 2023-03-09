@@ -46,7 +46,7 @@ void difftest_step(int ext_int){
     if (!nemu->isa_difftest_checkregs(&cemu_state)){
         nemu->log_pt->error("Nemu and Cemu is different!!!");
         nemu->isa_difftest_log_error(&cemu_state);
-        nemu_state.state = NEMU_ABORT;
+        nemu_state.state = NEMU_STOP;
     }
 }
 

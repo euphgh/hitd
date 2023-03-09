@@ -1,6 +1,7 @@
 #include "testbench/sim_state.hpp"
 #include "paddr/paddr_interface.hpp"
 #include "debug.hpp"
+#include "fmt/core.h"
 #include <utility>
 
 PaddrTop::PaddrTop(el::Logger* input_logger):
@@ -25,6 +26,7 @@ bool PaddrTop::do_read (word_t addr, wen_t info, word_t* data){
             return it.second->do_read(addr & dev_range.mask, info, data);
         }
     }
+    log_pt->error(fmt::format("read  addr " HEX_WORD " {} bytes out of bound", addr, (uint8_t)info.size));
     return false;
 }
 
@@ -42,5 +44,6 @@ bool PaddrTop::do_write(word_t addr, wen_t info, const word_t data){
             return it.second->do_write(addr & dev_range.mask, info, data);
         }
     }
+    log_pt->error(fmt::format("write addr " HEX_WORD " {} bytes out of bound", addr, (uint8_t)info.size));
     return false;
 }
