@@ -1,6 +1,5 @@
 TOPNAME = mycpu_top
-VSRC_DIR = $(HITD_HOME)/vsrc
-VSRC_SUB_DIR = $(shell find -L $(VSRC_DIR)/ -type d)
+VSRC_SUB_DIR = $(shell find -L $(VSRC_HOME)/ -type d)
 VINCLUDE = $(addprefix -I, $(VSRC_SUB_DIR))
 
 # verilator -Mdir Name of output object directory
@@ -25,8 +24,8 @@ ifdef CONFIG_WAVE_ON
 endif
 
 VXXBIN := $(VXX_MDIR)/V$(TOPNAME)
-VSRC_TOP := $(VSRC_DIR)/$(TOPNAME).v
-VSRC_ALL := $(shell find -L $(VSRC_DIR) -type f -name "*.v")
+VSRC_TOP := $(VSRC_HOME)/$(TOPNAME).v
+VSRC_ALL := $(shell find -L $(VSRC_HOME) -type f -name "*.v")
 
 vtoc: $(VSRC_ALL)
 	verilator $(VXXFLAG) $(VSRC_TOP) 

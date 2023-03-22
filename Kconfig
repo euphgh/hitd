@@ -11,6 +11,18 @@ config NSC_CEMU
     bool "Only run cemu with nscscc SoC"
 endchoice# }}}
 
+config NEED_NEMU
+    bool 
+    default y if NSC_NEMU || NSC_DIFF
+
+config NEED_CEMU
+    bool
+    default y if NSC_CEMU || (NSC_CEMU && DIFFTEST)
+
+config NEED_TB
+    bool
+    default y if NSC_DIFF
+
 menu "Build Options"# {{{
 choice
   prompt "Compiler"

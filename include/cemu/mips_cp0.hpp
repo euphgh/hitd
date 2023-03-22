@@ -41,6 +41,7 @@ public:
         status = 0;
         cp0_status *status_reg = (cp0_status*)&status;
         status_reg->BEV = 1;
+        status_reg->ERL = 1;
         cause = 0;
         epc = 0;
         prid = 0x00018003;
@@ -218,7 +219,7 @@ public:
                 status_reg->IE = status_new->IE;
                 status_reg->EXL = status_new->EXL;
                 status_reg->ERL = status_new->ERL;
-                assert(!status_reg->ERL);
+                // assert(!status_reg->ERL);
                 status_reg->KSU = status_new->KSU == USER_MODE ? USER_MODE : KERNEL_MODE;
                 status_reg->IM = status_new->IM;
                 if (status_reg->BEV != status_new->BEV) {

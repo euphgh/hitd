@@ -6,8 +6,8 @@
 #define __SYST_BIN__  NSCSCC_HOME "/system_test_v0.01/supervisor-mips32/kernel/kernel.bin"
 
 //TODO:input uboot ucore and linux path
-#define __UBOOT_BIN__ "current no uboot bin" 
-#define __LINUX_BIN__ "current no linux bin"
+#define __UBOOT_BIN__ "/home/hgh/cpu/cyy/u-boot/u-boot.bin" 
+#define __LINUX_BIN__ "/home/hgh/cpu/cyy/linux/vmlinux"
 #define __UCORE_BIN__ "current no ucore bin"
 
 static std::map<int, const char*> name_to_bin = {
@@ -41,7 +41,7 @@ static std::tuple<PaddrTop*, PaddrConfreg*> basic_soc(int test_code){/*{{{*/
     return std::make_tuple(top, confreg);
 }/*}}}*/
 static PaddrTop* boot_soc(int test_code) {/*{{{*/
-    AddrIntv flash_range(0x1fc00000, bit_mask(20));
+    AddrIntv flash_range(0x1fc00000, bit_mask(22));
     AddrIntv ddr_range  (0x00000000, bit_mask(27));
     AddrIntv uart_range (0x1fe40000, bit_mask(14));
 

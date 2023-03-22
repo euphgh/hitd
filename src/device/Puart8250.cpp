@@ -1,4 +1,5 @@
 #include "paddr/paddr_interface.hpp"
+#include <cstdio>
 
 #define UART8250_TX_RX_DLL  0
 #define UART8250_IER_DLM    1
@@ -95,6 +96,7 @@ bool Puart8250::do_write(word_t addr, wen_t info, const word_t data){/*{{{*/
                                      else {
                                          // tx.push(static_cast<char>(data));
                                          putchar(data);
+                                         fflush(stdout);
                                          thr_empty = false;
                                      }
                                      break;

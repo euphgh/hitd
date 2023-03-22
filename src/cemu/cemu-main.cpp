@@ -21,10 +21,12 @@ int main (int argc, char *argv[]) {
 
     mips_core cemu(cemu_paddr_top);
     std::signal(SIGINT, [](int) {cemu_run = false;});
+    cemu.pc = 0xbfc00000;
     while (cemu_run) {
         ticks++;
         cemu.step();
         log_pc = cemu.get_pc();
+        // printf(FMT_WORD "\n", log_pc);
         if (cemu_run==false) {
             printf(FMT_WORD "\n", log_pc);
             break;

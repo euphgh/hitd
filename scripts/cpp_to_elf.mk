@@ -11,7 +11,7 @@ BUILD_DIR := $(WORK_DIR)/build
 OBJ_DIR  := $(BUILD_DIR)/obj-$(NAME)
 
 # NEMU compile rule{{{
-ifndef CONFIG_NSC_CEMU
+ifdef CONFIG_NEED_NEMU
 # Include all filelist.mk to merge file lists
 FILELIST_MK = $(shell find ./src/nemu -name "filelist.mk")
 include $(FILELIST_MK)
@@ -37,7 +37,7 @@ endif
 # }}}
 
 # testbench compile rule{{{
-ifdef CONFIG_NSC_DIFF
+ifdef CONFIG_NEED_TB
 TB_SRCS     := $(shell find src/testbench -name "*.cpp")
 TB_CFLAGS   += $(CFLAGS_BUILD) -D__GUEST_ISA__=$(GUEST_ISA) -I$(HITD_HOME)/obj_dir
 TB_INCLUDES = $(addprefix -I, $(TB_INC_PATH) ./src/nemu/isa/mips32/include)
@@ -52,8 +52,8 @@ OBJS += $(TB_OBJS)
 endif
 # }}}
 
-# testbench compile rule{{{
-ifdef CONFIG_NSC_CEMU
+# CEMU compile rule{{{
+ifdef CONFIG_NEED_CEMU
 CEMU_SRCS     := $(shell find src/cemu -name "*.cpp")
 CEMU_CFLAGS   += $(CFLAGS_BUILD) -D__GUEST_ISA__=$(GUEST_ISA)
 CEMU_INCLUDES = $(addprefix -I, $(CEMU_INC_PATH))
@@ -71,7 +71,7 @@ endif
 SOC_SRCS    = $(shell find src/device src/soc.cpp -type f -name "*.cpp")#{{{
 SOC_CFLAGS  += $(COM_FLAG) $(CFLAGS_BUILD)
 SOC_OBJS = $(SOC_SRCS:%.cpp=$(OBJ_DIR)/%.o)
-$(SOC_OBJS): $(OBJ_DIR)/%.o: %.cpp $(CXX_CLOF)
+$(SOC_OBJS): $(OBJ_DIR)/%.o: %.cpp
 	@echo + CXX $<
 	@mkdir -p $(dir $@)
 	@$(CXX) $(SOC_CFLAGS) -c -o $@ $<
@@ -109,7 +109,6 @@ $(ARG_OBJS): $(OBJ_DIR)/%.o: %.cpp
 	$(call call_fixdep, $(@:.o=.d), $@)
 OBJS += $(ARG_OBJS) # }}}
 
-
 # Depencies
 -include $(OBJS:.o=.d)
 BINARY   := $(BUILD_DIR)/$(NAME)
@@ -118,9 +117,15 @@ LDFLAGS := $(LDFLAGS)
 LDFLAGS += $(CFLAGS_BUILD)
 EXTRA_OBJS = $(file < $(EXTRA_OBJS_LIST))
 LIBS += -lfmt
-$(BINARY): $(OBJS) $(OBJS_EXTRA) $(LD_HEAD_OF) $(LD_TAIL_OF) $(ARCHIVES)
+ifdef CONFIG_NSC_DIFF
+$(BINARY): $(OBJS) $(LD_HEAD_OF) $(LD_TAIL_OF) $(ARCHIVES)
 	@echo + LD $@
 	@$(LD) $(LDFLAGS) @$(LD_HEAD_OF) $(OBJS) $(EXTRA_OBJS) $(ARCHIVES) @$(LD_TAIL_OF) $(LIBS) -o $@ 
+else
+$(BINARY): $(OBJS)
+	@echo + LD $@
+	@$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ 
+endif
 
 
 
