@@ -18,6 +18,10 @@
 #include "utils.hpp"
 #include "nemu/cpu/difftest.hpp"
 #include <memory>
+extern uint64_t ticks ;
+extern uint32_t log_pc ;
+extern el::Logger* nemu_log ;
+extern el::Logger* cemu_log ;
 
 void init_rand();
 void init_sdb();
@@ -27,10 +31,6 @@ static void welcome() {
     printf(ANSI_FMT("For help, type \"help\"\n",ANSI_FG_BLUE));
 }
 
-uint64_t ticks = 0;
-uint32_t log_pc = 0xbfc00000;
-el::Logger* nemu_log = nullptr;
-el::Logger* cemu_log = nullptr;
 extern int parse_args(int argc, char *argv[]);
 extern el::Logger* logger_init(std::string name);
 extern int arg_img_code;
@@ -56,14 +56,14 @@ void init_monitor(int argc, char *argv[]) {
   PaddrTop* cemu_paddr = soc->get_ref_soc();
   nemu_paddr->set_logger(nemu_log);
   cemu_paddr->set_logger(cemu_log);
-  // soc->set_switch(3);
+  soc->set_switch(3);
 
 
   /* Perform ISA dependent initialization. */
   init_isa(nemu_paddr);
 
   /* Initialize differential testing. */
-  init_difftest(cemu_paddr);
+  IFDEF(CONFIG_DIFFTEST, init_difftest(cemu_paddr));
 
   /* Initialize the simple debugger. */
   init_sdb();

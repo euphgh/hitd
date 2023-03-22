@@ -29,6 +29,10 @@ endmenu# }}}
 
 menu "Wave and Debugging"
 
+config PERF_ANALISES
+bool "Record every instruction execute time"
+default n
+
 config WAVE_ON
 bool "trace wave file"
 default y

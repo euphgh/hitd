@@ -15,6 +15,12 @@
 #include "common.hpp"
 #include "debug.hpp"
 #include "easylogging++.h"
+
+
+uint64_t ticks = 0;
+uint32_t log_pc = 0xbfc00000;
+el::Logger* nemu_log = nullptr;
+el::Logger* cemu_log = nullptr;
 INITIALIZE_EASYLOGGINGPP
 
 void init_monitor(int, char *[]);

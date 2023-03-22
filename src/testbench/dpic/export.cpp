@@ -8,12 +8,14 @@ static svScope RegFile_u ;
 static svScope u_PrimaryBranchAmend ; 
 static svScope u_WriteBack ; 
 static svScope u_PrimaryExceptionProcessor ; 
+
 void dpi_init(){
     RegFile_u = svGetScopeFromName("TOP.mycpu_top.u_Main.u_ID.RegFile_u"); 
     u_PrimaryBranchAmend = svGetScopeFromName("TOP.mycpu_top.u_Main.u_PrimaryBranchAmend"); 
     u_WriteBack = svGetScopeFromName("TOP.mycpu_top.u_Main.u_WriteBack"); 
     u_PrimaryExceptionProcessor = svGetScopeFromName("TOP.mycpu_top.u_Main.u_PrimaryExceptionProcessor"); 
 }
+
 uint64_t dpi_get_hilo(){
     TODO();
 }

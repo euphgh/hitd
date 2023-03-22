@@ -17,7 +17,7 @@ config NEED_NEMU
 
 config NEED_CEMU
     bool
-    default y if NSC_CEMU || (NSC_CEMU && DIFFTEST)
+    default y if NSC_CEMU || (NSC_NEMU && DIFFTEST)
 
 config NEED_TB
     bool

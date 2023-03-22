@@ -1,4 +1,4 @@
-#include "debug.hpp"
+#include "macro.hpp"
 #include "paddr/paddr_interface.hpp"
 #include "testbench/axi.hpp"
 #include "nemu/isa.hpp"
@@ -93,7 +93,7 @@ bool mainloop(
         Vmycpu_top* top,
         axi_paddr* axi,
         std::string wave_name,
-        basic_soc& soc
+        dual_soc& soc
         ){/*{{{*/
 
     diff_state mycpu;
@@ -109,7 +109,7 @@ bool mainloop(
     top->aclk = 0;
     top->aresetn = 0;
     IFDEF(CONFIG_COMMIT_WAIT, uint64_t last_commit = ticks);
-    inst_timer perf_timer(AddrIntv(0x1fc00000,bit_mask(22)));
+    IFDEF(CONFIG_PERF_ANALYSES, perf_timer(AddrIntv(0x1fc00000,bit_mask(22))));
 
     while (ticks < (RST_TIME & ~0x1)) {
         ++ticks;
@@ -159,9 +159,8 @@ bool mainloop(
                 Decode& inst = nemu->inst_state;
                 if (inst.skip) nemu->arch_state.gpr[inst.wnum] = dpi_regfile(inst.wnum);
                 IFDEF(CONFIG_CP0_DIFF, mycpu_cp0_checker.check_value(inst.pc, nemu->cp0));
-                if (nemu->analysis) {
-                    perf_timer.add_inst(nemu->inst_state, ((consume_t)(ticks-last_commit))/commit_num, ticks);
-                }
+                IFDEF(CONFIG_PERF_ANALYSES, if (nemu->analysis) \
+                    perf_timer.add_inst(nemu->inst_state, ((consume_t)(ticks-last_commit))/commit_num, ticks));
             }
             dpi_api_get_state(&mycpu);
             check_cpu_state(&mycpu);
@@ -180,6 +179,6 @@ negtive_edge:
     }
 
     IFDEF(CONFIG_WAVE_ON,tfp.close());
-    perf_timer.save_date(wave_name+".bin");
+    IFDEF(CONFIG_PERF_ANALYSES, perf_timer.save_date(wave_name+".bin"));
     return sim_end_statistics();
 }/*}}}*/

@@ -13,22 +13,5 @@ GUEST_ISA ?= $(call remove_quote,$(CONFIG_ISA))
 # Include rules for menuconfig
 include $(HITD_HOME)/scripts/config.mk
 
-# include rule for verilog code to cpp
-include $(HITD_HOME)/scripts/ver_to_cpp.mk
-
-CXX_CLOF    	= $(HITD_HOME)/scripts/tb_cpp_flags.txt
-LD_HEAD_OF     	= $(HITD_HOME)/scripts/tb_ld_head_flags.txt
-LD_TAIL_OF     	= $(HITD_HOME)/scripts/tb_ld_tail_flags.txt
-EXTRA_OBJS_LIST = $(HITD_HOME)/scripts/tb_ld_extra_objs.txt
-ARCHIVES 		= $(HITD_HOME)/obj_dir/Vmycpu_top__ALL.a
-
-# compile verilator cpp to ar
-$(CXX_CLOF) $(LD_HEAD_OF) $(LD_TAIL_OF) $(EXTRA_OBJS_LIST) $(ARCHIVES) &: $(VSRCS)
-	$(MAKE) -C $(HITD_HOME)/obj_dir -f $(HITD_HOME)/scripts/vpp_to_ar.mk all \
-	CXX_CLOF=$(CXX_CLOF) \
-	LD_HEAD_OF=$(LD_HEAD_OF) \
-	LD_TAIL_OF=$(LD_TAIL_OF) \
-	EXTRA_OBJS_LIST=$(EXTRA_OBJS_LIST)
-
 # use verilator ar and cpp compile elf
 include $(HITD_HOME)/scripts/cpp_to_elf.mk

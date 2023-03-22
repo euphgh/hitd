@@ -13,6 +13,8 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
+#include <cstdio>
+#include <cstdlib>
 #include <nemu/cpu/cpu.hpp>
 #include "nemu/isa.hpp"
 #include "local-include/reg.hpp"
@@ -20,7 +22,7 @@
 #include "isa-def.hpp"
 #include "cp0.hpp"
 #include "utils.hpp"
-#include <signal.h>
+#include <csignal>
 
 
 enum {
@@ -209,10 +211,11 @@ int mips32_CPU_state::decode_exec() {
   return 0;
 }
 
-#include <signal.h>
 int mips32_CPU_state::isa_exec_once(bool has_int) {
     inst_state.wnum = 0;
     inst_state.flag = 0;
+
+    inst_state.snpc = inst_state.pc = arch_state.pc;
     word_t this_pc = inst_state.snpc;
     inst_state.is_delay_slot = next_is_delay_slot;
     if (unlikely(this_pc & 0x3)) {
@@ -228,9 +231,15 @@ int mips32_CPU_state::isa_exec_once(bool has_int) {
 
         if (inst_state.is_delay_slot) next_is_delay_slot = false;
     }
-    if (inst_state.pc==0x9fc13178)
-        analysis = !analysis;
+    arch_state.pc = inst_state.dnpc;
+
+    //TODO:check pc finish conditions
+    // if (this_pc==0x9fc13178)
+    //     analysis = !analysis;
+    if (this_pc==0xbfc00100){
+        nemu_state.state = NEMU_END;
+    }
     extern uint32_t log_pc;
     log_pc = this_pc;
-    return 0 ;
+    return 0;
 }

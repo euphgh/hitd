@@ -40,8 +40,10 @@ class mips32_CPU_state{
         bool analysis;
 
         mips32_CPU_state(PaddrTop* ptop_input);
-        void execute(uint64_t n);
+        void exec_once();
         void reset();
+
+        const char* isa_disasm_inst();
 
         // nscscc difftest api{{{
         void ref_tick_and_int(uint8_t ext_int);
@@ -57,7 +59,7 @@ class mips32_CPU_state{
         // nemu difftest{{{
         bool isa_difftest_checkregs(diff_state *ref_r);
         void isa_difftest_log_error(diff_state *ref_r);
-        int isa_exec_once(bool has_int);
+        int  isa_exec_once(bool has_int);
         /*}}}*/
 
         // regs{{{
@@ -67,6 +69,7 @@ class mips32_CPU_state{
         // }}}
 
     private:
+        char disasm[64];
         // Instruct execute method{{{
 #define R(i) arch_state.gpr[i]
 #define Rw(i,value) do {inst_state.wnum = i; arch_state.gpr[i] = value;} while(0)

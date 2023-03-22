@@ -31,7 +31,8 @@ void CPU_state::ref_tick_and_int(uint8_t ext_int){/*{{{*/
     if (cp0.count.all==cp0.compare.all) cp0.cause.ti = 1;
 }/*}}}*/
 #include <csignal>
-void nemu_ref_end_statistics(int state, el::Logger* log_pt){
+
+void nemu_ref_end_statistics(int state, el::Logger* log_pt){/*{{{*/
     extern std::string disassemble(uint64_t pc, uint8_t *code, int nbyte);
     switch (state) {
         case NEMU_END: 
@@ -44,13 +45,11 @@ void nemu_ref_end_statistics(int state, el::Logger* log_pt){
             __ASSERT_NEMU__(0, "unexpected quit state {}", state);
             break;
     }
-}
+}/*}}}*/
+
 bool mips32_CPU_state::ref_exec_once(bool mycpu_int) {/*{{{*/
     bool nemu_int = isa_query_intr();
-    inst_state.snpc = inst_state.pc = arch_state.pc;
     isa_exec_once(mycpu_int);
-    if (arch_state.pc == 0xbfc00100) nemu_state.state = NEMU_END;
-    arch_state.pc = inst_state.dnpc;
     if (mycpu_int == false) {
         int_delay += nemu_int;
         __ASSERT_NEMU__(int_delay < 32, "interrupt wait trigger too long");

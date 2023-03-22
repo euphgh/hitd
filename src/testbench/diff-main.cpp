@@ -22,7 +22,7 @@ extern bool mainloop(
         Vmycpu_top* top,
         axi_paddr* axi,
         std::string wave_name,
-        basic_soc& soc
+        dual_soc& soc
         );
 
 INITIALIZE_EASYLOGGINGPP
@@ -30,7 +30,7 @@ INITIALIZE_EASYLOGGINGPP
 static void run_func(
         Vmycpu_top* top,
         axi_paddr* axi,
-        basic_soc& soc
+        dual_soc& soc
         ){/*{{{*/
     for (size_t i = 0; i < 1; i++) {
         soc.set_switch(0);
@@ -41,7 +41,7 @@ static void run_func(
 static void run_perf(
         Vmycpu_top* top,
         axi_paddr* axi,
-        basic_soc& soc
+        dual_soc& soc
         ){/*{{{*/
     for (size_t i = 1; i <= 10; i++) {
         soc.set_switch(i);
@@ -60,14 +60,14 @@ int main (int argc, char *argv[]) {
 
     std::signal(SIGINT, [](int) {sim_status = SIM_INT;});
 
-    basic_soc soc(arg_img_code);
+    dual_soc soc(arg_img_code);
     Vmycpu_top* top = new Vmycpu_top();
     dpi_init();
     axi_paddr* axi = new axi_paddr(top);
-    axi->paddr_top = soc.get_paddr(basic_soc::SOC_DUT);
+    axi->paddr_top = soc.get_dut_soc();
     axi->paddr_top->set_logger(mycpu_log);
 
-    PaddrTop* nemu_paddr_top = soc.get_paddr(basic_soc::SOC_REF);
+    PaddrTop* nemu_paddr_top = soc.get_ref_soc();
     nemu_paddr_top->set_logger(nemu_log);
     IFDEF(CONFIG_MEM_DIFF, axi->set_diff_mem(nemu_paddr_top));
     init_isa(nemu_paddr_top);

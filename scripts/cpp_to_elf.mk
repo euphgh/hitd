@@ -1,5 +1,5 @@
 CC = $(call remove_quote,$(CONFIG_CC))
-COM_FLAG := -MMD -Wall -Werror -std=gnu++14 -I./include
+COM_FLAG := -MMD -Wall -Werror -std=gnu++17 -I$(HITD_HOME)/include
 COM_FLAG += -DNSCSCC_HOME=\"$(NSCSCC_HOME)\" -DHITD_HOME=\"$(HITD_HOME)\" 
 CFLAGS_BUILD += $(if $(CONFIG_CC_DEBUG),,$(call remove_quote,$(CONFIG_CC_OPT)))
 CFLAGS_BUILD += $(if $(CONFIG_CC_LTO),-flto,)
@@ -20,7 +20,8 @@ include $(FILELIST_MK)
 DIRS-BLACKLIST-y += $(DIRS-BLACKLIST)
 SRCS-BLACKLIST-y += $(SRCS-BLACKLIST) $(shell find $(DIRS-BLACKLIST-y) -name "*.cpp")
 SRCS-y += $(shell find $(DIRS-y) -name "*.cpp")
-NEMU_SRCS = $(filter-out $(SRCS-BLACKLIST-y),$(SRCS-y))
+NEMU_SRCS := $(filter-out $(SRCS-BLACKLIST-y),$(SRCS-y))
+NEMU_SRCS := $(filter-out $(if $(CONFIG_NSC_NEMU),,src/nemu/nemu-main.cpp), $(NEMU_SRCS))
 
 # Extract compiler and options from menuconfig
 NEMU_INCLUDES = $(addprefix -I, $(NEMU_INC_PATH))
@@ -32,39 +33,22 @@ $(NEMU_OBJS): $(OBJ_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	@$(CXX) $(NEMU_CFLAGS) -c -o $@ $<
 	$(call call_fixdep, $(@:.o=.d), $@)
-OBJS += $(NEMU_OBJS)
-endif
-# }}}
-
-# testbench compile rule{{{
-ifdef CONFIG_NEED_TB
-TB_SRCS     := $(shell find src/testbench -name "*.cpp")
-TB_CFLAGS   += $(CFLAGS_BUILD) -D__GUEST_ISA__=$(GUEST_ISA) -I$(HITD_HOME)/obj_dir
-TB_INCLUDES = $(addprefix -I, $(TB_INC_PATH) ./src/nemu/isa/mips32/include)
-TB_CFLAGS   := $(COM_FLAG) $(TB_INCLUDES) $(TB_CFLAGS)
-TB_OBJS = $(TB_SRCS:%.cpp=$(OBJ_DIR)/%.o)
-$(TB_OBJS): $(OBJ_DIR)/%.o: %.cpp $(CXX_CLOF)
-	@echo + CXX $<
-	@mkdir -p $(dir $@)
-	@$(CXX) $(TB_CFLAGS) @$(CXX_CLOF) -c -o $@ $<
-	$(call call_fixdep, $(@:.o=.d), $@)
-OBJS += $(TB_OBJS) 
+OBJ_ALL += $(NEMU_OBJS)
 endif
 # }}}
 
 # CEMU compile rule{{{
 ifdef CONFIG_NEED_CEMU
-CEMU_SRCS     := $(shell find src/cemu -name "*.cpp")
-CEMU_CFLAGS   += $(CFLAGS_BUILD) -D__GUEST_ISA__=$(GUEST_ISA)
-CEMU_INCLUDES = $(addprefix -I, $(CEMU_INC_PATH))
-CEMU_CFLAGS   := $(COM_FLAG) $(CEMU_INCLUDES) $(CEMU_CFLAGS)
+CEMU_SRCS     	:= $(shell find src/cemu -name "*.cpp")
+CEMU_SRCS 		:= $(filter-out $(if $(CONFIG_NSC_CEMU),,src/cemu/cemu-main.cpp), $(CEMU_SRCS))
+CEMU_CFLAGS   	+= $(COM_FLAG) $(CFLAGS_BUILD)
 CEMU_OBJS = $(CEMU_SRCS:%.cpp=$(OBJ_DIR)/%.o)
 $(CEMU_OBJS): $(OBJ_DIR)/%.o: %.cpp
 	@echo + CXX $<
 	@mkdir -p $(dir $@)
 	@$(CXX) $(CEMU_CFLAGS) -c -o $@ $<
 	$(call call_fixdep, $(@:.o=.d), $@)
-OBJS += $(CEMU_OBJS)
+OBJ_ALL += $(CEMU_OBJS)
 endif
 # }}}
 
@@ -76,7 +60,7 @@ $(SOC_OBJS): $(OBJ_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	@$(CXX) $(SOC_CFLAGS) -c -o $@ $<
 	$(call call_fixdep, $(@:.o=.d), $@)
-OBJS += $(SOC_OBJS) # }}}
+OBJ_ALL += $(SOC_OBJS) # }}}
 
 DIS_SRCS    = src/utils/disasm.cpp #{{{
 DIS_CFLAGS  += $(COM_FLAG) $(CFLAGS_BUILD) $(shell llvm-config --cxxflags)
@@ -87,9 +71,9 @@ $(DIS_OBJS): $(OBJ_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	@$(CXX) $(DIS_CFLAGS) -c -o $@ $<
 	$(call call_fixdep, $(@:.o=.d), $@)
-OBJS += $(DIS_OBJS) # }}}
+OBJ_ALL += $(DIS_OBJS) # }}}
 
-ELG_SRCS    = $(shell find src/utils/log -type f -name "*.cpp")#{{{
+ELG_SRCS    = $(shell find src/utils/log -type f -name "*.cpp") #{{{
 ELG_CFLAGS  += $(COM_FLAG) $(CFLAGS_BUILD) -fexceptions -Wno-range-loop-construct
 ELG_OBJS = $(ELG_SRCS:%.cpp=$(OBJ_DIR)/%.o)
 $(ELG_OBJS): $(OBJ_DIR)/%.o: %.cpp
@@ -97,9 +81,9 @@ $(ELG_OBJS): $(OBJ_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	@$(CXX) $(ELG_CFLAGS) -c -o $@ $<
 	$(call call_fixdep, $(@:.o=.d), $@)
-OBJS += $(ELG_OBJS) # }}}
+OBJ_ALL += $(ELG_OBJS) # }}}
 
-ARG_SRCS    = src/utils/parse_args.cpp#{{{
+ARG_SRCS    = src/utils/parse_args.cpp #{{{
 ARG_CFLAGS  += $(COM_FLAG) $(CFLAGS_BUILD)
 ARG_OBJS = $(ARG_SRCS:%.cpp=$(OBJ_DIR)/%.o)
 $(ARG_OBJS): $(OBJ_DIR)/%.o: %.cpp
@@ -107,39 +91,25 @@ $(ARG_OBJS): $(OBJ_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	@$(CXX) $(ARG_CFLAGS) -c -o $@ $<
 	$(call call_fixdep, $(@:.o=.d), $@)
-OBJS += $(ARG_OBJS) # }}}
+OBJ_ALL += $(ARG_OBJS) # }}}
 
 # Depencies
--include $(OBJS:.o=.d)
-BINARY   := $(BUILD_DIR)/$(NAME)
+-include $(OBJ_ALL:.o=.d)
 LD := $(CXX)
-LDFLAGS := $(LDFLAGS)
-LDFLAGS += $(CFLAGS_BUILD)
-EXTRA_OBJS = $(file < $(EXTRA_OBJS_LIST))
 LIBS += -lfmt
-ifdef CONFIG_NSC_DIFF
-$(BINARY): $(OBJS) $(LD_HEAD_OF) $(LD_TAIL_OF) $(ARCHIVES)
-	@echo + LD $@
-	@$(LD) $(LDFLAGS) @$(LD_HEAD_OF) $(OBJS) $(EXTRA_OBJS) $(ARCHIVES) @$(LD_TAIL_OF) $(LIBS) -o $@ 
+BINARY   := $(BUILD_DIR)/$(NAME)
+ifdef CONFIG_NEED_TB
+include ./scripts/ver_to_cpp.mk
 else
-$(BINARY): $(OBJS)
+$(BINARY): $(OBJ_ALL)
 	@echo + LD $@
-	@$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ 
+	@$(LD) $(OBJ_ALL) $(LIBS) -o $@ 
 endif
 
 
 
-
-
-
-
-
-
-
-
-
 # Some convenient rules
-.PHONY: tb gdb sim
+.PHONY: elf gdb sim
 
 LOG_FILE = $(call remove_quote, $(CONFIG_TRACE_FILE))
 ARGS = --log=$(LOG_FILE)
@@ -149,13 +119,13 @@ ARGS += --test=$(IMAGE)
 dirs:
 	mkdir -p $(dir $(LOG_FILE))
 
-tb: $(BINARY)
+elf: $(BINARY)
 
-sim: tb dirs
+sim: elf dirs
 	$(TB_EXEC)
 
 TB_EXEC := $(BINARY) $(ARGS)
-gdb: tb
+gdb: elf
 	gdb -s $(BINARY) --args $(TB_EXEC)
 
 log:

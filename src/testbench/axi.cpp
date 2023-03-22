@@ -63,7 +63,7 @@ const char* burst_str(burst_t num){/*{{{*/
         case BURST_WRAP:        res = "WRAP "; break;
         case BURST_INCR:        res = "INCR "; break;
         case BURST_FIXED:       res = "FIXED"; break;
-        case BURST_RESERVED:    res = "RESER"; break;
+        default: res = "RESER"; break;
     }
     return res;
 }/*}}}*/

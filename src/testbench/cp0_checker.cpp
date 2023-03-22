@@ -11,7 +11,17 @@ void cp0_checker::check_change(){
     word_t pc;
     if (dpi_is_cp0_change(&pc)){
         pc_when_changed.push(pc);
-        saved_cp0.push(std::make_unique<CP0_t>(true));
+        auto cnt_cp0 = std::make_unique<CP0_t>();
+        uint32_t data;
+#define __cp0_reg_load__(regname,rd,sel,...) \
+        data = dpi_get_cp0(rd, sel); \
+        cnt_cp0->regname = { \
+            __VA_ARGS__ \
+        };
+#define __cp0_field_load__(name,msb,lsb,reset,writable,check) \
+        .name = static_cast<unsigned int>((data & BITMASK(msb+1)) >> lsb),
+        __cp0_info__(__cp0_reg_load__, __cp0_field_load__);
+        saved_cp0.push(std::move(cnt_cp0));
     }
 }
 void cp0_checker::check_value(word_t pc, const CP0_t& ref){
