@@ -12,6 +12,7 @@
 *
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
+#include "easylogging++.h"
 #include "nemu/difftest-def.hpp"
 #include "nemu/cpu/difftest.hpp"
 #include "nemu/isa.hpp"
@@ -19,6 +20,7 @@
 #include "cemu/mips_core.hpp"
 #include "utils.hpp"
 #include <memory>
+#include "utils.hpp"
 
 #ifdef CONFIG_DIFFTEST
 
@@ -29,6 +31,7 @@ void difftest_skip_ref(){}
 void difftest_skip_dut(int nr_ref, int nr_dut){}
 
 void init_difftest(PaddrTop* paddr_top){/*{{{*/
+    LOG(INFO) << "Enable difftest with cemu";
     cemu.reset(new mips_core(paddr_top));
     cemu->reset();
 }/*}}}*/

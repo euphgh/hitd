@@ -115,6 +115,9 @@ LOG_FILE = $(call remove_quote, $(CONFIG_TRACE_FILE))
 ARGS = --log=$(LOG_FILE)
 IMAGE ?= func
 ARGS += --test=$(IMAGE)
+ifdef CONFIG_NEMU_BAT
+ARGS += -b
+endif
 
 dirs:
 	mkdir -p $(dir $(LOG_FILE))

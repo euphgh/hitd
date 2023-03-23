@@ -16,12 +16,12 @@ inline static void first_init(){
     el::Helpers::installCustomFormatSpecifier(el::CustomFormatSpecifier("%pc", now_pc));
     el::Helpers::installCustomFormatSpecifier(el::CustomFormatSpecifier("%ticks", now_ticks));
     el::Loggers::addFlag(el::LoggingFlag::ColoredTerminalOutput);
-    // el::Configurations per_conf;
-    // per_conf.setToDefault();
-    // per_conf.setGlobally(el::ConfigurationType::Format, "%msg");
-    // per_conf.setGlobally(el::ConfigurationType::Filename, "performance.log");
-    // per_conf.set(el::Level::Info, el::ConfigurationType::ToStandardOutput, "false");
-    // el::Loggers::getLogger("performance")->configure(per_conf);
+    el::Configurations per_conf;
+    per_conf.setToDefault();
+    per_conf.setGlobally(el::ConfigurationType::Format, "%msg");
+    per_conf.setGlobally(el::ConfigurationType::Filename, "performance.log");
+    per_conf.set(el::Level::Info, el::ConfigurationType::ToStandardOutput, "false");
+    el::Loggers::getLogger("performance")->configure(per_conf);
     is_first = false;
 }
 
@@ -30,6 +30,7 @@ el::Logger* logger_init(std::string name){
 
     el::Configurations log_conf;
     log_conf.setToDefault();
+    // log_conf.setGlobally(el::ConfigurationType::Enabled, "false");
 
     log_conf.setGlobally(el::ConfigurationType::Format, "[" + name + "][%ticks][%pc][%levshort]:%msg");
     log_conf.setGlobally(el::ConfigurationType::Filename, arg_log_file);

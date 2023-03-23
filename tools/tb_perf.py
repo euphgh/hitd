@@ -7,7 +7,7 @@ from tabulate import tabulate # pip3 inst all tabulate!!
 
 def main():
     # default parameters
-    inputfile='htrack_performance.log'
+    inputfile='performance.log'
     sortby=0
 
     # Parse command line options
@@ -62,13 +62,14 @@ def main():
         _avg = statistics.mean(data[key])
         _sum = sum(data[key])
         _max = max(data[key])
-        table.append((key, _med, _avg, _max, _sum))
+        _num = len(data[key])
+        table.append((key, _med, _avg, _max, _num, _sum))
 
     #--- sort it
     table = sorted(table, key=lambda val: val[sortby], reverse=True)
 
     #--- create a pretty table
-    header= ["Context","median (us)", "mean(us)","max(us)", "sum(us)"]
+    header= ["Context","median (us)", "mean(us)","max(us)", "number", "sum(us)"]
     header[sortby] = '**'+header[sortby]+'**' 
     # print('Table sorted by: ', header[sortby])
     print( tabulate(table, headers=header, floatfmt=".2f") )

@@ -43,7 +43,14 @@ class mips32_CPU_state{
         void exec_once();
         void reset();
 
-        const char* isa_disasm_inst();
+        const char* isa_disasm_inst(){/*{{{*/
+            if (!have_dised) {
+                extern std::string disassemble(word_t inst, word_t pc);
+                disasm_info = disassemble(inst_state.inst, inst_state.pc);
+                have_dised = true;
+            }
+            return disasm_info.c_str();
+        }/*}}}*/
 
         // nscscc difftest api{{{
         void ref_tick_and_int(uint8_t ext_int);
@@ -69,7 +76,8 @@ class mips32_CPU_state{
         // }}}
 
     private:
-        char disasm[64];
+        std::string disasm_info;
+        bool have_dised;
         // Instruct execute method{{{
 #define R(i) arch_state.gpr[i]
 #define Rw(i,value) do {inst_state.wnum = i; arch_state.gpr[i] = value;} while(0)

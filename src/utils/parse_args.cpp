@@ -29,6 +29,9 @@ void parse_args(int argc, char *argv[]) {
             case 'l': 
                 arg_log_file = optarg; 
                 break;
+            case 'b': 
+                arg_batch_mode = true; 
+                break;
             case 't': 
                 Assert(img_str_to_code.find(std::string(optarg))!=img_str_to_code.end(), "not support test name %s", optarg);
                 arg_img_code = img_str_to_code.at(optarg);

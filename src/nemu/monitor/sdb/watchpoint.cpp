@@ -39,6 +39,7 @@ void init_wp_pool() {
 
     head = NULL;
     free_ = wp_pool;
+    LOG(INFO) << "Enable watchpoint in sdb";
 }
 
 static WP* malloc_wp(){/*{{{*/

@@ -16,6 +16,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <nemu/cpu/cpu.hpp>
+#include "easylogging++.h"
 #include "nemu/isa.hpp"
 #include "local-include/reg.hpp"
 #include <nemu/cpu/ifetch.hpp>
@@ -212,8 +213,10 @@ int mips32_CPU_state::decode_exec() {
 }
 
 int mips32_CPU_state::isa_exec_once(bool has_int) {
+    // TIMED_FUNC(isa_exec_once);
     inst_state.wnum = 0;
     inst_state.flag = 0;
+    have_dised = false;
 
     inst_state.snpc = inst_state.pc = arch_state.pc;
     word_t this_pc = inst_state.snpc;
@@ -236,9 +239,7 @@ int mips32_CPU_state::isa_exec_once(bool has_int) {
     //TODO:check pc finish conditions
     // if (this_pc==0x9fc13178)
     //     analysis = !analysis;
-    if (this_pc==0xbfc00100){
-        nemu_state.state = NEMU_END;
-    }
+    // if (this_pc==0xbfc00100) nemu_state.state = NEMU_END;
     extern uint32_t log_pc;
     log_pc = this_pc;
     return 0;

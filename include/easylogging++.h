@@ -13,15 +13,17 @@
 //  https://amrayn.com
 //  http://muflihun.com
 //
+
+#ifndef EASYLOGGINGPP_H
+#define EASYLOGGINGPP_H
+
 // my def start
 #define ELPP_FRESH_LOG_FILE
-// #define ELPP_NO_DEFAULT_LOG_FILE
+#define ELPP_NO_DEFAULT_LOG_FILE
 // #define ELPP_PERFORMANCE_MICROSECONDS
 // #define ELPP_FEATURE_PERFORMANCE_TRACKING
 // mydef end
 
-#ifndef EASYLOGGINGPP_H
-#define EASYLOGGINGPP_H
 // Compilers and C++0x/C++11 Evaluation
 #if __cplusplus >= 201103L
 #  define ELPP_CXX11 1

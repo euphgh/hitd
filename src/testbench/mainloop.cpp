@@ -1,3 +1,4 @@
+#include "easylogging++.h"
 #include "macro.hpp"
 #include "paddr/paddr_interface.hpp"
 #include "testbench/axi.hpp"
@@ -62,11 +63,8 @@ static bool sim_end_statistics(){/*{{{*/
 static void check_cpu_state(diff_state* mycpu){/*{{{*/
     bool res = nemu->ref_checkregs(mycpu);
     if (!res){
-        extern std::string disassemble(uint64_t pc, uint8_t *code, int nbyte);
         __ASSERT_SIM__(0, "MyCPU execution{} error !!!",
-                disassemble(nemu->inst_state.pc, 
-                    (uint8_t*)&nemu->inst_state.inst, 
-                    4));
+                nemu->isa_disasm_inst());
         nemu->ref_log_error(mycpu);
     }
 }/*}}}*/
@@ -123,6 +121,7 @@ bool mainloop(
     top->aresetn = 1;
 
     while (!Verilated::gotFinish()) {
+        TIMED_SCOPE(one_clk,"one_clk");
         /* posedge edge comming {{{*/
         ++ticks;
         top->aclk = !top->aclk;
@@ -152,6 +151,7 @@ bool mainloop(
         if (commit_num > 0) {
             uint8_t mycpu_int = dpi_interrupt_seq();
             for (size_t i = 0; i < commit_num; i++) {
+                TIMED_SCOPE(nemu_once, "nemu_once");
                 if (!nemu->ref_exec_once(i+1 == mycpu_int)) {
                     sim_ending(nemu_state.state);
                     goto negtive_edge;

@@ -27,8 +27,16 @@ void init_rand();
 void init_sdb();
 
 static void welcome() {
-    printf(ANSI_FMT("Welcome to %s-NEMU!\n", ANSI_FG_BLUE), ANSI_FMT(nemu_str(__GUEST_ISA__), ANSI_FG_YELLOW ANSI_BG_RED));
-    printf(ANSI_FMT("For help, type \"help\"\n",ANSI_FG_BLUE));
+    extern bool arg_batch_mode ;
+    if (!arg_batch_mode) {
+        printf(ANSI_FMT("Welcome to %s-NEMU ", ANSI_FG_BLUE), ANSI_FMT(nemu_str(__GUEST_ISA__), ANSI_FG_YELLOW ANSI_BG_RED));
+        printf(ANSI_FMT("with simple debugger\n",ANSI_FG_BLUE));
+        printf(ANSI_FMT("For help, type \"help\"\n",ANSI_FG_BLUE));
+    }
+    else {
+        printf(ANSI_FMT("Welcome to %s-NEMU! ", ANSI_FG_BLUE), ANSI_FMT(nemu_str(__GUEST_ISA__), ANSI_FG_YELLOW ANSI_BG_RED));
+        printf(ANSI_FMT("on batch mode\n",ANSI_FG_BLUE));
+    }
 }
 
 extern int parse_args(int argc, char *argv[]);
@@ -56,7 +64,7 @@ void init_monitor(int argc, char *argv[]) {
   PaddrTop* cemu_paddr = soc->get_ref_soc();
   nemu_paddr->set_logger(nemu_log);
   cemu_paddr->set_logger(cemu_log);
-  soc->set_switch(3);
+  soc->set_switch(0);
 
 
   /* Perform ISA dependent initialization. */

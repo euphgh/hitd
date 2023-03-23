@@ -73,4 +73,8 @@ config RT_CHECK
   bool "Enable runtime checking"
   default y
 
+config NEMU_BAT
+    bool "run nemu with batch mode"
+    default n
+
 endmenu# }}}
