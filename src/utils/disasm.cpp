@@ -75,6 +75,7 @@ extern void init_disasm(const char *triple) {
                                     AsmInfo->getAssemblerDialect(), *AsmInfo,
                                     *gMII, *gMRI);
   gIP->setPrintImmHex(true);
+  gIP->setUseMarkup(true);
   gIP->setPrintBranchImmAsAddress(true);
 }
 #include "common.hpp"

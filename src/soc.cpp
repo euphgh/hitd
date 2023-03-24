@@ -41,7 +41,7 @@ static std::tuple<PaddrTop*, PaddrConfreg*> basic_soc(int test_code){/*{{{*/
     return std::make_tuple(top, confreg);
 }/*}}}*/
 static PaddrTop* boot_soc(int test_code) {/*{{{*/
-    AddrIntv flash_range(0x1fc00000, bit_mask(22));
+    AddrIntv flash_range(0x1fc00000, bit_mask(21));
     AddrIntv ddr_range  (0x00000000, bit_mask(27));
     AddrIntv uart_range (0x1fe40000, bit_mask(14));
 

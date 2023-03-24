@@ -21,6 +21,7 @@
 #include "cp0.hpp"
 #include "paddr/paddr_interface.hpp"
 #include "nemu/memory/vaddr.hpp"
+#include <fmt/core.h>
 #include <memory>
 #include "easylogging++.h"
 
@@ -135,10 +136,24 @@ class mips32_CPU_state{
         inline void inst_mfc0(word_t imm, int rd){/*{{{*/
             word_t tmp; 
             uint8_t pos = imm | imm >>8;
-            cp0.read(pos, tmp); 
+            if (cp0.read(pos, tmp)==false){
+                nemu_state.state = NEMU_ABORT;
+                log_pt->error(fmt::format("read not unimplemented CP0 {}({},{})", 
+                            cp0.find_name(pos), 
+                            (pos&0xff)>>3, pos&0x7));
+            }
             Rw(rd,tmp); 
             if (pos==(9<<3)){
                 inst_state.skip = true;
+            }
+        }/*}}}*/
+        inline void inst_mtc0(word_t imm, int rd){/*{{{*/
+            uint8_t pos = imm | imm >>8;
+            if (cp0.write(pos, R(rd))==false){
+                nemu_state.state = NEMU_ABORT;
+                log_pt->error(fmt::format("write not unimplemented CP0 {}({},{})", 
+                            cp0.find_name(pos), 
+                            (pos&0xff)>>3, pos&0x7));
             }
         }/*}}}*/
         inline void inst_add(uint8_t rd, word_t src1, word_t src2){/*{{{*/

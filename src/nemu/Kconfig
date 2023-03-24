@@ -51,7 +51,7 @@ config DEADLOOP
 config DIFFTEST
   depends on NSC_NEMU
   bool "Enable differential testing for nemu"
-  default n
+  default y
   help
     Enable differential testing with a reference design.
     Note that this will significantly reduce the performance of NEMU.

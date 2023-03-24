@@ -16,6 +16,7 @@
 #include "nemu/isa.hpp"
 #include "cp0.hpp"
 #include "local-include/reg.hpp"
+#include <cstdlib>
 
 const char *regs[] = {
   "$0", "at", "v0", "v1", "a0", "a1", "a2", "a3",
@@ -24,8 +25,7 @@ const char *regs[] = {
   "t8", "t9", "k0", "k1", "gp", "sp", "s8", "ra"
 };
 
-
-void CPU_state::isa_reg_display() {
+void CPU_state::isa_reg_display() {/*{{{*/
     uint8_t regs_len = ARRLEN(regs);
     for (int i = 0; i < regs_len; i++) {
         word_t value = arch_state.gpr[i];
@@ -34,15 +34,16 @@ void CPU_state::isa_reg_display() {
         printf(FMT_REG,name,value,value);
     }
     printf(FMT_REG,"pc",arch_state.pc,arch_state.pc);
-}
+}/*}}}*/
 
-
-word_t CPU_state::isa_reg_str2val(const char *s, bool *success) {
+word_t CPU_state::isa_reg_str2val(const char *s, bool *success) {/*{{{*/
     word_t res = 0;
     *success = false;
     uint8_t regs_len = ARRLEN(regs);
+    bool is_regnum = s[0]=='R';
+    int regnum = atoi(s+1);
     for (uint8_t i = 0; i < regs_len; i++) {
-        if (strcmp(regs[i], s)==0){
+        if (strcmp(regs[i], s)==0 || (is_regnum && regnum==i)){
             res = arch_state.gpr[i];
             *success = true;
             break;
@@ -60,4 +61,4 @@ word_t CPU_state::isa_reg_str2val(const char *s, bool *success) {
     }
     __cp0_info__(__cp0_name_read__,)
     return res;
-}
+}/*}}}*/

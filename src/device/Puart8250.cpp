@@ -1,4 +1,5 @@
 #include "paddr/paddr_interface.hpp"
+#include <csignal>
 #include <cstdio>
 
 #define UART8250_TX_RX_DLL  0

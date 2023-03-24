@@ -38,7 +38,7 @@
 #define EXPT_VECTOR 0xbfc00380
 word_t mips32_CPU_state::isa_raise_intr(word_t NO, vaddr_t epc) {/*{{{*/
             IFDEF(CONFIG_ETRACE,log_pt->trace("[E] exception %v trigger",e_msg[NO]));
-            __ASSERT_NEMU__(cp0.status.exl==0, "exception can not raise at " FMT_WORD_X "for Status.EXL is set",epc);
+            __ASSERT_NEMU__(cp0.status.exl==0, "exception can not raise at " HEX_WORD " for Status.EXL is set",epc);
             bool bd = inst_state.is_delay_slot;
             cp0.epc.all = bd ? epc-4 : epc;
             cp0.cause.bd = bd;

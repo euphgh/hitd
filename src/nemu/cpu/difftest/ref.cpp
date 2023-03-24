@@ -27,7 +27,7 @@ void CPU_state::ref_tick_and_int(uint8_t ext_int){/*{{{*/
     cp0.cause.ip_h = ext_int | (cp0.cause.ti<<5);
     cp0.count.all += cp0.clock_tick;
     cp0.clock_tick = 1 - cp0.clock_tick;
-    if (cp0.count.all==cp0.compare.all) cp0.cause.ti = 1;
+    // if (cp0.count.all==cp0.compare.all) cp0.cause.ti = 1;
 }/*}}}*/
 
 void nemu_ref_end_statistics(int state, el::Logger* log_pt){/*{{{*/
