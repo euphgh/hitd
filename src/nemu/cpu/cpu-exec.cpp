@@ -13,7 +13,9 @@
  * See the Mulan PSL v2 for more details.
  ***************************************************************************************/
 
+#include <csignal>
 #include <memory>
+#include <sstream>
 #include "common.hpp"
 #include "easylogging++.h"
 #include "nemu/cpu/cpu.hpp"
@@ -36,26 +38,24 @@
 #define MAX_INST_TO_PRINT 10
 bool is_wp_change();
 
-// void check_ftrace(const Decode * s){/*{{{*/
-//     if (s->flag!=0){
-//         int level = get_level();
-//         vaddr_t now_pc = s->pc;
-//         vaddr_t dest_pc = MUXDEF(CONFIG_ISA_mips32, cpu.delay_slot_npc, s->dnpc);
-//         log_write(FMT_WORD ": ",now_pc);
-//         if (IS_CALL(s->flag)) {
-//             for (int i = 0; i < level; i++)
-//                 log_write("  ");
-//             log_write("call [%s] -> [%s] (@" FMT_WORD ")\n",search_ftable(now_pc),search_ftable(dest_pc), dest_pc);
-//             set_level(push);
-//         }
-//         if (IS_RET (s->flag)){
-//             for (int i = 0; i < level-1; i++)
-//                 log_write("  ");
-//             log_write("ret  [%s] <- [%s]\n", search_ftable(dest_pc), search_ftable(now_pc));
-//             set_level(pop );
-//         }
-//     }
-// }/*}}}*/
+void check_ftrace(const Decode * s){/*{{{*/
+    if (s->flag!=0){
+        int level = get_level();
+        vaddr_t now_pc = s->pc;
+        vaddr_t dest_pc = nemu->delay_slot_npc;
+        if (IS_CALL(s->flag)) {
+            nemu->log_pt->trace(fmt::format("[F] {1: >{0}}call {2} -> {3}",
+                        level*2,"", search_ftable(now_pc),search_ftable(dest_pc)));
+            set_level(push);
+        }
+        if (IS_RET (s->flag)){
+            __ASSERT_NEMU__(level>=1, "Call stack must great than 1 when return");
+            nemu->log_pt->trace(fmt::format("[F] {1: >{0}}ret  {2} -> {3}",
+                        (level-1)*2,"", search_ftable(now_pc),search_ftable(dest_pc)));
+            set_level(pop);
+        }
+    }
+}/*}}}*/
 
 void check_deadloop(word_t pc){
     if (detect_deadloop(pc)){

@@ -2,7 +2,7 @@
 #define __DEADLOOP_H__
 #include "common.hpp"
 #define PC_FIFO_NR 256
-#define LOOP_MAX (1<<16)
+#define LOOP_MAX (1<<20)
 // #define LOOP_MAX (1<<16)
 typedef struct{
     word_t item[PC_FIFO_NR];

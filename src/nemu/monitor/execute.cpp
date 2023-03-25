@@ -15,7 +15,6 @@ void compare_exec(uint64_t n){
         soc->tick();
         nemu->ref_tick_and_int(0);
         if (nemu_state.state != NEMU_RUNNING) break;
-        
     }
 }
 
@@ -34,13 +33,13 @@ void cpu_exec(uint64_t n) {
             nemu_state.state = NEMU_STOP; 
             break;
         case NEMU_END:
-               nemu->log_pt->info("nemu run to end pc");
-               break;
+            nemu->log_pt->info("nemu run to end pc");
+            break;
         case NEMU_ABORT:
-               nemu->log_pt->info("nemu abort");
-               break;
+            nemu->log_pt->error("nemu abort when execute %v", nemu->isa_disasm_inst());
+            break;
         case NEMU_QUIT:
-               nemu->log_pt->info("nemu finish cpu-exec with unexpected state quit");
-               break;
+            nemu->log_pt->error("nemu finish cpu-exec with unexpected state quit");
+            break;
     }
 }

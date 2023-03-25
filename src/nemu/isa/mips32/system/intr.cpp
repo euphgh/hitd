@@ -38,13 +38,17 @@
 #define EXPT_VECTOR 0xbfc00380
 word_t mips32_CPU_state::isa_raise_intr(word_t NO, vaddr_t epc) {/*{{{*/
             IFDEF(CONFIG_ETRACE,log_pt->trace("[E] exception %v trigger",e_msg[NO]));
-            __ASSERT_NEMU__(cp0.status.exl==0, "exception can not raise at " HEX_WORD " for Status.EXL is set",epc);
-            bool bd = inst_state.is_delay_slot;
-            cp0.epc.all = bd ? epc-4 : epc;
-            cp0.cause.bd = bd;
-            cp0.status.exl = 1;
+            word_t trap_base = (cp0.status.bev ? 0xbfc00200u : (cp0.ebase.eptbase<<12|0x80000000));
+            word_t trap_offs = 0x180;
+            if (!cp0.status.exl){
+                bool bd = inst_state.is_delay_slot;
+                cp0.epc.all = bd ? epc-4 : epc;
+                cp0.cause.bd = bd;
+                trap_offs = ((NO == Int && cp0.cause.iv && cp0.status.bev) ? 0x200 : 0x180);
+            }
             cp0.cause.exccode = NO;
-            return EXPT_VECTOR;
+            cp0.status.exl = 1;
+            return trap_base + trap_offs;
 }/*}}}*/
 
 bool mips32_CPU_state::isa_query_intr() {/*{{{*/

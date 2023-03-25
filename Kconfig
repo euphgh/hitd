@@ -23,6 +23,27 @@ config NEED_TB
     bool
     default y if NSC_DIFF
 
+choice
+  prompt "Test Program"
+  default TEST_UBOOT
+config TEST_FUNC
+  bool "NSCSCC function test"
+config TEST_PERF
+  bool "NSCSCC perfermance test"
+config TEST_UBOOT
+  bool "u-boot"
+config TEST_LINUX
+  bool "linux"
+endchoice
+
+config HAS_CONFREG
+    bool
+    default y if TEST_FUNC || TEST_PERF
+
+config HAS_UART
+    bool
+    default y if TEST_LINUX|| TEST_UBOOT
+
 menu "Build Options"# {{{
 choice
   prompt "Compiler"
@@ -112,7 +133,7 @@ config MTRACE
 
 config FTRACE
   depends on TRACE
-  bool "Trace Nemu all Function call(not support now)"
+  bool "Trace Nemu all Function call"
   default n
 
 config ETRACE

@@ -16,25 +16,19 @@ static std::map<std::string, int> img_str_to_code{
 static const struct option table[] = {
     {"batch"    , no_argument      , NULL, 'b'},
     {"log"      , required_argument, NULL, 'l'},
-    {"test"     , required_argument, NULL, 't'},
     {"help"     , no_argument      , NULL, 'h'},
 };
 const char* arg_log_file = "trace.log";
-int arg_img_code;
 bool arg_batch_mode = false;
 void parse_args(int argc, char *argv[]) {
     int o;
-    while ( (o = getopt_long(argc, argv, "bl:i:", table, NULL)) != -1) {
+    while ( (o = getopt_long(argc, argv, "l:i:", table, NULL)) != -1) {
         switch (o) {
             case 'l': 
                 arg_log_file = optarg; 
                 break;
             case 'b': 
                 arg_batch_mode = true; 
-                break;
-            case 't': 
-                Assert(img_str_to_code.find(std::string(optarg))!=img_str_to_code.end(), "not support test name %s", optarg);
-                arg_img_code = img_str_to_code.at(optarg);
                 break;
             default:
                 printf("Usage: %s [OPTION...] [args]\n\n", argv[0]);

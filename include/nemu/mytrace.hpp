@@ -4,7 +4,7 @@
 #include <elf.h>
 #include <common.hpp>
 #include "testbench/difftest/struct.hpp"
-char* search_ftable(uint64_t addr);
+const char* search_ftable(uint64_t addr);
 void print_ftable();
 typedef enum {
     push = 0x1,

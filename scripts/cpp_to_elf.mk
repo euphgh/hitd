@@ -52,7 +52,8 @@ OBJ_ALL += $(CEMU_OBJS)
 endif
 # }}}
 
-SOC_SRCS    = $(shell find src/device src/soc.cpp -type f -name "*.cpp")#{{{
+#SOC compile rule{{{
+SOC_SRCS    = $(shell find src/device src/soc.cpp -type f -name "*.cpp")
 SOC_CFLAGS  += $(COM_FLAG) $(CFLAGS_BUILD)
 SOC_OBJS = $(SOC_SRCS:%.cpp=$(OBJ_DIR)/%.o)
 $(SOC_OBJS): $(OBJ_DIR)/%.o: %.cpp
@@ -113,8 +114,6 @@ endif
 
 LOG_FILE = $(call remove_quote, $(CONFIG_TRACE_FILE))
 ARGS = --log=$(LOG_FILE)
-IMAGE ?= func
-ARGS += --test=$(IMAGE)
 ifdef CONFIG_NEMU_BAT
 ARGS += -b
 endif

@@ -20,6 +20,7 @@ extern sim_status_t sim_status;
   } while (0)
 #define __WAVE_DIR__ HITD_HOME "/vlogs/wave/"
 enum {
+    TEST_NAME_NON,
     TEST_NAME_FUNC,
     TEST_NAME_PERF,
     TEST_NAME_SYST,

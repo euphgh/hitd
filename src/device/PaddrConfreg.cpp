@@ -30,8 +30,10 @@
 #define SIMU_FLAG_ADDR      0xfff4  //32'hbfaf_fff4 
 #define OPEN_TRACE_ADDR     0xfff8  //32'hbfaf_fff8
 #define NUM_MONITOR_ADDR    0xfffc  //32'hbfaf_fffc
+
 PaddrConfreg::PaddrConfreg(bool simulation, el::Logger* input_logger):
-    PaddrInterface(input_logger) {
+    PaddrInterface(input_logger),
+    output(input_logger){/*{{{*/
     timer = 0;
     memset(cr,0,sizeof(cr));
     led = 0;
@@ -44,7 +46,8 @@ PaddrConfreg::PaddrConfreg(bool simulation, el::Logger* input_logger):
     num_monitor = 1;
     virtual_uart = 0;
     set_switch(0);
-}
+}/*}}}*/
+
 void PaddrConfreg::tick() { timer ++; }
 
 bool PaddrConfreg::do_read (word_t addr, wen_t info, word_t* data) {/*{{{*/
@@ -125,34 +128,6 @@ bool PaddrConfreg::do_read (word_t addr, wen_t info, word_t* data) {/*{{{*/
     return true;
 }/*}}}*/
 
-void PaddrConfreg::set_difftest_mode(int mode, std::queue<uint8_t>* negtive_queue){/*{{{*/
-    diff_mode = mode;
-    if (diff_mode==POS_MODE){
-        diff_queue = negtive_queue;
-    }
-}/*}}}*/
-
-static void check_uart(std::queue<uint8_t>* ref, std::queue<uint8_t>* mycpu){/*{{{*/
-    bool res = ref->empty()==mycpu->empty();
-    if (res){
-        while (!ref->empty()) {
-            if (ref->front()==mycpu->front()) putchar(ref->front());
-            else break;
-            ref->pop();
-            mycpu->pop();
-        }
-        if (!res) {
-            __ASSERT_NEMU__(0, "uart is different");
-            extern void print_reg_diff(word_t ref, word_t my_ans, const char* name);
-            print_reg_diff(ref->front(), mycpu->front(), "uart");
-        }
-        return;
-    }
-    IFNDEF(CONFIG_NSC_CEMU,__ASSERT_NEMU__(res, "uart is different, nemu {}, mycpu is {}", 
-            ref->empty() ? "is empty" : "has data", 
-            mycpu->empty() ? "is empty" : "has data"));
-}/*}}}*/
-
 bool PaddrConfreg::do_write(word_t addr, wen_t info, const word_t data){/*{{{*/
     confreg_write ++;
     assert(info.size == 4 || (info.size == 1 && addr == VIRTUAL_UART_ADDR));
@@ -195,9 +170,7 @@ bool PaddrConfreg::do_write(word_t addr, wen_t info, const word_t data){/*{{{*/
             break;
         case VIRTUAL_UART_ADDR:
             virtual_uart = (data & 0xff);
-            uart_queue.push(virtual_uart);
-            if (diff_mode==POS_MODE) check_uart(&uart_queue, diff_queue);
-            else if (diff_mode==NOR_MODE) putchar(virtual_uart);
+            write_buf(virtual_uart);
             break;
         case NUM_ADDR:
             num = data;
@@ -218,6 +191,3 @@ void PaddrConfreg::set_switch(uint8_t value) {/*{{{*/
         }
     }
 }/*}}}*/
-
-uint32_t PaddrConfreg::get_num() { return num; }
-

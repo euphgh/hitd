@@ -41,7 +41,6 @@ static void welcome() {
 
 extern int parse_args(int argc, char *argv[]);
 extern el::Logger* logger_init(std::string name);
-extern int arg_img_code;
 extern bool arg_batch_mode;
 std::unique_ptr<dual_soc> soc;
 
@@ -59,7 +58,7 @@ void init_monitor(int argc, char *argv[]) {
   cemu_log = logger_init("CHemu");
 
   /* Initialize memory. */
-  soc.reset(new dual_soc(arg_img_code));
+  soc.reset(new dual_soc());
   PaddrTop* nemu_paddr = soc->get_dut_soc();
   PaddrTop* cemu_paddr = soc->get_ref_soc();
   nemu_paddr->set_logger(nemu_log);

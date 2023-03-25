@@ -87,6 +87,7 @@ class mips32_CPU_state{
 #define __NOT_DELAY__ __ASSERT_NEMU__(!is_delay_slot,"this instr can not be delay slot")
         int decode_exec();
         void decode_operand(int *rd, word_t *src1, word_t *src2, word_t *imm, int type);
+        void check_link(int rs);
         word_t inst_lwl(word_t addr, word_t src2){/*{{{*/
             word_t memword = Mr(addr & ~(0x3), 4);
             uint8_t byte = addr & 0x3;

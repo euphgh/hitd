@@ -1,5 +1,7 @@
 #include "nemu/mytrace.hpp"
+#include <algorithm>
 #include <cassert>
+#include <ios>
 #include "fmt/core.h"
 #include "easylogging++.h"
 #ifdef CONFIG_ISA64
@@ -24,7 +26,7 @@ static Elf_Ehdr head;
 static Elf_Shdr shstr_shd;
 static Elf_Shdr str_shd;
 #define NAME_LEN 32
-#define FTABLE_NR 128
+#define FTABLE_NR 1024
 typedef struct {
     struct{
         uint64_t start;
@@ -47,17 +49,17 @@ bool add_ftable(Elf_Off start,  uint32_t len, char* name){/*{{{*/
     }
     return res;
 }/*}}}*/
-char* search_ftable(uint64_t addr){/*{{{*/
-    char* res = NULL;
+const char* search_ftable(uint64_t addr){/*{{{*/
+    const char* res = "unknow";
     uint32_t i ;
     for (i = 0; i < ftable.num; i++) {
         uint64_t start = ftable.items[i].start;
         uint64_t len = ftable.items[i].len;
-        res = ftable.items[i].name;
-        if((addr>=start)&&(addr<start+len))
+        if((addr>=start)&&(addr<start+len)){
+            res = ftable.items[i].name;
             break;
+        }
     }
-    res = (i>=ftable.num) ? NULL : res;
     return res;
 }/*}}}*/
 void print_ftable(){/*{{{*/
@@ -141,4 +143,10 @@ void init_ftrace(const char* filename){
         }
     }
     fclose(fp);
+    // uint64_t test_addr;
+    // while (1) {
+    //     std::cout << "input search addr:";
+    //     std::cin  >> std::hex >> test_addr;
+    //     std::cout << search_ftable(test_addr) << std::endl;
+    // }
 }

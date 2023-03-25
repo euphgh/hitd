@@ -86,7 +86,7 @@ extern std::string disassemble(word_t inst_value, word_t pc){
     uint64_t dummy_size = 0;
     gDisassembler->getInstruction(inst, dummy_size, arr, pc, llvm::nulls());
     // raise(SIGTRAP);
-    std::string s = fmt::format("{:2x} {:2x} {:2x} {:2x}", code[0], code[1],code[2],code[3]);
+    std::string s = fmt::format("{:02x} {:02x} {:02x} {:02x}", code[3], code[2],code[1],code[0]);
     raw_string_ostream os(s);
     gIP->printInst(&inst, pc, "", *gSTI, os);
     return s;

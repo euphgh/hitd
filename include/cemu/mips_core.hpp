@@ -290,9 +290,8 @@ private:
                     case FUNCT_JR: {
                         // JR
                         next_delay_slot = true;
-                        if (instr.r_type.rt || instr.r_type.rd || instr.r_type.sa) {
-                            ri = true;
-                        }
+                        // if (instr.r_type.rt || instr.r_type.rd || instr.r_type.sa) { ri = true; }
+                        if (instr.r_type.rt || instr.r_type.rd ) { ri = true; } //JR.HB
                         else {
                             delay_npc = GPR[instr.r_type.rs];
                             next_control_trans = true;

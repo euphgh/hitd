@@ -16,7 +16,8 @@
 #define UART8250_IER_LSRC   4   // Receiver line status register chagne
 #define UART8250_IER_MSRC   8   // Modem status register change
 
-Puart8250::Puart8250():
+Puart8250::Puart8250(el::Logger* input_logger):
+    output(input_logger),
     thr_empty(false), 
     DLL(0), DLM(0), IER(0), 
     LCR(0b00000011), IIR (0), MCR (0) {}
@@ -85,23 +86,15 @@ bool Puart8250::do_read (word_t addr, wen_t info, word_t* data){/*{{{*/
     return true;
 }/*}}}*/
 bool Puart8250::do_write(word_t addr, wen_t info, const word_t data){/*{{{*/
-    std::unique_lock<std::mutex> lock_tx(tx_lock);
+    // std::unique_lock<std::mutex> lock_tx(tx_lock);
     std::unique_lock<std::mutex> lock_rx(rx_lock);
     bool res = true;
     if (info.size != 1) log_pt->error("write uart8250 size not 1");
     switch (addr) {
-        case UART8250_TX_RX_DLL: {
-                                     if (DLAB()) {
-                                         DLL = data;
-                                     }
-                                     else {
-                                         // tx.push(static_cast<char>(data));
-                                         putchar(data);
-                                         fflush(stdout);
-                                         thr_empty = false;
-                                     }
-                                     break;
-                                 }
+        case UART8250_TX_RX_DLL: 
+            if (DLAB()) DLL = data;
+            else write_buf(data);
+            break;
         case UART8250_IER_DLM: {
                                    if (DLAB()) {
                                        DLM = data;
@@ -117,7 +110,7 @@ bool Puart8250::do_write(word_t addr, wen_t info, const word_t data){/*{{{*/
                                        while (!rx.empty()) rx.pop();
                                    }
                                    if ( (data) & (1 << 2)) {
-                                       while (!tx.empty()) tx.pop();
+                                       while (exist_tx()) getc();
                                    }
                                    break;
                                }
@@ -144,29 +137,16 @@ void Puart8250::putc(char c) {
     rx.push(c);
 }
 
-char Puart8250::getc() {
-    std::unique_lock<std::mutex> lock(tx_lock);
-    if (!tx.empty()) {
-        char res = tx.front();
-        tx.pop();
-        if (tx.empty()) thr_empty = true;
-        return res;
-    }
-    else return EOF;
-}
 
 bool Puart8250::irq() {
     update_IIR();
     return !(IIR & 1);
 }
-bool Puart8250::exist_tx() {
-    std::unique_lock<std::mutex> lock(tx_lock);
-    return !tx.empty();
-}
+
 bool Puart8250::DLAB() {
     return (LCR >> 7) != 0;
 }
-void Puart8250::update_IIR() {
+void Puart8250::update_IIR() {/*{{{*/
     IIR = 3 << 6; // FIFO Enabled
     bool no_int = true;
     if ( (IER & UART8250_IER_THRE) && thr_empty) {
@@ -178,4 +158,4 @@ void Puart8250::update_IIR() {
         no_int = false;
     }
     IIR |= no_int;
-}
+}/*}}}*/

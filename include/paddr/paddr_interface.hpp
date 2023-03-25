@@ -76,62 +76,88 @@ class Pmem : public PaddrInterface  {/*{{{*/
         uint8_t *get_mem_ptr();
 };/*}}}*/
 
-class PaddrConfreg: public PaddrInterface {/*{{{*/
-    public:
-    enum {
-        POS_MODE, // when uart has output read negtive queue and check
-        NEG_MODE,
-        NOR_MODE
-    };
-    // physical address = [0x1faf0000,0x1fafffff]
+class output {
     private:
-    uint32_t cr[8];
-    uint32_t switch_data;
-    uint32_t switch_inter_data;
-    uint32_t timer;
-    uint32_t led;
-    uint32_t led_rg0;
-    uint32_t led_rg1;
-    uint32_t num;
-    uint32_t simu_flag;
-    uint32_t io_simu;
-    uint8_t virtual_uart;
-    uint32_t open_trace;
-    uint32_t num_monitor;
-    int diff_mode; // not a physical register, using as uart difftest
-    std::queue<uint8_t>* diff_queue; // not a physical register, using as uart difftest
+        std::queue <uint8_t> uart_queue;
+        bool thr_empty;
     public:
-    std::queue <uint8_t> uart_queue;
-    uint32_t confreg_read = 0;
-    uint32_t confreg_write = 0;
-    PaddrConfreg(bool simulation = false,
-            el::Logger* input_logger = el::Loggers::getLogger("default"));
-    void tick();
-    bool do_read (word_t addr, wen_t info, word_t* data);
-    bool do_write(word_t addr, wen_t info, const word_t data);
-    void set_switch(uint8_t value);
-    uint32_t get_num();
-    void set_difftest_mode(int mode, std::queue<uint8_t>* negtive_queue);
+        output(el::Logger* input_logger = el::Loggers::getLogger("default")): 
+            thr_empty(true),
+            op_log(input_logger) {}
+        el::Logger* op_log;
+        void write_buf(uint8_t c){ uart_queue.push(c); thr_empty = false; }
+        inline bool exist_tx(){ return !thr_empty; }
+        uint8_t getc(){/*{{{*/
+            char res = EOF;
+            if (!uart_queue.empty()) {
+                res = uart_queue.front();
+                uart_queue.pop();
+            }
+            thr_empty = uart_queue.empty();
+            return res;
+        }/*}}}*/
+};
+
+class PaddrConfreg: public PaddrInterface, public output {/*{{{*/
+    public:
+        enum {
+            POS_MODE, // when uart has output read negtive queue and check
+            NEG_MODE,
+            NOR_MODE
+        };
+        // physical address = [0x1faf0000,0x1fafffff]
+    private:
+        uint32_t cr[8];
+        uint32_t switch_data;
+        uint32_t switch_inter_data;
+        uint32_t timer;
+        uint32_t led;
+        uint32_t led_rg0;
+        uint32_t led_rg1;
+        uint32_t num;
+        uint32_t simu_flag;
+        uint32_t io_simu;
+        uint8_t virtual_uart;
+        uint32_t open_trace;
+        uint32_t num_monitor;
+    public:
+        uint32_t confreg_read = 0;
+        uint32_t confreg_write = 0;
+        PaddrConfreg(bool simulation = false,
+                el::Logger* input_logger = el::Loggers::getLogger("default"));
+        void set_logger(el::Logger* input_logger){ 
+            log_pt = input_logger; 
+            op_log = input_logger;
+        }
+        void tick();
+        bool do_read (word_t addr, wen_t info, word_t* data);
+        bool do_write(word_t addr, wen_t info, const word_t data);
+        void set_switch(uint8_t value);
+        inline uint32_t get_num() { return num; }
 };/*}}}*/
 
-class Puart8250: public PaddrInterface {/*{{{*/
+class Puart8250: public PaddrInterface, public output{/*{{{*/
     public:
-        Puart8250();
+        Puart8250(el::Logger* input_logger = el::Loggers::getLogger("default"));
         bool do_read (word_t addr, wen_t info, word_t* data);
         bool do_write(word_t addr, wen_t info, const word_t data);
         void putc(char c);
-        char getc();
         bool irq();
-        bool exist_tx();
+        void set_logger(el::Logger* input_logger){ 
+            log_pt = input_logger; 
+            op_log = input_logger;
+        }
+        
     private:
         bool DLAB();
         void update_IIR();
         const static uint64_t UART_RX = 0;
         const static uint64_t UART_TX = 0;
         std::queue <char> rx;
-        std::queue <char> tx;
         std::mutex rx_lock;
-        std::mutex tx_lock;
+
+        // std::queue <char> tx;
+        // std::mutex tx_lock;
 
         bool thr_empty;
         // regs
