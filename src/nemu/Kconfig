@@ -15,7 +15,8 @@ endchoice
 choice
 prompt "MIPS SET"
 depends on ISA_mips32
-default MIPS_BASIC
+default MIPS_BASIC if TEST_FUNC || TEST_PERF
+default MIPS_RLS1 if TEST_UBOOT || TEST_LINUX
 config MIPS_BASIC
 bool "nscscc set"
 config MIPS_RLS1
@@ -76,5 +77,7 @@ config RT_CHECK
 config NEMU_BAT
     bool "run nemu with batch mode"
     default n
-
+config TLB_NR
+    int "TLB entry number"
+    default 16
 endmenu# }}}

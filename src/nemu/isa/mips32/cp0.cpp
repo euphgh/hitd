@@ -1,14 +1,12 @@
 #include "cp0.hpp"
-
-#define __cp0_compare_wcfun__ 1
-
-bool CP0_t::read (uint8_t rd_sel, word_t& data) const{/*{{{*/
+bool CP0_t::read (uint8_t rd_sel, word_t& data) {/*{{{*/
     bool res = true;
     switch (rd_sel) {
 #define __cp0_reg_read__(regname,rd,sel,...) \
     case (rd<<3|sel):{ \
                          const regname##_t& tmp = regname;\
                          data = (__VA_ARGS__ 0); \
+                         IFDEF(__cp0_##regname##_rfunc__, regname##_rfunc();) \
                          break; \
                      }
 #define __cp0_field_read__(name,msb,lsb,reset,writable,check) \
@@ -28,7 +26,7 @@ bool CP0_t::write(uint8_t rd_sel, word_t data){/*{{{*/
                          regname = { \
                              __VA_ARGS__ \
                          }; \
-                         IFDEF(__cp0_##regname##_wcfun__, regname##_wfunc();) \
+                         IFDEF(__cp0_##regname##_wfunc__, regname##_wfunc();) \
                          break; \
                      } 
 #define __cp0_field_write__(name,msb,lsb,reset,writable,check) \
@@ -41,7 +39,7 @@ bool CP0_t::write(uint8_t rd_sel, word_t data){/*{{{*/
     return res;
 }/*}}}*/
 
-bool CP0_t::check(const CP0_t &ref){/*{{{*/
+bool CP0_t::check(CP0_t &ref){/*{{{*/
     bool res = true;
 #define __cp0_reg_check__(regname,rd,sel,...) \
     res &= regname.equals(ref.regname);
@@ -60,7 +58,7 @@ bool CP0_t::check(const CP0_t &ref){/*{{{*/
 __cp0_info__(__cp0_reg_equals__, __cp0_field_equals__)
 
 
-void CP0_t::log_error(const CP0_t& ref) {/*{{{*/
+void CP0_t::log_error(CP0_t& ref) {/*{{{*/
     extern void print_reg_diff(word_t ref, word_t my_ans, const char* name);
     word_t the_value, ref_value;
 #define __cp0_reg_log__(regname,rd,sel,...) \

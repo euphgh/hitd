@@ -132,8 +132,8 @@ config MTRACE
   default y
 
 config FTRACE
-  depends on TRACE
-  bool "Trace Nemu all Function call"
+  depends on TRACE && !(TEST_FUNC)
+  bool "Trace Nemu all Function call(not support functional test)"
   default n
 
 config ETRACE

@@ -15,6 +15,7 @@
 
 #include "nemu/isa.hpp"
 #include "utils.hpp"
+#include "macro.hpp"
 #include <memory>
 
 std::unique_ptr<CPU_state> nemu;
@@ -34,6 +35,7 @@ void CPU_state::reset() {/*{{{*/
 CPU_state::mips32_CPU_state(PaddrTop* ptop_input): 
     log_pt(ptop_input->log_pt), 
     paddr_top(ptop_input) {
+        Assert(IS_2_POW(CONFIG_TLB_NR), "TLB entry number is not power of 2");
         extern void init_disasm(const char *triple);
         IFDEF(CONFIG_ITRACE, init_disasm("mipsel-pc-linux-gnu"));
     };

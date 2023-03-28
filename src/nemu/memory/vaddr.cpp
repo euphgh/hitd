@@ -13,21 +13,64 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
+#include "cp0.hpp"
 #include "nemu/memory/paddr.hpp"
 #include <nemu/isa.hpp>
 #include <paddr/nemu_paddr.hpp>
 
-word_t vaddr_ifetch(vaddr_t addr, int len) {
-    word_t paddr = ((addr>>30)==0x2) ? (addr & 0x1fffffff) : addr;
+word_t CPU_state::vaddr_ifetch(vaddr_t addr, int len) {
+    word_t paddr = addr & 0x1fffffff;
+    bool refill = false;
+    switch (mmu_check(addr)) {
+        case MMU_DIRECT:
+            paddr = addr & 0x1fffffff;
+            break;
+        case MMU_TRANSLATE:
+            if (mmu_translate(addr,paddr,refill).hit==false) 
+                isa_raise_intr(EC_TLBL, addr, refill);
+            break;
+        case MMU_FAIL:
+            isa_raise_intr(EC_AdEL, addr);
+            break;
+    }
+    //TODO: Bus Error Exception
     return paddr_read(paddr, len);
 }
 
-word_t vaddr_read(vaddr_t addr, int len) {
-    word_t paddr = ((addr>>30)==0x2) ? (addr & 0x1fffffff) : addr;
+word_t CPU_state::vaddr_read(vaddr_t addr, int len) {
+    word_t paddr = addr & 0x1fffffff;
+    bool refill = false;
+    switch (mmu_check(addr)) {
+        case MMU_DIRECT:
+            paddr = addr & 0x1fffffff;
+            break;
+        case MMU_TRANSLATE:
+            if (mmu_translate(addr,paddr,refill).hit==false) 
+                isa_raise_intr(EC_TLBL, addr, refill);
+            break;
+        case MMU_FAIL:
+            isa_raise_intr(EC_AdEL, addr);
+            break;
+    }
+    //TODO: Bus Error Exception
     return paddr_read(paddr, len);
 }
 
-void vaddr_write(vaddr_t addr, int len, word_t data) {
-    word_t paddr = ((addr>>30)==0x2) ? (addr & 0x1fffffff) : addr;
+void CPU_state::vaddr_write(vaddr_t addr, int len, word_t data) {
+    word_t paddr = addr & 0x1fffffff;
+    bool refill = false;
+    switch (mmu_check(addr)) {
+        case MMU_DIRECT:
+            paddr = addr & 0x1fffffff;
+            break;
+        case MMU_TRANSLATE:
+            if (mmu_translate(addr,paddr,refill).hit==false) 
+                isa_raise_intr(EC_TLBL, addr, refill);
+            break;
+        case MMU_FAIL:
+            isa_raise_intr(EC_AdES, addr);
+            break;
+    }
+    //TODO: Bus Error Exception
     paddr_write(paddr, len, data);
 }

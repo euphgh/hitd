@@ -24,6 +24,7 @@
 #include <fmt/core.h>
 #include <memory>
 #include "easylogging++.h"
+#include "mmu.hpp"
 
 class mips32_CPU_state{
     public:
@@ -75,6 +76,7 @@ class mips32_CPU_state{
         word_t isa_reg_str2val(const char *s, bool *success);
         diff_state* isa_diff_state(){ return &arch_state;}
         // }}}
+        word_t isa_vaddr_read(vaddr_t addr, int len){ return vaddr_read(addr, len); }
 
     private:
         std::string disasm_info;
@@ -162,27 +164,41 @@ class mips32_CPU_state{
             bool sign_src1 = src1 >> 31;
             bool sign_src2 = src2 >> 31;
             bool sign_ans  = ans  >> 31;
-            bool overflow = (!sign_src1 && !sign_src2 && sign_ans) || (sign_src1 && sign_src2 && !sign_ans);
-            if (overflow) inst_state.dnpc = isa_raise_intr(Ov,inst_state.pc);
-            else Rw(rd, ans);
+            if ((!sign_src1 && !sign_src2 && sign_ans) || 
+                    (sign_src1 && sign_src2 && !sign_ans)) 
+                isa_raise_intr(EC_Ov);
+            Rw(rd, ans);
         }/*}}}*/
-        inline bool data_addr_ok(word_t addr, uint8_t bytes, uint8_t NO){/*{{{*/
-            bool res = true;
-            if (unlikely((bytes-1) & addr)){
-                inst_state.dnpc = isa_raise_intr(NO,inst_state.pc); 
-                cp0.badvaddr.all = addr;
-                res = false;
-            }
-            return res;
+        inline word_t align_check(word_t addr, word_t mask, ExcCode_t eccode){/*{{{*/
+            if (unlikely(mask & addr)) isa_raise_intr(eccode,addr); 
+            return addr;
         }/*}}}*/
+        void tlbp();
+        void tlbr();
+        void tlbwi();
+        void tlbwr();
         // }}}
 
         // Exception method{{{
         uint32_t int_delay;
-        vaddr_t isa_raise_intr(word_t NO, vaddr_t epc);
+        void isa_raise_intr(word_t NO, vaddr_t badva = 0, bool refill = false);
         bool isa_query_intr();
         // }}}
-
+        tlb_entry tlb[CONFIG_TLB_NR];
+        enum mode_t { USER, SPVI, KRNL, };
+        enum mmu_t { MMU_DIRECT, MMU_TRANSLATE, MMU_FAIL };
+        enum mem_t { MEM_TYPE_IFETCH, MEM_TYPE_READ, MEM_TYPE_WRITE };
+        // enum { MEM_RET_OK, MEM_RET_FAIL, MEM_RET_CROSS_PAGE };
+        struct tlb_info {bool hit:8; bool dirty:8;};
+        inline mode_t machine_mode(){
+            return KRNL;
+        }
+        mmu_t mmu_check(vaddr_t vaddr);
+        tlb_info mmu_translate(vaddr_t vaddr, paddr_t& paddr, bool& refill);
+        tlb_entry* tlb_match(vaddr_t vaddr);
+        word_t vaddr_ifetch(vaddr_t addr, int len);
+        word_t vaddr_read(vaddr_t addr, int len);
+        void vaddr_write(vaddr_t addr, int len, word_t data);
 };
 
 #endif

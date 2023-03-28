@@ -116,7 +116,7 @@ static int cmd_x(char *args) {/*{{{*/
                 vaddr_t offset = (i<<3)+j;
                 bool hasValue = (offset<size);
                 if (hasValue){
-                    word_t byte = vaddr_read(vAddr+offset, 1);
+                    word_t byte = nemu->isa_vaddr_read(vAddr+offset, 1);
                     printf( FMT_WORD_X "    ",byte);
                 }
                 else {

@@ -17,11 +17,11 @@ inline static void first_init(){
     el::Helpers::installCustomFormatSpecifier(el::CustomFormatSpecifier("%ticks", now_ticks));
     el::Loggers::addFlag(el::LoggingFlag::ColoredTerminalOutput);
     el::Configurations per_conf;
-    per_conf.setToDefault();
-    per_conf.setGlobally(el::ConfigurationType::Format, "%msg");
-    per_conf.setGlobally(el::ConfigurationType::Filename, "performance.log");
-    per_conf.set(el::Level::Info, el::ConfigurationType::ToStandardOutput, "false");
-    el::Loggers::getLogger("performance")->configure(per_conf);
+    // per_conf.setToDefault();
+    // per_conf.setGlobally(el::ConfigurationType::Format, "%msg");
+    // per_conf.setGlobally(el::ConfigurationType::Filename, "performance.log");
+    // per_conf.set(el::Level::Info, el::ConfigurationType::ToStandardOutput, "false");
+    // el::Loggers::getLogger("performance")->configure(per_conf);
     is_first = false;
 }
 

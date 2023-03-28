@@ -91,6 +91,11 @@
 #define PG_ALIGN __attribute((aligned(4096)))
 
 #define IS_2_POW(n) ((n & (n-1))==0)
+#define LOG_1(n) (((n) >= 2) ? 1 : 0)
+#define LOG_2(n) (((n) >= 1<<2) ? (2 + LOG_1((n)>>2)) : LOG_1(n))
+#define LOG_4(n) (((n) >= 1<<4) ? (4 + LOG_2((n)>>4)) : LOG_2(n))
+#define LOG_8(n) (((n) >= 1<<8) ? (8 + LOG_4((n)>>8)) : LOG_4(n))
+#define LOG2(n)   (((n) >= 1<<16) ? (16 + LOG_8((n)>>16)) : LOG_8(n))
 
 #if !defined(likely)
 #define likely(cond)   __builtin_expect(cond, 1)
