@@ -47,6 +47,7 @@ void mips32_CPU_state::isa_raise_intr(word_t NO, vaddr_t badva, bool refill) {/*
     cp0.cause.exccode = NO;
     cp0.status.exl = 1;
     inst_state.dnpc = trap_base + trap_offs;
+    arch_state.llbit = 0;
     switch (NO) {
         case EC_TLBL:
         case EC_TLBS:

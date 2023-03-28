@@ -34,6 +34,7 @@ void init_difftest(PaddrTop* paddr_top){/*{{{*/
     LOG(INFO) << "Enable difftest with cemu";
     cemu.reset(new mips_core(paddr_top));
     cemu->reset();
+    cemu->jump(CONFIG_RESET_PC);
 }/*}}}*/
 
 void difftest_step(int ext_int){

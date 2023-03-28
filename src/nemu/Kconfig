@@ -15,8 +15,8 @@ endchoice
 choice
 prompt "MIPS SET"
 depends on ISA_mips32
-default MIPS_BASIC if TEST_FUNC || TEST_PERF
-default MIPS_RLS1 if TEST_UBOOT || TEST_LINUX
+default MIPS_BASIC if (TEST_FUNC || TEST_PERF)
+default MIPS_RLS1 if (TEST_UBOOT || TEST_LINUX)
 config MIPS_BASIC
 bool "nscscc set"
 config MIPS_RLS1

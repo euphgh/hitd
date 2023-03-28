@@ -26,7 +26,7 @@ static Elf_Ehdr head;
 static Elf_Shdr shstr_shd;
 static Elf_Shdr str_shd;
 #define NAME_LEN 32
-#define FTABLE_NR 1024
+#define FTABLE_NR 32768
 typedef struct {
     struct{
         uint64_t start;

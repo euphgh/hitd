@@ -92,6 +92,12 @@
     f2(epc,14,0,\
             f1(all      ,31 ,0  ,0x0  ,__W__, __c__)\
     )\
+    f2(prid,15,0,\
+            f1(cpo      ,31 ,24 ,0x0  ,__R__, __c__)\
+            f1(cpid     ,23 ,16 ,0x1  ,__R__, __c__)\
+            f1(prid     ,15 ,8  ,0x80 ,__R__, __c__)\
+            f1(revs     ,7  ,0  ,0x3  ,__R__, __c__)\
+    )\
     f2(ebase,15,1,\
             f1(z31      ,31 ,31 ,0x1 ,__R__, __c__)\
             f1(z30      ,30 ,30 ,0x0 ,__R__, __c__)\
@@ -144,6 +150,7 @@ typedef enum{/*{{{*/
     EC_RI   = 0x0a,
     EC_CpU  = 0x0b,
     EC_Ov   = 0x0c,
+    EC_Tr   = 0x0d,
 } ExcCode_t;   /*}}}*/
     
 #define __cp0_reg_type__(regname,rd,sel,...) \

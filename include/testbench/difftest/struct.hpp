@@ -14,6 +14,7 @@ typedef struct {
     word_t gpr[32];
     word_t lo,hi;
     word_t pc;
+    bool llbit;
 } diff_state;
 
 typedef struct {

@@ -79,7 +79,7 @@ static std::tuple<PaddrTop*, Puart8250*> kernel_soc(int test_code) {/*{{{*/
 
     Puart8250* uart = new Puart8250();
     Pmem* dram = new Pmem(ddr_range);
-    dram->load_binary(0, name_to_bin[test_code]);
+    dram->load_binary(0x00100000, name_to_bin[test_code]);
 
     PaddrTop* top = new PaddrTop();
     top->add_dev(ddr_range, dram);

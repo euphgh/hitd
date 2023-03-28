@@ -19,8 +19,9 @@
 #include <memory>
 
 std::unique_ptr<CPU_state> nemu;
-void CPU_state::reset() {/*{{{*/
-    arch_state.pc = 0xbfc00000;
+void CPU_state::reset(word_t reset_pc) {/*{{{*/
+    arch_state.pc = reset_pc;
+    arch_state.llbit = 0;
     raise_ex = false;
     nemu_state.state = NEMU_RUNNING;
     next_is_delay_slot = false;
@@ -42,5 +43,5 @@ CPU_state::mips32_CPU_state(PaddrTop* ptop_input):
 
 void init_isa(PaddrTop* ptop_input) {
     nemu.reset(new CPU_state(ptop_input));
-    nemu->reset();
+    nemu->reset(CONFIG_RESET_PC);
 }

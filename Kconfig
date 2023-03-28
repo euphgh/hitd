@@ -44,6 +44,11 @@ config HAS_UART
     bool
     default y if TEST_LINUX|| TEST_UBOOT
 
+config RESET_PC
+    int 
+    default 2148532224 if TEST_LINUX
+    default 3217031168 if !TEST_LINUX
+
 menu "Build Options"# {{{
 choice
   prompt "Compiler"

@@ -16,6 +16,7 @@
 #ifndef __ISA_MIPS32_H__
 #define __ISA_MIPS32_H__
 
+#include "macro.hpp"
 #include "nemu/cpu/decode.hpp"
 #include "common.hpp"
 #include "cp0.hpp"
@@ -43,7 +44,7 @@ class mips32_CPU_state{
 
         mips32_CPU_state(PaddrTop* ptop_input);
         void exec_once();
-        void reset();
+        void reset(word_t reset_pc = 0xbfc00000);
 
         const char* isa_disasm_inst(){/*{{{*/
             if (!have_dised) {
@@ -177,6 +178,24 @@ class mips32_CPU_state{
         void tlbr();
         void tlbwi();
         void tlbwr();
+        void inst_sc(int rd, word_t addr){/*{{{*/
+            bool& llbit = arch_state.llbit;
+            if (llbit){
+                Mw(align_check(addr, 0x3, EC_AdES), 0xf4, R(rd));
+            }
+            Rw(rd, llbit);
+            llbit = 0;
+        }/*}}}*/
+        void inst_clz(word_t src1, int rd){/*{{{*/
+            uint8_t res = 32;
+            for (int i = 31; i >= 0; i--) {
+                if (BITS(src1, i, i)==1) {
+                    res = 31 - i;
+                    break;
+                }
+            }
+            Rw(rd,res);
+        }/*}}}*/
         // }}}
 
         // Exception method{{{
