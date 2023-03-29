@@ -31,8 +31,8 @@ class single_soc {/*{{{*/
     public:
         single_soc();
         inline PaddrTop* get_single_soc(){ return ptop; }
-        inline void tick() { if(pcfreg) pcfreg->tick(); }
-        inline void set_switch(uint8_t value) { if(pcfreg) pcfreg->set_switch(value); } 
+        void tick();
+        void set_switch(uint8_t value);
 
     private:
         PaddrTop* ptop;

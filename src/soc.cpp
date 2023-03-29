@@ -94,7 +94,7 @@ dual_soc::dual_soc() {/*{{{*/
     IFDEF(CONFIG_TEST_SYST,  test_code=TEST_NAME_SYST);
     IFDEF(CONFIG_TEST_UBOOT, test_code=TEST_NAME_UBOOT);
     IFDEF(CONFIG_TEST_LINUX, test_code=TEST_NAME_LINUX);
-    init_ftrace(name_to_elf.at(test_code));
+    IFDEF(CONFIG_NEED_NEMU, init_ftrace(name_to_elf.at(test_code)));
     switch (test_code) {
         case TEST_NAME_FUNC:
         case TEST_NAME_PERF: 
@@ -140,7 +140,7 @@ single_soc::single_soc() {/*{{{*/
     IFDEF(CONFIG_TEST_SYST,  test_code=TEST_NAME_SYST);
     IFDEF(CONFIG_TEST_UBOOT, test_code=TEST_NAME_UBOOT);
     IFDEF(CONFIG_TEST_LINUX, test_code=TEST_NAME_LINUX);
-    init_ftrace(name_to_elf.at(test_code));
+    IFDEF(CONFIG_NEED_NEMU, init_ftrace(name_to_elf.at(test_code)));
     switch (test_code) {
         case TEST_NAME_FUNC:
         case TEST_NAME_PERF: 
@@ -166,7 +166,7 @@ void single_soc::create_boot_soc(int test_code){/*{{{*/
 }/*}}}*/
 void single_soc::create_kernel_soc(int test_code){/*{{{*/
     pcfreg = nullptr;
-    std::tie(ptop, puart) = boot_soc(test_code);
+    std::tie(ptop, puart) = kernel_soc(test_code);
 }/*}}}*/
 
 #define UART_CHAR "'{:c}'({:#x})"
@@ -198,7 +198,7 @@ void loop_check(output* dut, output* ref){/*{{{*/
         putchar(ref_c);
         fflush(stdout);
     }
-    else nemu_state.state = NEMU_ABORT;
+    IFDEF(CONFIG_NEED_NEMU,else nemu_state.state = NEMU_ABORT);
 }/*}}}*/
 
 void chech_output(output* dut, output* ref){/*{{{*/
@@ -206,7 +206,7 @@ void chech_output(output* dut, output* ref){/*{{{*/
     else if (unlikely(dut->exist_tx())){
             dut->op_log->error(fmt::format("should not output " UART_CHAR,
                 dut->getc(),dut->getc()));
-            nemu_state.state = NEMU_ABORT;
+            IFDEF(CONFIG_NEED_,nemu_state.state = NEMU_ABORT);
     }
 }/*}}}*/
 
@@ -217,4 +217,12 @@ void dual_soc::tick(){ /*{{{*/
 }/*}}}*/
 void dual_soc::set_switch(uint8_t value){/*{{{*/
     IFDEF(CONFIG_HAS_CONFREG, pcfreg[0]->set_switch(value); pcfreg[1]->set_switch(value);)
+}/*}}}*/
+void single_soc::tick(){ /*{{{*/
+    IFDEF(CONFIG_HAS_CONFREG, pcfreg->tick();pcfreg->tick();)
+    IFDEF(CONFIG_HAS_CONFREG, chech_output(pcfreg, pcfreg));
+    IFDEF(CONFIG_HAS_UART, if (unlikely(puart->exist_tx())) putchar(puart->getc()));
+}/*}}}*/
+void single_soc::set_switch(uint8_t value){/*{{{*/
+    IFDEF(CONFIG_HAS_CONFREG, pcfreg->set_switch(value); pcfreg->set_switch(value);)
 }/*}}}*/

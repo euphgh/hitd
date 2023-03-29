@@ -15,13 +15,14 @@ int main (int argc, char *argv[]) {
     extern el::Logger* logger_init(std::string name);
     cemu_log = logger_init("CHemu");
 
-    single_soc soc(arg_img_code);
+    single_soc soc;
     PaddrTop * cemu_paddr_top = soc.get_single_soc();
     cemu_paddr_top->set_logger(cemu_log);
 
     mips_core cemu(cemu_paddr_top);
     std::signal(SIGINT, [](int) {cemu_run = false;});
-    cemu.pc = 0xbfc00000;
+    cemu.reset();
+    cemu.jump(CONFIG_RESET_PC);
     while (cemu_run) {
         ticks++;
         cemu.step();
@@ -31,6 +32,7 @@ int main (int argc, char *argv[]) {
             printf(FMT_WORD "\n", log_pc);
             break;
         }
+        soc.tick();
     }
     return 0;
 }
