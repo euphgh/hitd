@@ -29,14 +29,13 @@ void cpu_exec(uint64_t n) {
     compare_exec(n);
 
     switch (nemu_state.state) {
-        case NEMU_RUNNING:
-            nemu_state.state = NEMU_STOP; 
+        case NEMU_ABORT:
+            nemu->log_pt->error("nemu abort when execute %v", nemu->isa_disasm_inst());
+        case NEMU_STOP:
+            nemu->isa_call_stack();
             break;
         case NEMU_END:
             nemu->log_pt->info("nemu run to end pc");
-            break;
-        case NEMU_ABORT:
-            nemu->log_pt->error("nemu abort when execute %v", nemu->isa_disasm_inst());
             break;
         case NEMU_QUIT:
             nemu->log_pt->error("nemu finish cpu-exec with unexpected state quit");

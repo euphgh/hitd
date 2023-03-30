@@ -21,6 +21,7 @@
 #include "utils.hpp"
 #include <memory>
 #include "utils.hpp"
+#include "fmt/core.h"
 
 #ifdef CONFIG_DIFFTEST
 

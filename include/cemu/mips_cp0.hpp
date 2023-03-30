@@ -270,12 +270,15 @@ public:
     }
     void pre_exec(unsigned int ext_int) {
         cur_need_trap = false;
+
         count = (count + tick) & 0xfffffffflu;
         tick = !tick;
         random = random == wired ? (nr_tlb_entry - 1) : random - 1;
+
         cp0_cause *cause_reg = (cp0_cause*)&cause;
         cause_reg->IP = (cause_reg->IP & 0b10000011u) | ( (ext_int & 0b11111u) << 2);
         if (count == compare) cause_reg->IP |= 1u << 7;
+
         check_and_raise_int();
     }
     bool need_trap() {

@@ -2,45 +2,43 @@
 #include "fmt/core.h"
 #include <csignal>
 void ftracer::push(word_t call_at, word_t call_to){
-    std::map<word_t, std::tuple<word_t, std::string>>::iterator
-        it = start_addr_map.upper_bound(call_to);
+    // std::map<word_t, std::tuple<word_t, std::string>>::iterator
+    //     it = start_addr_map.upper_bound(call_to);
     IFDEF(CONFIG_FTRACE, 
             log_pt->trace(fmt::format("[F] {1: >{0}}call {2} -> {3}",
-                fstack.size()*2,"", search(call_at), std::get<1>(it->second))));
-    fstack.push(std::pair(call_at, it));
+                fstack.size()*2,"", search(call_at), search(call_to))));
+    fstack.push(call_at);
 }
 bool ftracer::pop(word_t ret_at, word_t ret_to){
-    addr_pair top = fstack.top();
-    word_t call_at = top.first;
+    // addr_pair top = fstack.top();
+    word_t call_at = fstack.top();
     IFDEF(CONFIG_FTRACE, 
             log_pt->trace(fmt::format("[F] {1: >{0}}ret  {2} -> {3}",
                     (fstack.size()-1)*2,"", search(ret_at), search(ret_to))));
-    if (fstack.empty()){
-        log_pt->warn("function stack not match");
-        raise(SIGTRAP);
-        nemu_state.state=NEMU_STOP;
-        return false;
-    }
+    // if (fstack.empty()){
+    //     log_pt->warn("function stack not match");
+    //     raise(SIGTRAP);
+    //     nemu_state.state=NEMU_STOP;
+    //     return false;
+    // }
     fstack.pop();
     return ret_to==call_at+8;
 }
-std::string ftracer::call_stack_info(){
+std::string ftracer::call_stack_info(word_t pc){
     auto copy = fstack;
-    std::stringstream buf("function call stack has ");
-    buf << copy.size() << " levels\n";
+    std::stringstream buf;
+    copy.push(pc);
+    buf <<  "function call stack has " << copy.size() << " levels\n";
     int level = 0;
-    while (!copy.empty()) {
-        auto elemrnt = copy.top();
-        word_t begin = std::get<0>(elemrnt.second->second);
-        const char* func_name = begin < elemrnt.first ? 
-            std::get<1>(elemrnt.second->second).c_str() : "unknow";
+    do {
+        word_t current_pc = copy.top();
+        buf << fmt::format("#{:<2d}  " HEX_WORD " in {}\n", 
+                level++, current_pc, search(current_pc));
         copy.pop();
-        buf << fmt::format("#{:04d}" HEX_WORD "in {}\n", 
-                level, elemrnt.first, func_name);
-    }
+    } while(!copy.empty());
     return buf.str();
 }
-ftracer::ftracer(std::string elf_name, el::Logger* input_logger):
+ftracer::ftracer(std::string elf_name, el::Logger* input_logger, word_t _start_pc):
     log_pt(input_logger){/*{{{*/
         std::vector<std::tuple<word_t, word_t, std::string>> func_list;
         load_elf_info(elf_name.c_str(), func_list);

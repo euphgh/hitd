@@ -230,6 +230,7 @@ class mips32_CPU_state{
         ftracer mips_ftracer;
     public:
         void isa_ftrace();
+        void isa_call_stack();
 };
 
 #endif

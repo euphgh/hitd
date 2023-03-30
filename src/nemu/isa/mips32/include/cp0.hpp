@@ -167,7 +167,7 @@ typedef enum{/*{{{*/
     unsigned int name: msb-lsb+1; \
 
 __cp0_info__(__cp0_reg_type__,__cp0_field_def__)
-
+#include <csignal>
 class CP0_t {
     public:
         CP0_t (bool dpic = false) {}
@@ -187,7 +187,7 @@ class CP0_t {
         }
     private:
 #define __cp0_compare_wfunc__ 1
-        inline void compare_wfunc(){ cause.ti = 0;}
+        inline void compare_wfunc(){ cause.ip_h &= 0x1f;}
 #define __cp0_wire_wfunc__ 1
         inline void wire_wfunc(){ random.random = CONFIG_TLB_NR-1;}
 #define __cp0_random_rfunc__ 1

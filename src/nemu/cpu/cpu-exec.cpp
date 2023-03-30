@@ -49,6 +49,9 @@ void CPU_state::isa_ftrace(){/*{{{*/
             mips_ftracer.pop(now_pc, dest_pc);
     }
 }/*}}}*/
+void CPU_state::isa_call_stack(){
+    log_pt->info(mips_ftracer.call_stack_info(inst_state.pc));
+}
 
 void check_deadloop(word_t pc){
     if (detect_deadloop(pc)){

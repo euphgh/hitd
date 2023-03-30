@@ -46,7 +46,7 @@ void CPU_state::reset(word_t reset_pc) {/*{{{*/
 CPU_state::mips32_CPU_state(PaddrTop* ptop_input): 
     log_pt(ptop_input->log_pt), 
     paddr_top(ptop_input),
-    mips_ftracer(__TEST_ELF__, ptop_input->log_pt) 
+    mips_ftracer(__TEST_ELF__, ptop_input->log_pt, CONFIG_RESET_PC)
 {
     Assert(IS_2_POW(CONFIG_TLB_NR), "TLB entry number is not power of 2");
     extern void init_disasm(const char *triple);
