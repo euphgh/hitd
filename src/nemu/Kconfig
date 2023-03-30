@@ -17,6 +17,7 @@ prompt "MIPS SET"
 depends on ISA_mips32
 default MIPS_BASIC if (TEST_FUNC || TEST_PERF)
 default MIPS_RLS1 if (TEST_UBOOT || TEST_LINUX)
+
 config MIPS_BASIC
 bool "nscscc set"
 config MIPS_RLS1
@@ -56,6 +57,27 @@ config DIFFTEST
   help
     Enable differential testing with a reference design.
     Note that this will significantly reduce the performance of NEMU.
+
+config ITRACE
+  depends on TRACE
+  bool "Trace Nemu all executed Instructions"
+  default y
+
+config MTRACE
+  depends on TRACE
+  bool "Trace Nemu all access to Memory"
+  default y
+
+config FTRACE
+  depends on TRACE && !(TEST_FUNC)
+  bool "Trace Nemu all Function call(not support functional test)"
+  default n
+
+config ETRACE
+  depends on TRACE
+  bool "Trace Nemu all Exception trigger and return"
+  default y
+
 endmenu
 # }}}
 

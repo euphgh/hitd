@@ -36,7 +36,48 @@ typedef MUXDEF(CONFIG_ISA64, int64_t, int32_t)  sword_t;
 typedef word_t vaddr_t;
 typedef MUXDEF(PMEM64, uint64_t, uint32_t) paddr_t;
 #define FMT_PADDR MUXDEF(PMEM64, "0x%016" PRIx64, "0x%08" PRIx32)
-typedef uint16_t ioaddr_t;
+enum {
+    TEST_NAME_NON,
+    TEST_NAME_FUNC,
+    TEST_NAME_PERF,
+    TEST_NAME_SYST,
+    TEST_NAME_UBOOT,
+    TEST_NAME_UCORE,
+    TEST_NAME_LINUX
+};
+
+#define __FUNC_DIR__ NSCSCC_HOME "/func_test_v0.01/soft/func/obj/"
+#define __PERF_DIR__ NSCSCC_HOME "/perf_test_v0.01/soft/perf_func/obj/allbench/"
+#define __SYST_DIR__ NSCSCC_HOME "/system_test_v0.01/supervisor-mips32/kernel/kernel.bin"
+#define __UBOOT_DIR__ "/home/hgh/cpu/cyy/u-boot/" 
+#define __LINUX_DIR__ "/home/hgh/cpu/cyy/linux/"
+#define __UCORE_DIR__ "current no ucore bin"
+
+#define __FUNC_BIN__ __FUNC_DIR__ "main.bin"
+#define __PERF_BIN__ __PERF_DIR__ "inst_data.bin"
+#define __SYST_BIN__ __SYST_DIR__ "kernel.bin"
+#define __UBOOT_BIN__ __UBOOT_DIR__ "u-boot.bin"
+#define __LINUX_BIN__ __LINUX_DIR__ "vmlinux.bin"
+
+#define __FUNC_ELF__ __FUNC_DIR__ "main.elf"  
+#define __PERF_ELF__ __PERF_DIR__ "main.elf"  
+#define __SYST_ELF__ __SYST_DIR__ "kernel.elf"
+#define __UBOOT_ELF__ __UBOOT_DIR__ "u-boot"   
+#define __LINUX_ELF__ __LINUX_DIR__ "vmlinux"  
+
+#define __TEST_BIN__ \
+    MUXDEF(CONFIG_TEST_FUNC, __FUNC_BIN__, \
+            MUXDEF(CONFIG_TEST_PERF, __PERF_BIN__, \
+                MUXDEF(CONFIG_TEST_SYST, __SYST_BIN__,  \
+                    MUXDEF(CONFIG_TEST_UBOOT, __UBOOT_BIN__,\
+                        MUXDEF(CONFIG_TEST_LINUX, __LINUX_BIN__, "Non bin")))))
+
+#define __TEST_ELF__ \
+    MUXDEF(CONFIG_TEST_FUNC, __FUNC_ELF__, \
+            MUXDEF(CONFIG_TEST_PERF, __PERF_ELF__, \
+                MUXDEF(CONFIG_TEST_SYST, __SYST_ELF__,  \
+                    MUXDEF(CONFIG_TEST_UBOOT, __UBOOT_ELF__,\
+                        MUXDEF(CONFIG_TEST_LINUX, __LINUX_ELF__, "Non elf")))))
 
 #include "debug.hpp"
 

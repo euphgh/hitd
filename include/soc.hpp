@@ -20,9 +20,9 @@ class dual_soc {/*{{{*/
         PaddrConfreg*   pcfreg[2];
         Puart8250*      puart[2];
         bool has_confreg;
-        void create_basic_soc(int test_code);
-        void create_boot_soc(int test_code);
-        void create_kernel_soc(int test_code);
+        void create_basic_soc();
+        void create_boot_soc();
+        void create_kernel_soc();
         void check_uart_tx();
         void check_confreg_tx();
 };/*}}}*/
@@ -38,9 +38,9 @@ class single_soc {/*{{{*/
         PaddrTop* ptop;
         PaddrConfreg *pcfreg;
         Puart8250 *puart;
-        void create_basic_soc(int test_code);
-        void create_boot_soc(int test_code);
-        void create_kernel_soc(int test_code);
+        void create_basic_soc();
+        void create_boot_soc();
+        void create_kernel_soc();
 };/*}}}*/
 
 #endif // !__SOC_HPP__

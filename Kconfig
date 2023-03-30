@@ -30,11 +30,25 @@ config TEST_FUNC
   bool "NSCSCC function test"
 config TEST_PERF
   bool "NSCSCC perfermance test"
+config TEST_SYS
+  bool "NSCSCC system test"
 config TEST_UBOOT
   bool "u-boot"
 config TEST_LINUX
   bool "linux"
 endchoice
+
+config BASIC_SOC
+    bool
+    default y if TEST_FUNC || TEST_PERF
+
+config BOOT_SOC
+    bool
+    default y if TEST_SYS || TEST_UBOOT
+
+config KERNEL_SOC
+    bool
+    default y if TEST_LINUX
 
 config HAS_CONFREG
     bool
@@ -125,26 +139,6 @@ config TRACE_FILE_SIZE
     help 
         the uint of trace file is KB
         close truncation by setting the value zero
-
-config ITRACE
-  depends on TRACE
-  bool "Trace Nemu all executed Instructions"
-  default y
-
-config MTRACE
-  depends on TRACE
-  bool "Trace Nemu all access to Memory"
-  default y
-
-config FTRACE
-  depends on TRACE && !(TEST_FUNC)
-  bool "Trace Nemu all Function call(not support functional test)"
-  default n
-
-config ETRACE
-  depends on TRACE
-  bool "Trace Nemu all Exception trigger and return"
-  default y
 
 config TTRACE
   depends on TRACE

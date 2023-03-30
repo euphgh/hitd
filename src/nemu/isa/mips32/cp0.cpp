@@ -71,12 +71,12 @@ void CP0_t::log_error(CP0_t& ref) {/*{{{*/
 }/*}}}*/
 
 void CP0_t::reset(){/*{{{*/
+    clock_tick = false;
+    clock_tick = 0;
 #define __cp0_reg_init__(regname,rd,sel,...) \
     regname = { \
         __VA_ARGS__ \
     };
-    clock_tick = false;
 #define __cp0_field_init__(name,msb,lsb,reset,writable,check) .name = reset,
-    clock_tick = 0;
     __cp0_info__(__cp0_reg_init__, __cp0_field_init__)
 }/*}}}*/

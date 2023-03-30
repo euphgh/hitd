@@ -38,22 +38,15 @@
 #define MAX_INST_TO_PRINT 10
 bool is_wp_change();
 
-void check_ftrace(const Decode * s){/*{{{*/
-    if (s->flag!=0){
-        int level = get_level();
-        vaddr_t now_pc = s->pc;
-        vaddr_t dest_pc = nemu->delay_slot_npc;
-        if (IS_CALL(s->flag)) {
-            nemu->log_pt->trace(fmt::format("[F] {1: >{0}}call {2} -> {3}",
-                        level*2,"", search_ftable(now_pc),search_ftable(dest_pc)));
-            set_level(push);
-        }
-        if (IS_RET (s->flag)){
-            __ASSERT_NEMU__(level>=1, "Call stack must great than 1 when return");
-            nemu->log_pt->trace(fmt::format("[F] {1: >{0}}ret  {2} -> {3}",
-                        (level-1)*2,"", search_ftable(now_pc),search_ftable(dest_pc)));
-            set_level(pop);
-        }
+void CPU_state::isa_ftrace(){/*{{{*/
+    uint8_t flag = inst_state.flag;
+    if (flag!=0){
+        vaddr_t now_pc = inst_state.pc;
+        vaddr_t dest_pc = delay_slot_npc;
+        if (IS_CALL(flag)) 
+            mips_ftracer.push(now_pc, dest_pc);
+        if (IS_RET (flag))
+            mips_ftracer.pop(now_pc, dest_pc);
     }
 }/*}}}*/
 
@@ -70,7 +63,7 @@ void trace_and_difftest(Decode *_this) {
     IFDEF(CONFIG_ITRACE, nemu->log_pt->trace("[I] %v", nemu->isa_disasm_inst()));
     IFDEF(CONFIG_DIFFTEST, difftest_step(0));
     IFDEF(CONFIG_WATCH_POINT, if(is_wp_change()) nemu_state.state=NEMU_STOP); //TODO: make watch point a class with methor
-    IFDEF(CONFIG_FTRACE, check_ftrace(_this));
+    IFDEF(CONFIG_FTRACE, nemu->isa_ftrace());
     IFDEF(CONFIG_DEADLOOP, check_deadloop(_this->pc));
 }
 

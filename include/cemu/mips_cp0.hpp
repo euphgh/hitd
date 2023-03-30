@@ -170,14 +170,14 @@ public:
                 break;
             case RD_ENTRYLO0: {
                 entrylo0 = value & 0x03ffffffu; // mask higher 32bit PFN
-                cp0_entrylo *entrylo0_reg = (cp0_entrylo*)&entrylo0;
-                printf("write entrylo0 PFN = %05x, V = %x\n",entrylo0_reg->PFN,entrylo0_reg->V);
+                // cp0_entrylo *entrylo0_reg = (cp0_entrylo*)&entrylo0;
+                // printf("write entrylo0 PFN = %05x, V = %x\n",entrylo0_reg->PFN,entrylo0_reg->V);
                 break;
             }
             case RD_ENTRYLO1: {
                 entrylo1 = value & 0x03ffffffu; // mask higher 32bit PFN
-                cp0_entrylo *entrylo1_reg = (cp0_entrylo*)&entrylo1;
-                printf("write entrylo1 PFN = %05x, V = %x\n",entrylo1_reg->PFN,entrylo1_reg->V);
+                // cp0_entrylo *entrylo1_reg = (cp0_entrylo*)&entrylo1;
+                // printf("write entrylo1 PFN = %05x, V = %x\n",entrylo1_reg->PFN,entrylo1_reg->V);
                 break;
             }
             case RD_CONTEXT: {
@@ -270,8 +270,8 @@ public:
     }
     void pre_exec(unsigned int ext_int) {
         cur_need_trap = false;
-        tick = !tick;
         count = (count + tick) & 0xfffffffflu;
+        tick = !tick;
         random = random == wired ? (nr_tlb_entry - 1) : random - 1;
         cp0_cause *cause_reg = (cp0_cause*)&cause;
         cause_reg->IP = (cause_reg->IP & 0b10000011u) | ( (ext_int & 0b11111u) << 2);
@@ -404,7 +404,8 @@ public:
             raise_trap(EXC_INT);
         }
     }
-private:
+// private:
+public:
     mips_mmu<nr_tlb_entry> &mmu;
 
     uint32_t &pc;

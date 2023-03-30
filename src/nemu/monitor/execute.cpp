@@ -7,13 +7,13 @@ bool g_si_print = false;
 void compare_exec(uint64_t n){
     for (;n > 0; n --) {
         // TIMED_SCOPE(exec_once, "compare exec once");
+        nemu->ref_tick_and_int(0);
         nemu->exec_once();
         if (g_si_print) fmt::print(HEX_WORD ":\t{}\n",nemu->inst_state.pc, nemu->isa_disasm_inst());
         extern uint64_t ticks;
         ++ticks;
         extern std::unique_ptr<dual_soc> soc;
         soc->tick();
-        nemu->ref_tick_and_int(0);
         if (nemu_state.state != NEMU_RUNNING) break;
     }
 }

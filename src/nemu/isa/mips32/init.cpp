@@ -18,11 +18,21 @@
 #include "macro.hpp"
 #include <memory>
 
+static std::map<int, const char*> name_to_elf = {
+    std::make_pair(TEST_NAME_FUNC, __FUNC_DIR__ "main.elf"),
+    std::make_pair(TEST_NAME_PERF, __PERF_DIR__ "main.elf"),
+    std::make_pair(TEST_NAME_SYST, __SYST_DIR__ "kernel.elf"),
+    std::make_pair(TEST_NAME_UBOOT, __UBOOT_DIR__ "u-boot"),
+    std::make_pair(TEST_NAME_LINUX, __LINUX_DIR__ "vmlinux"),
+    // std::make_pair(TEST_NAME_UCORE, __UCORE_DIR__ ),
+};
+
 std::unique_ptr<CPU_state> nemu;
 void CPU_state::reset(word_t reset_pc) {/*{{{*/
     arch_state.pc = reset_pc;
     arch_state.llbit = 0;
     raise_ex = false;
+    cp0.clock_tick = 0;
     nemu_state.state = NEMU_RUNNING;
     next_is_delay_slot = false;
     nemu->int_delay = 0;
@@ -35,11 +45,13 @@ void CPU_state::reset(word_t reset_pc) {/*{{{*/
 }/*}}}*/
 CPU_state::mips32_CPU_state(PaddrTop* ptop_input): 
     log_pt(ptop_input->log_pt), 
-    paddr_top(ptop_input) {
-        Assert(IS_2_POW(CONFIG_TLB_NR), "TLB entry number is not power of 2");
-        extern void init_disasm(const char *triple);
-        IFDEF(CONFIG_ITRACE, init_disasm("mipsel-pc-linux-gnu"));
-    };
+    paddr_top(ptop_input),
+    mips_ftracer(__TEST_ELF__, ptop_input->log_pt) 
+{
+    Assert(IS_2_POW(CONFIG_TLB_NR), "TLB entry number is not power of 2");
+    extern void init_disasm(const char *triple);
+    init_disasm("mipsel-pc-linux-gnu");
+};
 
 void init_isa(PaddrTop* ptop_input) {
     nemu.reset(new CPU_state(ptop_input));

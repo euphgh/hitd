@@ -22,7 +22,7 @@ const char* arg_log_file = "trace.log";
 bool arg_batch_mode = false;
 void parse_args(int argc, char *argv[]) {
     int o;
-    while ( (o = getopt_long(argc, argv, "l:i:", table, NULL)) != -1) {
+    while ( (o = getopt_long(argc, argv, "bl:i:", table, NULL)) != -1) {
         switch (o) {
             case 'l': 
                 arg_log_file = optarg; 

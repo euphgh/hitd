@@ -20,6 +20,7 @@
 #include "nemu/cpu/decode.hpp"
 #include "common.hpp"
 #include "cp0.hpp"
+#include "nemu/mytrace.hpp"
 #include "paddr/paddr_interface.hpp"
 #include "nemu/memory/vaddr.hpp"
 #include <fmt/core.h>
@@ -174,6 +175,12 @@ class mips32_CPU_state{
             if (unlikely(mask & addr)) isa_raise_intr(eccode,addr); 
             return addr;
         }/*}}}*/
+        void inst_madd(word_t src1, word_t src2){
+            int64_t ans = ((uint64_t)arch_state.hi)<<32 | arch_state.lo;
+            ans += (int64_t)src1 * (int64_t)src2;
+            arch_state.lo = BITS(ans, 31, 0);
+            arch_state.hi = BITS(ans, 63, 32);
+        }
         void tlbp();
         void tlbr();
         void tlbwi();
@@ -218,6 +225,11 @@ class mips32_CPU_state{
         word_t vaddr_ifetch(vaddr_t addr, int len);
         word_t vaddr_read(vaddr_t addr, int len);
         void vaddr_write(vaddr_t addr, int len, word_t data);
+
+    private:
+        ftracer mips_ftracer;
+    public:
+        void isa_ftrace();
 };
 
 #endif
