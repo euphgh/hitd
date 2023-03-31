@@ -66,7 +66,7 @@ void trace_and_difftest(Decode *_this) {
     IFDEF(CONFIG_ITRACE, nemu->log_pt->trace("[I] %v", nemu->isa_disasm_inst()));
     IFDEF(CONFIG_DIFFTEST, difftest_step(0));
     IFDEF(CONFIG_WATCH_POINT, if(is_wp_change()) nemu_state.state=NEMU_STOP); //TODO: make watch point a class with methor
-    IFDEF(CONFIG_FTRACE, nemu->isa_ftrace());
+    nemu->isa_ftrace();
     IFDEF(CONFIG_DEADLOOP, check_deadloop(_this->pc));
 }
 

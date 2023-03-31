@@ -72,6 +72,7 @@ public:
                 assert(sel == 0);
                 return index;
             case RD_RANDOM:
+                random = random == wired ? (nr_tlb_entry - 1) : random - 1;
                 assert(sel == 0);
                 return random;
             case RD_ENTRYLO0:
@@ -273,7 +274,6 @@ public:
 
         count = (count + tick) & 0xfffffffflu;
         tick = !tick;
-        random = random == wired ? (nr_tlb_entry - 1) : random - 1;
 
         cp0_cause *cause_reg = (cp0_cause*)&cause;
         cause_reg->IP = (cause_reg->IP & 0b10000011u) | ( (ext_int & 0b11111u) << 2);

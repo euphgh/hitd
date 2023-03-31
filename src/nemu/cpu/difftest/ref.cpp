@@ -24,11 +24,12 @@
 
 void CPU_state::ref_tick_and_int(uint8_t ext_int){/*{{{*/
     // only ext_int[5:0] is valid
+    // if (inst_state.pc==0x80100adc) raise(SIGTRAP);
+    cp0.count.all += cp0.clock_tick;
+    cp0.clock_tick = 1 - cp0.clock_tick;
     bool new_ip5 = cp0.cause.ip_h >> 5 || (cp0.count.all==cp0.compare.all);
     cp0.cause.ip_h =  (new_ip5 << 5)|(ext_int & 0b011111);
     cp0.cause.ip_h |= ((cp0.count.all==cp0.compare.all)<<5);
-    cp0.count.all += cp0.clock_tick;
-    cp0.clock_tick = 1 - cp0.clock_tick;
     // if (cp0.count.all==cp0.compare.all) cp0.cause.ti = 1;
 }/*}}}*/
 

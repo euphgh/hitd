@@ -1,6 +1,8 @@
 #ifndef __CP0_H__
 #define __CP0_H__
 #include "common.hpp"
+#include "easylogging++.h"
+#include <fmt/core.h>
 
 /* CP0 List{{{*/
 #define __W__ 1
@@ -187,9 +189,11 @@ class CP0_t {
         }
     private:
 #define __cp0_compare_wfunc__ 1
-        inline void compare_wfunc(){ cause.ip_h &= 0x1f;}
+        inline void compare_wfunc(word_t data){ 
+            cause.ip_h &= 0x1f; 
+        }
 #define __cp0_wire_wfunc__ 1
-        inline void wire_wfunc(){ random.random = CONFIG_TLB_NR-1;}
+        inline void wire_wfunc(word_t data){ random.random = CONFIG_TLB_NR-1;}
 #define __cp0_random_rfunc__ 1
         inline void random_rfunc(){ random.random = random.random==wire.wire ? CONFIG_TLB_NR-1 : random.random-1;}
 };

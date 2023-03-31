@@ -235,7 +235,7 @@ int mips32_CPU_state::isa_exec_once(bool has_int) {
     word_t this_pc = inst_state.snpc;
     inst_state.is_delay_slot = next_is_delay_slot;
     next_is_delay_slot = false;
-
+    // if (this_pc==0x80100ad0) raise(SIGTRAP);
     try {
         inst_state.inst = vaddr_ifetch(align_check(inst_state.snpc,0x3,EC_AdEL), 4);
         inst_state.snpc += 4;

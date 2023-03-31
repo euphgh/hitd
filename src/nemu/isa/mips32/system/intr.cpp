@@ -34,7 +34,6 @@
 #endif
 #define EXPT_VECTOR 0xbfc00380
 void mips32_CPU_state::isa_raise_intr(word_t NO, vaddr_t badva, bool refill) {/*{{{*/
-    IFDEF(CONFIG_ETRACE,log_pt->trace("[E] exception %v trigger",e_msg[NO]));
     word_t trap_base = (cp0.status.bev ? 0xbfc00200u : (cp0.ebase.eptbase<<12|0x80000000));
     word_t trap_offs = 0x180;
     if (!cp0.status.exl){
@@ -47,6 +46,7 @@ void mips32_CPU_state::isa_raise_intr(word_t NO, vaddr_t badva, bool refill) {/*
     cp0.cause.exccode = NO;
     cp0.status.exl = 1;
     inst_state.dnpc = trap_base + trap_offs;
+    IFDEF(CONFIG_ETRACE,log_pt->trace(fmt::format("[E] exception {} trigger to " HEX_WORD,e_msg[NO], inst_state.dnpc)));
     arch_state.llbit = 0;
     switch (NO) {
         case EC_TLBL:

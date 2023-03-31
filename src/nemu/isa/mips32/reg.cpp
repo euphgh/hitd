@@ -50,10 +50,12 @@ word_t CPU_state::isa_reg_str2val(const char *s, bool *success) {/*{{{*/
         }
     }
     if (*success==false && strcmp("pc",s)==0){
-        if (strcmp("pc", s)==0){
-            res = arch_state.pc;
-            *success = true;
-        }
+        res = arch_state.pc;
+        *success = true;
+    }
+    if (*success==false && strcmp("ll",s)==0){
+        res = arch_state.llbit;
+        *success = true;
     }
 #define __cp0_name_read__(regname,rd,sel,...) \
     if (*success==false && strcmp(#regname,s)==0){ \

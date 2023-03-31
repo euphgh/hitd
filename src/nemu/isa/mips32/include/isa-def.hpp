@@ -136,7 +136,7 @@ class mips32_CPU_state{
         inline void inst_eret(){/*{{{*/
             inst_state.dnpc = cp0.epc.all;
             cp0.status.exl = 0;
-            IFDEF(CONFIG_ETRACE,log_pt->trace("[E] exception return"));
+            IFDEF(CONFIG_ETRACE,log_pt->trace(fmt::format("[E] exception return to " HEX_WORD, inst_state.dnpc)));
         }/*}}}*/
         inline void inst_mfc0(word_t imm, int rd){/*{{{*/
             word_t tmp; 

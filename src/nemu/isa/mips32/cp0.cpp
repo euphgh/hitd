@@ -4,9 +4,9 @@ bool CP0_t::read (uint8_t rd_sel, word_t& data) {/*{{{*/
     switch (rd_sel) {
 #define __cp0_reg_read__(regname,rd,sel,...) \
     case (rd<<3|sel):{ \
+                         IFDEF(__cp0_##regname##_rfunc__, regname##_rfunc();) \
                          const regname##_t& tmp = regname;\
                          data = (__VA_ARGS__ 0); \
-                         IFDEF(__cp0_##regname##_rfunc__, regname##_rfunc();) \
                          break; \
                      }
 #define __cp0_field_read__(name,msb,lsb,reset,writable,check) \
@@ -26,7 +26,7 @@ bool CP0_t::write(uint8_t rd_sel, word_t data){/*{{{*/
                          regname = { \
                              __VA_ARGS__ \
                          }; \
-                         IFDEF(__cp0_##regname##_wfunc__, regname##_wfunc();) \
+                         IFDEF(__cp0_##regname##_wfunc__, regname##_wfunc(data);) \
                          break; \
                      } 
 #define __cp0_field_write__(name,msb,lsb,reset,writable,check) \
