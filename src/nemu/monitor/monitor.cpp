@@ -65,9 +65,9 @@ void init_monitor(int argc, char *argv[]) {
   cemu_paddr->set_logger(cemu_log);
   soc->set_switch(1);
 
-
   /* Perform ISA dependent initialization. */
   init_isa(nemu_paddr);
+  std::signal(SIGINT, [](int) {nemu_state.state = NEMU_STOP;});
 
   /* Initialize differential testing. */
   IFDEF(CONFIG_DIFFTEST, init_difftest(cemu_paddr));

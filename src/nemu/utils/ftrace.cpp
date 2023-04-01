@@ -11,6 +11,10 @@ void ftracer::push(word_t call_at, word_t call_to){
 }
 bool ftracer::pop(word_t ret_at, word_t ret_to){
     // addr_pair top = fstack.top();
+    if (fstack.empty()) {
+        log_pt->warn("pop empty call stack");
+        return false;
+    }
     word_t call_at = fstack.top();
     IFDEF(CONFIG_FTRACE, 
             log_pt->trace(fmt::format("[F] {1: >{0}}ret  {2} -> {3}",

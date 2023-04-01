@@ -46,7 +46,6 @@ tlb_entry* CPU_state::tlb_match(vaddr_t vaddr){
 }
 CPU_state::tlb_info CPU_state::mmu_translate(vaddr_t vaddr, paddr_t& paddr, bool& refill) { 
     tlb_entry* entry = nullptr;
-    log_pt->info("use mmu_translate");
     for (size_t i = 0; i < CONFIG_TLB_NR; i++) {
         tlb_entry* tmp = &tlb[i];
         bool vaddr_hit = tmp->vpn2==BITS(vaddr, 31, 13);

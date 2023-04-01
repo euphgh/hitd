@@ -41,7 +41,6 @@ enum {
 #define immB() do { *imm = SEXT(BITS(i, 15, 0), 16)<<2;} while(0)
 #define immJ() do { *imm = BITS(i, 25, 0) << 2; } while(0)
 
-#ifdef CONFIG_FTRACE
 void mips32_CPU_state::check_link(int rs){
     uint8_t opcode = BITS(inst_state.inst,31,26);
     //NOTE:jal instr must link to 31
@@ -54,7 +53,6 @@ void mips32_CPU_state::check_link(int rs){
         if (special==0x8 && rs==31) SET_RET(inst_state.flag);
     }
 }
-#endif /* CONFIG_FTRACE */
 void mips32_CPU_state::decode_operand(int *rd, word_t *src1, word_t *src2, word_t *imm, int type) {
   uint32_t i = inst_state.inst;
   int rt = BITS(i, 20, 16);
@@ -64,7 +62,7 @@ void mips32_CPU_state::decode_operand(int *rd, word_t *src1, word_t *src2, word_
     case TYPE_J: 
         immJ();
         src1R();
-        IFDEF(CONFIG_FTRACE,check_link(rs));
+        check_link(rs);
         break;
     case TYPE_I: src1R();immI(); break;
     case TYPE_U: src1R();immU(); break;

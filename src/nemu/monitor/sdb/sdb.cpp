@@ -15,13 +15,13 @@
 
 #include <nemu/isa.hpp>
 #include <nemu/cpu/cpu.hpp>
-#include <macro.hpp>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "common.hpp"
 #include "nemu/memory/vaddr.hpp"
 #include "sdb.hpp"
 #include "utils.hpp"
+#include "nemu/addr_map.hpp"
 
 
 void init_regex();
@@ -54,7 +54,32 @@ static int cmd_c(char *args) {/*{{{*/
   return 0;
 }/*}}}*/
 
+static int cmd_bt(char *args) {/*{{{*/
+    nemu->isa_call_stack();
+    return 0;
+}/*}}}*/
+
 static void print_description(const char *arg);
+
+static int cmd_s(char *args){
+    int step = 1;
+    bool legal_arg = 1;
+    if (args) legal_arg = sscanf(strtok(NULL, " "),"%d",&step)==1;
+    // 除step无其他参数 and step>0
+    legal_arg &= (strtok(NULL, " ")==NULL) && (step>0);     
+    extern bool g_si_print;
+    g_si_print = step < 8;
+    if (legal_arg) cpu_exec(step);
+    else print_description("si");
+    g_si_print = false;
+    return 0;
+}
+static int cmd_n(char *args){
+    return 0;
+}
+static int cmd_b(char *args){
+    return 0;
+}
 
 static int cmd_si(char *args) {/*{{{*/
     int step = 1;
@@ -194,8 +219,12 @@ cmd_table [] = {/*{{{*/
     { "x",    "check memory by \"x [size] [addr]\"",                        cmd_x   },  
     { "c",    "Continue the execution of the program",                      cmd_c   },
     { "p",    "print expressions value",                                    cmd_p   },
+    { "bt",   "print function call stack",                                  cmd_bt  },
     { "q",    "Exit NEMU",                                                  cmd_q   },
     { "si",   "run program with instruction by \"si [step]\"",              cmd_si  },  
+    { "s",    "run into function or next line by \"s [step]\"",             cmd_s   },  
+    { "n",    "run to next line of src by \"n [step]\"",                    cmd_n   },  
+    { "b",    "set break point by \"b [addr]|[function name]\"",            cmd_b   },  
     { "help", "Display information about all supported commands",           cmd_help},
 
 };/*}}}*/

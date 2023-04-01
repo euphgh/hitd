@@ -23,6 +23,7 @@ class ftracer {
     std::string unknow;
     const std::string& search(word_t addr);
     public:
+    bool end_of(word_t addr, word_t& end_addr);
     ftracer(std::string elf_name, el::Logger* input_logger, word_t _start_pc);
     void push(word_t call_at, word_t call_to);
     bool pop(word_t ret_at, word_t ret_to);

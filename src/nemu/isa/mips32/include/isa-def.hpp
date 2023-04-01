@@ -186,12 +186,14 @@ class mips32_CPU_state{
         void tlbwi();
         void tlbwr();
         void inst_sc(int rd, word_t addr){/*{{{*/
-            bool& llbit = arch_state.llbit;
-            if (llbit){
-                Mw(align_check(addr, 0x3, EC_AdES), 0xf4, R(rd));
-            }
-            Rw(rd, llbit);
-            llbit = 0;
+            Mw(align_check(addr, 0x3, EC_AdES), 0xf4, R(rd));
+            Rw(rd, 1);
+
+            // bool& llbit = arch_state.llbit;
+            // if (llbit)
+            //     Mw(align_check(addr, 0x3, EC_AdES), 0xf4, R(rd));
+            // Rw(rd, llbit);
+            // llbit = 0;
         }/*}}}*/
         void inst_clz(word_t src1, int rd){/*{{{*/
             uint8_t res = 32;
