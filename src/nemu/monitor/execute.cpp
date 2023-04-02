@@ -18,11 +18,11 @@ void compare_exec(uint64_t n){
     }
 }
 
-void cpu_exec(uint64_t n) {
+bool cpu_exec(uint64_t n) {
     switch (nemu_state.state) {
         case NEMU_END: case NEMU_ABORT:
             printf("Program execution has ended. To restart the program, exit NEMU and run again.\n");
-            return;
+            return false;
         default: nemu_state.state = NEMU_RUNNING;
     }
 
@@ -32,7 +32,6 @@ void cpu_exec(uint64_t n) {
         case NEMU_ABORT:
             nemu->log_pt->error("nemu abort when execute %v", nemu->isa_disasm_inst());
         case NEMU_STOP:
-            nemu->isa_call_stack();
             break;
         case NEMU_END:
             nemu->log_pt->info("nemu run to end pc");
@@ -41,4 +40,5 @@ void cpu_exec(uint64_t n) {
             nemu->log_pt->error("nemu finish cpu-exec with unexpected state quit");
             break;
     }
+    return nemu_state.state==NEMU_RUNNING;
 }

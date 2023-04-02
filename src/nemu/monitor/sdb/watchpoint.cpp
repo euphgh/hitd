@@ -15,22 +15,32 @@
 
 #include "common.hpp"
 #include "debug.hpp"
+#include "nemu/isa.hpp"
 #include "sdb.hpp"
 #include "fmt/core.h"
 #include "easylogging++.h"
 
-#define NR_WP 32
-typedef struct watchpoint {
+#define NR_WP 64
+struct debug_point {
     int NO;
-    struct watchpoint *next;
-    word_t last_value;
-    char expression[64];
-} WP;
+    debug_point* next;
+    bool is_break;
+    union {
+        struct {
+            word_t last_value;
+            char expression[64];
+        } wp;
+        struct {
+            word_t addr;
+            char name[64];
+        } bp;
+    } info;
+};
 
-static WP wp_pool[NR_WP] = {};
-static WP *head = NULL, *free_ = NULL;
+static debug_point wp_pool[NR_WP] = {};
+static debug_point *head = NULL, *free_ = NULL;
 
-void init_wp_pool() {
+void init_wp_pool() {/*{{{*/
     int i;
     for (i = 0; i < NR_WP; i ++) {
         wp_pool[i].NO = i;
@@ -40,30 +50,32 @@ void init_wp_pool() {
     head = NULL;
     free_ = wp_pool;
     LOG(INFO) << "Enable watchpoint in sdb";
-}
+}/*}}}*/
 
-static WP* malloc_wp(){/*{{{*/
+static debug_point* malloc_wp(){/*{{{*/
     if (free_==NULL) __ASSERT_NEMU__(0, "no more watchpoint");
-    WP* tmp = free_;
+    debug_point* tmp = free_;
     free_ = free_->next;
     tmp->next = head;
     head = tmp;
     return head;
 }/*}}}*/
+
 bool new_wp(char* expression){/*{{{*/
     bool success = false;
     word_t value = expr(expression, &success);
     if (success){
-        WP* p = malloc_wp();
-        memset(p->expression,0,64);
-        strcpy(p->expression, expression);
-        p->last_value = value;
+        debug_point* p = malloc_wp();
+        strcpy(p->info.wp.expression, expression);
+        p->info.wp.last_value = value;
+        p->is_break = false;
     }
     return success;
 }/*}}}*/
-bool free_wp(int number){/*{{{*/
+
+bool free_node(int number){/*{{{*/
     bool res = false;
-    WP *wp = head;
+    debug_point *wp = head;
     while (wp!=NULL) {
         if (wp->NO==number) break;
         wp = wp->next;
@@ -76,7 +88,7 @@ bool free_wp(int number){/*{{{*/
             head = wp->next;
         }
         else {
-            WP* tmp = head;
+            debug_point* tmp = head;
             while (tmp->next!=wp) {
                 tmp = tmp->next;
             }
@@ -88,36 +100,62 @@ bool free_wp(int number){/*{{{*/
     }
     return res;
 }/*}}}*/
+
 bool is_wp_change(){/*{{{*/
     bool is_change = false;
-    WP* tmp = head;
+    debug_point* tmp = head;
     while (tmp!=NULL) {
         bool success = false;
-        word_t new_value = expr(tmp->expression, &success);
-        __ASSERT_NEMU__(success, "fail to calculate \"%s\"\n",tmp->expression);
-        if (new_value!=tmp->last_value){
-            printf("Hardware watchpoint %d: %s\n",tmp->NO,tmp->expression);
-            printf("\n");
-            printf("Old value = " FMT_WORD_U "\n",tmp->last_value);
-            printf("New value = " FMT_WORD_U "\n",new_value);
-            printf("\n");
-            tmp->last_value = new_value;
-            is_change = true;
+        if (tmp->is_break)
+            is_change = nemu->arch_state.pc==tmp->info.bp.addr;
+        else {
+            word_t new_value = expr(tmp->info.wp.expression, &success);
+            __ASSERT_NEMU__(success, "fail to calculate \"%s\"\n",tmp->info.wp.expression);
+            if (new_value!=tmp->info.wp.last_value){
+                printf("Hardware watchpoint %d: %s\n",tmp->NO,tmp->info.wp.expression);
+                printf("\n");
+                printf("Old value = " FMT_WORD_U "\n",tmp->info.wp.last_value);
+                printf("New value = " FMT_WORD_U "\n",new_value);
+                printf("\n");
+                tmp->info.wp.last_value = new_value;
+                is_change = true;
+            }
         }
         tmp = tmp->next;
     }
     return is_change;
 }/*}}}*/
-void print_wp_info(){
-    WP* tmp = head;
+
+void print_wp_info(){/*{{{*/
+    debug_point* tmp = head;
     if (tmp!=NULL){
-        printf("%8s\t%16s\t%10s\t%12s\n","Num", "Expression", "Hexadecimal", "Decimal");
+        printf("%8s\t%16s\t%10s\t%12s\n","Num", "Expr/Name", "Hex/Address", "Decimal");
         while (tmp!=NULL) {
-            printf("%8d\t%16s\t" FMT_WORD "\t" FMT_WORD_U "\n",tmp->NO,tmp->expression,tmp->last_value,tmp->last_value);
+            if (tmp->is_break)
+                printf("%8d\t%16s\t" FMT_WORD "\t" "\n",
+                        tmp->NO, tmp->info.bp.name[0] ? tmp->info.bp.name : "addr break",tmp->info.bp.addr);
+            else 
+                printf("%8d\t%16s\t" FMT_WORD "\t" FMT_WORD_U "\n",
+                        tmp->NO,tmp->info.wp.expression,tmp->info.wp.last_value,tmp->info.wp.last_value);
             tmp = tmp->next;
         }
     }
     else {
         printf("No watchpoints.\n");
     }
-}
+}/*}}}*/
+
+bool new_br(word_t br_pc, const char* info){/*{{{*/
+    bool success = true;
+    if (br_pc==nemu->arch_state.pc){
+        fmt::print(ANSI_FMT("fail to break, the next pc is break pc", ANSI_FG_YELLOW));
+        success = false;
+    }
+    if (success){
+        debug_point* p = malloc_wp();
+        strcpy(p->info.bp.name, info);
+        p->info.bp.addr = br_pc;
+        p->is_break = true;
+    }
+    return success;
+}/*}}}*/

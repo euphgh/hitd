@@ -175,12 +175,18 @@ class mips32_CPU_state{
             if (unlikely(mask & addr)) isa_raise_intr(eccode,addr); 
             return addr;
         }/*}}}*/
-        void inst_madd(word_t src1, word_t src2){
+        void inst_madd(word_t src1, word_t src2){/*{{{*/
             int64_t ans = ((uint64_t)arch_state.hi)<<32 | arch_state.lo;
             ans += (int64_t)src1 * (int64_t)src2;
             arch_state.lo = BITS(ans, 31, 0);
             arch_state.hi = BITS(ans, 63, 32);
-        }
+        }/*}}}*/
+        void inst_maddu(word_t src1, word_t src2){/*{{{*/
+            uint64_t ans = ((uint64_t)arch_state.hi)<<32 | arch_state.lo;
+            ans += (uint64_t)src1 * (uint64_t)src2;
+            arch_state.lo = BITS(ans, 31, 0);
+            arch_state.hi = BITS(ans, 63, 32);
+        }/*}}}*/
         void tlbp();
         void tlbr();
         void tlbwi();
@@ -231,8 +237,8 @@ class mips32_CPU_state{
     private:
         ftracer mips_ftracer;
     public:
-        void isa_ftrace();
-        void isa_call_stack();
+        // void isa_ftrace();
+        // void isa_call_stack();
 };
 
 #endif

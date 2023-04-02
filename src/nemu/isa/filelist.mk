@@ -14,4 +14,5 @@
 #**************************************************************************************/
 
 NEMU_INC_PATH += $(HITD_HOME)/src/nemu/isa/$(GUEST_ISA)/include
+NEMU_INC_PATH += $(HITD_HOME)/tools/libelfin
 DIRS-y += src/nemu/isa/$(GUEST_ISA)

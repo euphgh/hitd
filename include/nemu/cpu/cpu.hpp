@@ -18,7 +18,7 @@
 
 #include "common.hpp"
 
-void cpu_exec(uint64_t n);
+bool cpu_exec(uint64_t n);
 
 void set_nemu_state(int state, vaddr_t pc, int halt_ret);
 void invalid_inst(word_t inst_value);

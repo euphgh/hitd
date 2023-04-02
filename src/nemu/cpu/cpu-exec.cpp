@@ -30,6 +30,7 @@
 #include "nemu/cpu/difftest.hpp"
 #include "soc.hpp"
 #include "utils.hpp"
+#include "nemu/Debugger.hpp"
 /* The assembly code of instructions executed is only output to the screen
  * when the number of instructions executed is less than this value.
  * This is useful when you use the `si' command.
@@ -37,21 +38,6 @@
  */
 #define MAX_INST_TO_PRINT 10
 bool is_wp_change();
-
-void CPU_state::isa_ftrace(){/*{{{*/
-    uint8_t flag = inst_state.flag;
-    if (flag!=0){
-        vaddr_t now_pc = inst_state.pc;
-        vaddr_t dest_pc = delay_slot_npc;
-        if (IS_CALL(flag)) 
-            mips_ftracer.push(now_pc, dest_pc);
-        if (IS_RET (flag))
-            mips_ftracer.pop(now_pc, dest_pc);
-    }
-}/*}}}*/
-void CPU_state::isa_call_stack(){
-    log_pt->info(mips_ftracer.call_stack_info(inst_state.pc));
-}
 
 void check_deadloop(word_t pc){
     if (detect_deadloop(pc)){
@@ -66,8 +52,14 @@ void trace_and_difftest(Decode *_this) {
     IFDEF(CONFIG_ITRACE, nemu->log_pt->trace("[I] %v", nemu->isa_disasm_inst()));
     IFDEF(CONFIG_DIFFTEST, difftest_step(0));
     IFDEF(CONFIG_WATCH_POINT, if(is_wp_change()) nemu_state.state=NEMU_STOP); //TODO: make watch point a class with methor
-    nemu->isa_ftrace();
     IFDEF(CONFIG_DEADLOOP, check_deadloop(_this->pc));
+    uint8_t flag = _this->flag;
+    if (flag!=0){
+        if (IS_CALL(flag)) 
+            mips_dwarf.call_func_at(_this->pc);
+        if (IS_RET (flag))
+            mips_dwarf.ret_func_to(nemu->delay_slot_npc);
+    }
 }
 
 void mips32_CPU_state::exec_once() {

@@ -18,6 +18,13 @@
 
 #include "common.hpp"
 
+void init_regex();
+void init_wp_pool();
 word_t expr(char *e, bool *success);
+bool new_wp(char* expression);
+bool new_br(word_t br_pc, const char* info);
+bool free_node(int number);
+bool is_wp_change();
+void print_wp_info();
 
 #endif

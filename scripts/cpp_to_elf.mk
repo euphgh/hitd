@@ -33,6 +33,13 @@ $(NEMU_OBJS): $(OBJ_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	@$(CXX) $(NEMU_CFLAGS) -c -o $@ $<
 	$(call call_fixdep, $(@:.o=.d), $@)
+ifdef CONFIG_NSC_NEMU
+ELFIN_AR += tools/libelfin/elf/libelf++.a
+ELFIN_AR += tools/libelfin/dwarf/libdwarf++.a
+# OBJ_ALL  += tools/libelfin/elf/test.a
+# $(ELFIN_AR):
+# 	make -C tools/libelfin -j $(nproc)
+endif
 OBJ_ALL += $(NEMU_OBJS)
 endif
 # }}}
@@ -102,9 +109,9 @@ BINARY   := $(BUILD_DIR)/$(NAME)
 ifdef CONFIG_NEED_TB
 include ./scripts/ver_to_cpp.mk
 else
-$(BINARY): $(OBJ_ALL)
+$(BINARY): $(OBJ_ALL) $(ELFIN_AR)
 	@echo + LD $@
-	@$(LD) $(OBJ_ALL) $(LIBS) -o $@ 
+	@$(LD) $(OBJ_ALL) $(ELFIN_AR) $(LIBS) -o $@ 
 endif
 
 

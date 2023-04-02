@@ -13,6 +13,8 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
+#include "sdb.hpp"
+#include <fmt/core.h>
 #include <nemu/isa.hpp>
 #include <nemu/cpu/cpu.hpp>
 #include <readline/readline.h>
@@ -21,32 +23,23 @@
 #include "nemu/memory/vaddr.hpp"
 #include "sdb.hpp"
 #include "utils.hpp"
-#include "nemu/addr_map.hpp"
-
-
-void init_regex();
-void init_wp_pool();
-word_t expr(char *e, bool *success);
-bool new_wp(char* expression);
-bool free_wp(int number);
-bool is_wp_change();
-void print_wp_info();
+#include "nemu/Debugger.hpp"
 
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {/*{{{*/
-  static char *line_read = NULL;
-  if (line_read) {
-    free(line_read);
-    line_read = NULL;
-  }
+    static char *line_read = NULL;
+    if (line_read) {
+        free(line_read);
+        line_read = NULL;
+    }
 
-  line_read = readline("(nemu) ");
+    line_read = readline("(nemu) ");
 
-  if (line_read && *line_read) {
-    add_history(line_read);
-  }
+    if (line_read && *line_read) {
+        add_history(line_read);
+    }
 
-  return line_read;
+    return line_read;
 }/*}}}*/
 
 static int cmd_c(char *args) {/*{{{*/
@@ -55,31 +48,65 @@ static int cmd_c(char *args) {/*{{{*/
 }/*}}}*/
 
 static int cmd_bt(char *args) {/*{{{*/
-    nemu->isa_call_stack();
+    backtrace();
+    // nemu->isa_call_stack();
     return 0;
 }/*}}}*/
 
 static void print_description(const char *arg);
 
-static int cmd_s(char *args){
+static int cmd_s(char *args){/*{{{*/
     int step = 1;
     bool legal_arg = 1;
     if (args) legal_arg = sscanf(strtok(NULL, " "),"%d",&step)==1;
     // 除step无其他参数 and step>0
     legal_arg &= (strtok(NULL, " ")==NULL) && (step>0);     
-    extern bool g_si_print;
-    g_si_print = step < 8;
-    if (legal_arg) cpu_exec(step);
-    else print_description("si");
-    g_si_print = false;
+    if (legal_arg) {
+        for (int i = 0; i < step; i++)
+            if (step_once(step==1)==false) break;
+    }
+    else print_description("s");
     return 0;
-}
-static int cmd_n(char *args){
+}/*}}}*/
+
+static int cmd_n(char *args){/*{{{*/
+    int step = 1;
+    bool legal_arg = 1;
+    if (args) legal_arg = sscanf(strtok(NULL, " "),"%d",&step)==1;
+    // 除step无其他参数 and step>0
+    legal_arg &= (strtok(NULL, " ")==NULL) && (step>0);     
+    if (legal_arg) {
+        for (int i = 0; i < step; i++) {
+            if (!next_once(step==1)) fmt::print("fail to next for out of range\n");
+        }
+    }
+    else print_description("n");
     return 0;
-}
-static int cmd_b(char *args){
+}/*}}}*/
+
+static int cmd_b(char *args){/*{{{*/
+    bool is_addr = false;
+    word_t addr = expr(args, &is_addr);
+    if (is_addr) {
+        new_br(addr, "");
+        fmt::print("address break at " HEX_WORD "\n", addr);
+    }
+    else {
+        bool is_func = true;
+        try{
+            addr = mips_dwarf.pc_at_func(args);
+        } catch (std::out_of_range const&) { is_func = false; }
+        if (is_func) {
+            new_br(addr, args);
+            fmt::print("function break at " HEX_WORD "\n", addr);
+        }
+        else {
+            fmt::print("{} is not function name or a address expressions\n", args);
+            print_description("b");
+        }
+    }
     return 0;
-}
+}/*}}}*/
 
 static int cmd_si(char *args) {/*{{{*/
     int step = 1;
@@ -99,16 +126,19 @@ static int cmd_info(char *args) {/*{{{*/
     bool success = (args!=NULL);
     bool is_reg = false;
     bool is_watch = false;
+    bool is_variable = false;
     if (success){
         char c = '\0';
         sscanf(strtok(NULL, " "), "%c", &c);
         is_reg = c=='r';
         is_watch = c=='w';
-        success = (is_reg || is_watch) && (strtok(NULL, " ")==NULL);
+        is_variable = c=='l';
+        success = (is_reg || is_watch || is_variable) && (strtok(NULL, " ")==NULL);
     }
     if (success){
         if (is_reg) nemu->isa_reg_display();
         if (is_watch) print_wp_info();
+        if (is_variable) mips_dwarf.read_variables(nemu->inst_state.pc);
     }
     else print_description("info");
     return 0;
@@ -142,7 +172,7 @@ static int cmd_x(char *args) {/*{{{*/
                 bool hasValue = (offset<size);
                 if (hasValue){
                     word_t byte = nemu->isa_vaddr_read(vAddr+offset, 1);
-                    printf( FMT_WORD_X "    ",byte);
+                    printf("%02x    ",byte);
                 }
                 else {
                     printf("\t\t");
@@ -185,7 +215,9 @@ static int cmd_p(char *args) {/*{{{*/
     else print_description("p");
     return 0;
 }/*}}}*/
+
 static int cmd_help(char *args);
+
 static int cmd_w(char *args){/*{{{*/
 #ifndef CONFIG_WATCH_POINT
     printf("watchpoint function not enable, please first enable it by \"make memuconfig\"\n");
@@ -195,17 +227,37 @@ static int cmd_w(char *args){/*{{{*/
 #endif
     return 0;
 }/*}}}*/
+
 int cmd_d(char *args){/*{{{*/
     int number = 0;
     bool success = false;
     if (args) {
         success = (sscanf(args,"%u", &number)==1);
-        success = free_wp(number);
+        success = free_node(number);
         print_wp_info();
     }
     if (!success) print_description("d");
     return 0;
 }/*}}}*/
+
+static int cmd_pi(char* args){
+    fmt::print("pc:\t" HEX_WORD "\t{}\n", nemu->inst_state.pc, nemu->isa_disasm_inst());
+    return 0;
+}
+
+static int cmd_fin(char* args){
+    step_out();
+    return 0;
+}
+
+static int cmd_l(char *args){
+    unsigned up = 5, down = 5;
+    bool legal_arg = true;
+    if (args) legal_arg = sscanf(args, "%d %d",&up, &down)==2;
+    if (legal_arg) mips_dwarf.print_src_blk_at(nemu->inst_state.pc, up, down);
+    else print_description("l");
+    return 0;
+}
 
 static struct {/*{{{*/
   const char *name;
@@ -214,17 +266,20 @@ static struct {/*{{{*/
 } /*}}}*/
 cmd_table [] = {/*{{{*/
     { "w",    "add watchpoint by \"w [expressions]\"",                      cmd_w   },
-    { "d",    "delete watchpoint with number by \"d [number]\"",            cmd_d   },
+    { "d",    "delete watchpoint/break with number by \"d [number]\"",      cmd_d   },
     { "info", "print registers by \"info r\" and watchpoint by \"info w\"", cmd_info},  
     { "x",    "check memory by \"x [size] [addr]\"",                        cmd_x   },  
     { "c",    "Continue the execution of the program",                      cmd_c   },
     { "p",    "print expressions value",                                    cmd_p   },
+    { "pi",   "print last instruction",                                     cmd_pi  },
     { "bt",   "print function call stack",                                  cmd_bt  },
     { "q",    "Exit NEMU",                                                  cmd_q   },
     { "si",   "run program with instruction by \"si [step]\"",              cmd_si  },  
     { "s",    "run into function or next line by \"s [step]\"",             cmd_s   },  
     { "n",    "run to next line of src by \"n [step]\"",                    cmd_n   },  
     { "b",    "set break point by \"b [addr]|[function name]\"",            cmd_b   },  
+    { "fin",  "return current function by \"fin\"",                         cmd_fin },  
+    { "l",    "list source code arrounded by \"l [up] [down]\"",            cmd_l   },  
     { "help", "Display information about all supported commands",           cmd_help},
 
 };/*}}}*/
