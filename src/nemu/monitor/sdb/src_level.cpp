@@ -1,60 +1,30 @@
+#include <algorithm>
 #include <fmt/core.h>
 #include <nemu/isa.hpp>
 #include <nemu/cpu/cpu.hpp>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <tuple>
+#include <vector>
 #include "common.hpp"
 #include "nemu/memory/vaddr.hpp"
 #include "sdb.hpp"
 #include "utils.hpp"
 #include "nemu/Debugger.hpp"
-/*
- * false for return ??:??
- * */
-void print_inst_arch(word_t inst, word_t arch){/*{{{*/
+
+static void print_env(word_t pc){/*{{{*/
     std::string file; unsigned line;
-    std::tie(file,line) = mips_dwarf.get_local(inst);
-    fmt::print("finish " HEX_WORD " in {} at {} {}\n", 
-            inst, mips_dwarf.get_func_name(inst),
-            file,line);
-
-    std::tie(file,line) = mips_dwarf.get_local(arch);
-    fmt::print("next   " HEX_WORD " in {} at {} {}\n",
-            arch, mips_dwarf.get_func_name(arch),
-            file,line);
-}/*}}}*/
-
-bool step_once(bool once){/*{{{*/
-    bool success = true;
-    unsigned num = 0;
+    std::string func = "??";
     try {
-        do {
-            cpu_exec(1);
-            print_inst_arch(nemu->inst_state.pc, nemu->arch_state.pc);
-            num++;
-            if (nemu_state.state!=NEMU_RUNNING) {
-                fmt::print("fail for nemu not run\n");
-                success = false;
-                break;
-            }
-        } while (mips_dwarf.is_same_src(nemu->inst_state.pc, nemu->arch_state.pc));
-    } catch (std::out_of_range const&) { 
-        fmt::print("fail for out_of_range\n");
-        success = false; 
-    }
-    if  (success) {
-        fmt::print("execute {} inst\n", num);
-        if (once)
-            mips_dwarf.print_src_blk_at(nemu->arch_state.pc, 3, 3);
-        else 
-            mips_dwarf.print_src_line_at(nemu->arch_state.pc);
-    }
-    else fmt::print("finish execute " HEX_WORD "\t{}\n", nemu->inst_state.pc, nemu->isa_disasm_inst());
-    return success;
+        func = mips_dwarf.get_func_name(pc);
+    } catch (std::out_of_range const&) {}
+    std::tie(file,line) = mips_dwarf.get_local(pc);
+    fmt::print("finish " HEX_WORD " in {} at {} {}\n", 
+            pc, func,
+            file,line);
 }/*}}}*/
 
-bool has_ret_addr(word_t pc, word_t&ret_addr, std::string& func_name){/*{{{*/
+static bool has_ret_addr(word_t pc, word_t&ret_addr, std::string& func_name){/*{{{*/
     bool find_ret_addr = true;
     try {
         auto func_entry = mips_dwarf.get_function_from_pc(pc);
@@ -66,57 +36,74 @@ bool has_ret_addr(word_t pc, word_t&ret_addr, std::string& func_name){/*{{{*/
     return find_ret_addr;
 }/*}}}*/
 
-bool next_once(bool once){/*{{{*/
-    bool success = true;
+static void statistic(bool once, unsigned num){/*{{{*/
+    fmt::print("execute {} instructs\n", num);
+    if (once)
+        mips_dwarf.print_src_blk_at(nemu->arch_state.pc, 3, 3);
+    else 
+        mips_dwarf.print_src_line_at(nemu->arch_state.pc);
+}/*}}}*/
+
+bool step_once(bool once){/*{{{*/
+    print_env(nemu->arch_state.pc);
+    std::string old_file_name, cur_file_name;
+    word_t old_line, cur_line;
+    std::tie(old_file_name, old_line) = mips_dwarf.get_local(nemu->arch_state.pc);
     unsigned num = 0;
     try {
         do {
-            cpu_exec(1);
-            print_inst_arch(nemu->inst_state.pc, nemu->arch_state.pc);
+            ASSERT_RET(cpu_exec(1), "fail for nemu not run");
+            std::tie(cur_file_name, cur_line) = mips_dwarf.get_local(nemu->arch_state.pc);
             num++;
-            if (nemu_state.state!=NEMU_RUNNING) {
-                fmt::print("fail for nemu not run\n");
-                success = false;
-                break;
-            }
-        } while (!mips_dwarf.is_func_new_line(nemu->inst_state.pc, nemu->arch_state.pc));
-    } catch (std::out_of_range const&) { 
-        fmt::print("fail for out_of_range\n");
-        success = false; 
+        } while (cur_file_name==old_file_name && cur_line==old_line);
+    } catch (std::out_of_range const&) {
+        ASSERT_RET(0, "fail for out_of_range");
     }
-    if  (success) {
-        fmt::print("execute {} inst\n", num);
-
-        if (once)
-            mips_dwarf.print_src_blk_at(nemu->arch_state.pc, 3, 3);
-        else 
-            mips_dwarf.print_src_line_at(nemu->arch_state.pc);
-    }
-    else fmt::print("finish execute " HEX_WORD "\t{}\n", nemu->inst_state.pc, nemu->isa_disasm_inst());
-    return success;
+    statistic(once, num);
+    print_env(nemu->arch_state.pc);
+    return true;
 }/*}}}*/
 
-void step_out(){/*{{{*/
+bool next_once(bool once){/*{{{*/
+    print_env(nemu->arch_state.pc);
+    word_t ret_addr;
+    std::string func_name;
+    bool find_ret = has_ret_addr(nemu->arch_state.pc, ret_addr, func_name);
+    std::vector<word_t> all_brk = mips_dwarf.get_next_stop_pc(nemu->arch_state.pc);
+    bool find_brk = all_brk.size() > 0;
+    bool not_last_inst, not_next_line = true;
+    ASSERT_RET (find_ret && find_brk, 
+            "fail for no {}", find_brk ?"return address":"line instructs");
+    unsigned num = 0;
+    do {
+        ASSERT_RET(cpu_exec(1), "fail for nemu not run");
+        word_t arch_pc = nemu->arch_state.pc;
+        not_last_inst = arch_pc != ret_addr;
+        for (word_t stop_pc: all_brk) 
+            not_next_line &= stop_pc!=arch_pc;
+        num++;
+    } while(not_next_line && not_last_inst);
+    statistic(once, num);
+    print_env(nemu->arch_state.pc);
+    return true;
+}/*}}}*/
+
+bool step_out(){/*{{{*/
+    print_env(nemu->arch_state.pc);
     word_t ret_addr = 0;
     std::string func_name;
-    if (has_ret_addr(nemu->arch_state.pc, ret_addr, func_name)) {
-        bool success = true;
-        do {
-            if (cpu_exec(1)==false) {
-                fmt::print("can not s for nemu not run\n");
-                success = false;
-                break;
-            }
-        } while(nemu->inst_state.pc==ret_addr);
-        if (success)
-            fmt::print("return function {}", func_name);
-    }
-    else fmt::print("fail for out_of_range");
+    ASSERT_RET(has_ret_addr(nemu->arch_state.pc, ret_addr, func_name),
+            "fail for out_of_range");
+    do { ASSERT_RET(cpu_exec(1), "fail for nemu not run");
+    } while(nemu->arch_state.pc==ret_addr);
+    fmt::print("return function {}\n", func_name);
+    print_env(nemu->arch_state.pc);
+    return true;
 }/*}}}*/
 
-void backtrace(){
+void backtrace(){/*{{{*/
     auto copy = mips_dwarf.fstack;
-    copy.push(nemu->inst_state.pc);
+    copy.push(nemu->arch_state.pc);
     fmt::print("function call stack has {} levels\n", copy.size());
     int level = 0;
     do {
@@ -139,4 +126,4 @@ void backtrace(){
                 level++, current_pc, func_name, srcs_name, srcs_line);
         copy.pop();
     } while(!copy.empty());
-}
+}/*}}}*/

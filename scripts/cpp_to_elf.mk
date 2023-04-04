@@ -37,8 +37,8 @@ ifdef CONFIG_NSC_NEMU
 ELFIN_AR += tools/libelfin/elf/libelf++.a
 ELFIN_AR += tools/libelfin/dwarf/libdwarf++.a
 # OBJ_ALL  += tools/libelfin/elf/test.a
-# $(ELFIN_AR):
-# 	make -C tools/libelfin -j $(nproc)
+$(ELFIN_AR):
+	make -C tools/libelfin -j $(nproc)
 endif
 OBJ_ALL += $(NEMU_OBJS)
 endif

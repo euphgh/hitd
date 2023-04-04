@@ -67,7 +67,11 @@ void init_monitor(int argc, char *argv[]) {
 
   /* Perform ISA dependent initialization. */
   init_isa(nemu_paddr);
-  std::signal(SIGINT, [](int) {nemu_state.state = NEMU_STOP;});
+  std::signal(SIGINT, [](int) {
+          if (nemu_state.state!=NEMU_STOP)
+          nemu_state.state = NEMU_STOP;
+          else fmt::print("nemu already stop\n(nemu) ");
+          });
 
   /* Initialize differential testing. */
   IFDEF(CONFIG_DIFFTEST, init_difftest(cemu_paddr));

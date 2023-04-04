@@ -12,6 +12,7 @@
 *
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
+#include "nemu/disassemble.hpp"
 #include <nemu/isa.hpp>
 #include "common.hpp"
 #include <nemu/cpu/cpu.hpp>
@@ -19,7 +20,6 @@
 #include "nemu/cpu/decode.hpp"
 #include "../local-include/reg.hpp"
 #include "testbench/sim_state.hpp"
-#include "fmt/core.h"
 #include "testbench/dpic.hpp"
 
 void CPU_state::ref_tick_and_int(uint8_t ext_int){/*{{{*/
@@ -40,7 +40,8 @@ void nemu_ref_end_statistics(int state, el::Logger* log_pt){/*{{{*/
             log_pt->info("run to end pc");
             break;
         case NEMU_ABORT: 
-            log_pt->error("Fail to execute %v", nemu->isa_disasm_inst());
+            log_pt->error("Fail to execute %v", 
+                    mips_disassemble.get_disassemble(nemu->inst_state.pc, nemu->inst_state.inst));
             break;
         default:
             __ASSERT_NEMU__(0, "unexpected quit state {}", state);

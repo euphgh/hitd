@@ -42,19 +42,11 @@ class mips32_CPU_state{
         std::shared_ptr<PaddrTop> paddr_top;
         Decode inst_state;
         bool analysis;
+        bool e_protect;
 
         mips32_CPU_state(PaddrTop* ptop_input);
         void exec_once();
         void reset(word_t reset_pc = 0xbfc00000);
-
-        const char* isa_disasm_inst(){/*{{{*/
-            if (!have_dised) {
-                extern std::string disassemble(word_t inst, word_t pc);
-                disasm_info = disassemble(inst_state.inst, inst_state.pc);
-                have_dised = true;
-            }
-            return disasm_info.c_str();
-        }/*}}}*/
 
         // nscscc difftest api{{{
         void ref_tick_and_int(uint8_t ext_int);

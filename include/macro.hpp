@@ -112,4 +112,14 @@
   ({ reg##_T __io_param = (reg##_T) { __VA_ARGS__ }; \
     ioe_write(reg, &__io_param); })
 
+#define TODO() Assert(0,"please implement first")
+
+#define ASSERT_RET(cond, str, ...) \
+    do { \
+        if (cond==false) { \
+            fmt::print(str "\n", ## __VA_ARGS__); \
+            return false; \
+        } \
+  } while (0)
+
 #endif

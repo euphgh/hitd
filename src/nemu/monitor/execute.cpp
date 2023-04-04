@@ -1,4 +1,5 @@
 #include "easylogging++.h"
+#include "nemu/disassemble.hpp"
 #include "nemu/isa.hpp"
 #include "common.hpp"
 #include "fmt/core.h"
@@ -9,7 +10,9 @@ void compare_exec(uint64_t n){
         // TIMED_SCOPE(exec_once, "compare exec once");
         nemu->ref_tick_and_int(0);
         nemu->exec_once();
-        if (g_si_print) fmt::print(HEX_WORD ":\t{}\n",nemu->inst_state.pc, nemu->isa_disasm_inst());
+        if (g_si_print) fmt::print(HEX_WORD ":\t{}\n",
+                nemu->arch_state.pc, mips_disassemble.get_disassemble(nemu->arch_state.pc, 
+                    nemu->isa_vaddr_read(nemu->arch_state.pc, 4)));
         extern uint64_t ticks;
         ++ticks;
         extern std::unique_ptr<dual_soc> soc;
@@ -30,7 +33,8 @@ bool cpu_exec(uint64_t n) {
 
     switch (nemu_state.state) {
         case NEMU_ABORT:
-            nemu->log_pt->error("nemu abort when execute %v", nemu->isa_disasm_inst());
+            nemu->log_pt->error("nemu abort when execute %v", 
+                    mips_disassemble.get_disassemble(nemu->inst_state.pc, nemu->inst_state.inst));
         case NEMU_STOP:
             break;
         case NEMU_END:

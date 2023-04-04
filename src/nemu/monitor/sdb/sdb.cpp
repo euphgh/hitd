@@ -1,4 +1,4 @@
-/***************************************************************************************
+/***************************************************************************************sdb.cpp
 * Copyright (c) 2014-2022 Zihao Yu, Nanjing University
 *
 * NEMU is licensed under Mulan PSL v2.
@@ -13,7 +13,9 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
+#include "nemu/disassemble.hpp"
 #include "sdb.hpp"
+#include <cstdlib>
 #include <fmt/core.h>
 #include <nemu/isa.hpp>
 #include <nemu/cpu/cpu.hpp>
@@ -94,7 +96,12 @@ static int cmd_b(char *args){/*{{{*/
     else {
         bool is_func = true;
         try{
-            addr = mips_dwarf.pc_at_func(args);
+            std::string info = strtok(nullptr, " ");
+            auto colon = info.find(':');
+            if (colon == std::string::npos)
+                addr = mips_dwarf.pc_at_func(info);
+            else 
+                addr = mips_dwarf.get_pc_at_src_line(info.substr(0,colon),atoi(info.substr(colon+1).c_str()));
         } catch (std::out_of_range const&) { is_func = false; }
         if (is_func) {
             new_br(addr, args);
@@ -138,7 +145,9 @@ static int cmd_info(char *args) {/*{{{*/
     if (success){
         if (is_reg) nemu->isa_reg_display();
         if (is_watch) print_wp_info();
-        if (is_variable) mips_dwarf.read_variables(nemu->inst_state.pc);
+        try{
+            if (is_variable) mips_dwarf.read_variables(nemu->inst_state.pc);
+        } catch(std::exception const& e) {fmt::print("read_variables exception:{}\n",e.what());}
     }
     else print_description("info");
     return 0;
@@ -171,8 +180,8 @@ static int cmd_x(char *args) {/*{{{*/
                 vaddr_t offset = (i<<3)+j;
                 bool hasValue = (offset<size);
                 if (hasValue){
-                    word_t byte = nemu->isa_vaddr_read(vAddr+offset, 1);
-                    printf("%02x    ",byte);
+                    uint8_t byte = nemu->isa_vaddr_read(vAddr+offset, 1);
+                    printf("%02x(%1c)    ",byte, byte);
                 }
                 else {
                     printf("\t\t");
@@ -200,6 +209,7 @@ static int cmd_q(char *args) {/*{{{*/
   }
   else {
       nemu_state.state = NEMU_QUIT;
+      write_history ("./.nemu_history");
       res = -1;
   }
   return res;
@@ -209,8 +219,8 @@ static int cmd_p(char *args) {/*{{{*/
     bool success = false;
     word_t value = expr(args, &success);
     if (success) {
-        printf("Decimal    :\t" FMT_WORD_U "\n",value);
-        printf("Hexadecimal:\t" FMT_WORD "\n",value);
+        printf("Decimal    :" FMT_WORD_U "\n",value);
+        printf("Hexadecimal:" FMT_WORD "\n",value);
     }
     else print_description("p");
     return 0;
@@ -241,7 +251,11 @@ int cmd_d(char *args){/*{{{*/
 }/*}}}*/
 
 static int cmd_pi(char* args){
-    fmt::print("pc:\t" HEX_WORD "\t{}\n", nemu->inst_state.pc, nemu->isa_disasm_inst());
+    nemu->e_protect = true;
+    word_t arch_pc = nemu->arch_state.pc;
+    fmt::print("pc:\t" HEX_WORD "\t{}\n", arch_pc, 
+            mips_disassemble.get_disassemble(arch_pc,nemu->isa_vaddr_read(arch_pc, 4)));
+    nemu->e_protect = false;
     return 0;
 }
 
@@ -351,9 +365,11 @@ void sdb_mainloop() {/*{{{*/
 }/*}}}*/
 
 void init_sdb() {/*{{{*/
-  /* Compile the regular expressions. */
-  init_regex();
+    using_history();
+    read_history_range ("./.nemu_history", 0, -1);
+    /* Compile the regular expressions. */
+    init_regex();
 
-  /* Initialize the watchpoint pool. */
-  init_wp_pool();
+    /* Initialize the watchpoint pool. */
+    init_wp_pool();
 }/*}}}*/

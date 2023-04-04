@@ -4,6 +4,7 @@
 #include "isa.hpp"
 #include <fmt/core.h>
 #include <stack>
+#include <vector>
 class nemu_context : public dwarf::expr_context {
     dwarf::taddr reg (unsigned regnum) override {
         return nemu->arch_state.gpr[regnum];
@@ -27,6 +28,7 @@ class Debugger {
         bool is_func_new_line(word_t old_pc, word_t new_pc);
         std::string get_func_name(word_t pc);
         std::tuple<std::string, unsigned> get_local(word_t pc);
+        std::vector<word_t> get_next_stop_pc(word_t pc);
         inline void call_func_at(word_t pc) { fstack.push(pc); }
         inline void ret_func_to(word_t pc) { 
             if (fstack.empty()) 
@@ -34,6 +36,7 @@ class Debugger {
             else 
                 fstack.pop();
         }
+        word_t get_pc_at_src_line(const std::string& file, unsigned line);
         void read_variables(word_t pc) {
             using namespace dwarf;
             auto func = get_function_from_pc(pc);
@@ -78,5 +81,5 @@ class Debugger {
 bool step_once(bool once);
 bool next_once(bool once);
 void backtrace();
-void step_out();
+bool step_out();
 extern Debugger mips_dwarf;

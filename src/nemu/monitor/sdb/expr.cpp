@@ -258,7 +258,7 @@ static word_t eval(uint8_t p, uint8_t q, bool* success){/*{{{*/
             case TK_OR  : res = val1 || val2;break;
             case TK_EQ  : res = val1 == val2;break;
             case TK_NOTEQ:res = val1 != val2;break;
-            case TK_DEREF:res = nemu->isa_vaddr_read(val2, 8);break;
+            case TK_DEREF:res = nemu->isa_vaddr_read(val2, 4);break;
             default: __ASSERT_NEMU__(0, "main operator \"%s\" type is not legal",tokens[op].str);break;
         }
     }

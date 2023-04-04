@@ -34,6 +34,7 @@
 #endif
 #define EXPT_VECTOR 0xbfc00380
 void mips32_CPU_state::isa_raise_intr(word_t NO, vaddr_t badva, bool refill) {/*{{{*/
+    if (e_protect) { e_protect = false; throw 0;}
     word_t trap_base = (cp0.status.bev ? 0xbfc00200u : (cp0.ebase.eptbase<<12|0x80000000));
     word_t trap_offs = 0x180;
     if (!cp0.status.exl){
