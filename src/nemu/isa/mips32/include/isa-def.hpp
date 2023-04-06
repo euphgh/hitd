@@ -173,6 +173,12 @@ class mips32_CPU_state{
             arch_state.lo = BITS(ans, 31, 0);
             arch_state.hi = BITS(ans, 63, 32);
         }/*}}}*/
+        void inst_msub(word_t src1, word_t src2){/*{{{*/
+            int64_t ans = ((uint64_t)arch_state.hi)<<32 | arch_state.lo;
+            ans -= (int64_t)src1 * (int64_t)src2;
+            arch_state.lo = BITS(ans, 31, 0);
+            arch_state.hi = BITS(ans, 63, 32);
+        }/*}}}*/
         void inst_maddu(word_t src1, word_t src2){/*{{{*/
             uint64_t ans = ((uint64_t)arch_state.hi)<<32 | arch_state.lo;
             ans += (uint64_t)src1 * (uint64_t)src2;

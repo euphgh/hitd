@@ -51,6 +51,7 @@ enum {
 #define __SYST_DIR__ NSCSCC_HOME "/system_test_v0.01/supervisor-mips32/kernel/kernel.bin"
 #define __UBOOT_DIR__ "/home/hgh/cpu/cyy/u-boot/" 
 #define __LINUX_DIR__ "/home/hgh/cpu/cyy/linux/"
+// #define __LINUX_DIR__ "/home/hgh/cpu/nscscc2021_group_v0.01/soc_run_os_v0.01/soc_up/pmon_and_linux/linux-2.6.32/"
 #define __UCORE_DIR__ "current no ucore bin"
 
 #define __FUNC_BIN__ __FUNC_DIR__ "main.bin"

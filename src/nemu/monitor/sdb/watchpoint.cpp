@@ -107,7 +107,7 @@ bool is_wp_change(){/*{{{*/
     while (tmp!=NULL) {
         bool success = false;
         if (tmp->is_break)
-            is_change = nemu->arch_state.pc==tmp->info.bp.addr;
+            is_change |= nemu->arch_state.pc==tmp->info.bp.addr;
         else {
             word_t new_value = expr(tmp->info.wp.expression, &success);
             __ASSERT_NEMU__(success, "fail to calculate \"%s\"\n",tmp->info.wp.expression);
@@ -118,7 +118,7 @@ bool is_wp_change(){/*{{{*/
                 printf("New value = " FMT_WORD_U "\n",new_value);
                 printf("\n");
                 tmp->info.wp.last_value = new_value;
-                is_change = true;
+                is_change |= true;
             }
         }
         tmp = tmp->next;

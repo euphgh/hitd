@@ -95,7 +95,7 @@ bool step_out(){/*{{{*/
     ASSERT_RET(has_ret_addr(nemu->arch_state.pc, ret_addr, func_name),
             "fail for out_of_range");
     do { ASSERT_RET(cpu_exec(1), "fail for nemu not run");
-    } while(nemu->arch_state.pc==ret_addr);
+    } while(nemu->inst_state.pc==ret_addr);
     fmt::print("return function {}\n", func_name);
     print_env(nemu->arch_state.pc);
     return true;

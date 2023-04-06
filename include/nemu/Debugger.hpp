@@ -9,7 +9,7 @@ class nemu_context : public dwarf::expr_context {
     dwarf::taddr reg (unsigned regnum) override {
         return nemu->arch_state.gpr[regnum];
     }
-    dwarf::taddr pc()   { return nemu->inst_state.pc; }
+    dwarf::taddr pc()   { return nemu->arch_state.pc; }
     dwarf::taddr deref_size (dwarf::taddr address, unsigned size) override {
         return nemu->isa_vaddr_read(address, size);
     }
