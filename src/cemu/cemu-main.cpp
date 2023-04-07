@@ -25,7 +25,7 @@ int main (int argc, char *argv[]) {
     cemu.jump(CONFIG_RESET_PC);
     while (cemu_run) {
         ticks++;
-        cemu.step();
+        cemu.step(soc.ext_int());
         log_pc = cemu.get_pc();
         // printf(FMT_WORD "\n", log_pc);
         if (cemu_run==false) {

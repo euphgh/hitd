@@ -1,5 +1,5 @@
-#ifndef MIPS_MMU
-#define MIPS_MMU
+#ifndef CYY_MIPS_MMU
+#define CYY_MIPS_MMU
 
 #include "paddr/paddr_interface.hpp"
 #include "mips_common.hpp"
@@ -143,6 +143,7 @@ private:
         return NULL;
     }
     PaddrTop *bus;
+public:
     mips_tlb tlb[nr_tlb_entry];
 };
 

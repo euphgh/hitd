@@ -8,6 +8,7 @@
 #include "testbench/difftest/struct.hpp"
 #include "easylogging++.h"
 #include <mutex>
+#include <fmt/core.h>
 
 class bit_mask {/*{{{*/
     public:
@@ -77,16 +78,16 @@ class Pmem : public PaddrInterface  {/*{{{*/
 };/*}}}*/
 
 class output {
-    private:
+    public:
         std::queue <uint8_t> uart_queue;
         bool thr_empty;
     public:
         output(el::Logger* input_logger = el::Loggers::getLogger("default")): 
-            thr_empty(true),
+            thr_empty(false),
             op_log(input_logger) {}
         el::Logger* op_log;
         void write_buf(uint8_t c){ uart_queue.push(c); thr_empty = false; }
-        inline bool exist_tx(){ return !thr_empty; }
+        inline bool exist_tx(){ return !uart_queue.empty(); }
         uint8_t getc(){/*{{{*/
             char res = EOF;
             if (!uart_queue.empty()) {
@@ -148,18 +149,12 @@ class Puart8250: public PaddrInterface, public output{/*{{{*/
             op_log = input_logger;
         }
         
-    private:
+    public:
         bool DLAB();
         void update_IIR();
-        const static uint64_t UART_RX = 0;
-        const static uint64_t UART_TX = 0;
         std::queue <char> rx;
         std::mutex rx_lock;
 
-        // std::queue <char> tx;
-        // std::mutex tx_lock;
-
-        bool thr_empty;
         // regs
         unsigned char DLL;
         unsigned char DLM;
@@ -167,5 +162,10 @@ class Puart8250: public PaddrInterface, public output{/*{{{*/
         unsigned char LCR;
         unsigned char IIR;
         unsigned char MCR;
+
+    void print(){
+        fmt::print("{{DLL:{}, DLM:{}, IER:{}, LCR:{}, IIR:{}, MCR:{}, thr_empty:{}, rx_empty:{}, tx.empty:{}}}\n",
+                      DLL,    DLM,    IER,    LCR,    IIR,    MCR,    thr_empty,    rx.empty(),  uart_queue.empty());
+    }
 };/*}}}*/
 #endif

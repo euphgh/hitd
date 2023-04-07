@@ -33,6 +33,7 @@ class single_soc {/*{{{*/
         inline PaddrTop* get_single_soc(){ return ptop; }
         void tick();
         void set_switch(uint8_t value);
+        uint8_t ext_int() { return (puart->irq() << 1); }
 
     private:
         PaddrTop* ptop;

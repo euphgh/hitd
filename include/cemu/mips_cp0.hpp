@@ -2,7 +2,7 @@
 #define MIPS_CP0
 
 #include "cemu/mips_common.hpp"
-#include "cemu/mips_mmu.hpp"
+#include "mips_mmu.hpp"
 #include <cstdint>
 #include <cassert>
 #include <cstdio>
@@ -41,7 +41,7 @@ public:
         status = 0;
         cp0_status *status_reg = (cp0_status*)&status;
         status_reg->BEV = 1;
-        status_reg->ERL = 1;
+        // status_reg->ERL = 1;
         cause = 0;
         epc = 0;
         prid = 0x00018003;
@@ -72,7 +72,6 @@ public:
                 assert(sel == 0);
                 return index;
             case RD_RANDOM:
-                random = random == wired ? (nr_tlb_entry - 1) : random - 1;
                 assert(sel == 0);
                 return random;
             case RD_ENTRYLO0:
@@ -278,6 +277,7 @@ public:
         cp0_cause *cause_reg = (cp0_cause*)&cause;
         cause_reg->IP = (cause_reg->IP & 0b10000011u) | ( (ext_int & 0b11111u) << 2);
         if (count == compare) cause_reg->IP |= 1u << 7;
+        random = random == wired ? (nr_tlb_entry - 1) : random - 1;
 
         check_and_raise_int();
     }
@@ -364,7 +364,7 @@ public:
         tlbe.PFN1 = entrylo1_reg->PFN;
         tlbe.VPN2 = entryhi_reg->VPN2;
         tlbe.ASID = entryhi_reg->ASID;
-        // printf("TLBWI at pc %x, VPN2 = %05x, index = %x\n",pc, tlbe.VPN2, index);
+        // printf("cyy TLBWI at pc %x, VPN2 = %05x, index = %x\n",pc, tlbe.VPN2, index);
         mmu.tlbw(tlbe, index);
     }
     void tlbwr() {
@@ -384,7 +384,7 @@ public:
         tlbe.VPN2 = entryhi_reg->VPN2;
         tlbe.ASID = entryhi_reg->ASID;
         // tlbe.print();
-        // printf("TLBWR at pc %x, VPN2 = %05x, index = %x\n",pc, tlbe.VPN2, index);
+        // printf("cyy TLBWR at pc %x, VPN2 = %05x, index = %x\n",pc, tlbe.VPN2, index);
         mmu.tlbw(tlbe, random);
     }
     mips32_ksu get_ksu() {

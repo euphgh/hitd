@@ -18,7 +18,6 @@
 
 Puart8250::Puart8250(el::Logger* input_logger):
     output(input_logger),
-    thr_empty(false), 
     DLL(0), DLM(0), IER(0), 
     LCR(0b00000011), IIR (0), MCR (0) {}
 

@@ -58,7 +58,8 @@ enum {
 #define __PERF_BIN__ __PERF_DIR__ "inst_data.bin"
 #define __SYST_BIN__ __SYST_DIR__ "kernel.bin"
 #define __UBOOT_BIN__ __UBOOT_DIR__ "u-boot.bin"
-#define __LINUX_BIN__ __LINUX_DIR__ "vmlinux.bin"
+#define __LINUX_BIN__ "/home/hgh/cpu/cyy/cyy_vmlinux.bin"
+// #define __LINUX_BIN__ __LINUX_DIR__ "vmlinux.bin"
 
 #define __FUNC_ELF__ __FUNC_DIR__ "main.elf"  
 #define __PERF_ELF__ __PERF_DIR__ "main.elf"  
