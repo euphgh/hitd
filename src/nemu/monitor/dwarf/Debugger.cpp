@@ -185,4 +185,4 @@ word_t Debugger::get_pc_at_src_line(const std::string& file, unsigned line) {
     throw std::out_of_range{"Cannot find file and line"};
 }
 
-Debugger mips_dwarf(__TEST_ELF__);
+IFDEF(CONFIG_DWARF, Debugger mips_dwarf(__TEST_ELF__));

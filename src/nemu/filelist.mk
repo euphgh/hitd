@@ -17,7 +17,6 @@ SRCS-$(CONFIG_NSC_NEMU) += src/nemu/nemu-main.cpp
 
 LIBS += $(if $(CONFIG_NEED_NEMU),-lreadline -ldl)
 DIRS-BLACKLIST-$(CONFIG_NSC_DIFF) += src/nemu/monitor 
-DIRS-y += src/nemu/monitor 
 DIRS-y += src/nemu/cpu 
 DIRS-y += src/nemu/utils
 DIRS-y += src/nemu/memory

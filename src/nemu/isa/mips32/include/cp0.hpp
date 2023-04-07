@@ -194,7 +194,5 @@ class CP0_t {
         }
 #define __cp0_wire_wfunc__ 1
         inline void wire_wfunc(word_t data){ random.random = CONFIG_TLB_NR-1;}
-#define __cp0_random_rfunc__ 1
-        inline void random_rfunc(){ random.random = random.random==wire.wire ? CONFIG_TLB_NR-1 : random.random-1;}
 };
 #endif

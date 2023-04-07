@@ -13,7 +13,7 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include "nemu/disassemble.hpp"
+#include "disassemble.hpp"
 #include "sdb.hpp"
 #include <cstdlib>
 #include <fmt/core.h>
@@ -22,6 +22,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "common.hpp"
+#include "macro.hpp"
 #include "nemu/memory/vaddr.hpp"
 #include "sdb.hpp"
 #include "utils.hpp"
@@ -50,14 +51,18 @@ static int cmd_c(char *args) {/*{{{*/
 }/*}}}*/
 
 static int cmd_bt(char *args) {/*{{{*/
+#ifdef CONFIG_DWARF
     backtrace();
-    // nemu->isa_call_stack();
+#else 
+    printf("C level debugger not enable, please first enable it by \"make memuconfig\"\n");
+#endif 
     return 0;
 }/*}}}*/
 
 static void print_description(const char *arg);
 
 static int cmd_s(char *args){/*{{{*/
+#ifdef CONFIG_DWARF
     int step = 1;
     bool legal_arg = 1;
     if (args) legal_arg = sscanf(strtok(NULL, " "),"%d",&step)==1;
@@ -68,10 +73,14 @@ static int cmd_s(char *args){/*{{{*/
             if (step_once(step==1)==false) break;
     }
     else print_description("s");
+#else 
+    printf("C level debugger not enable, please first enable it by \"make memuconfig\"\n");
+#endif 
     return 0;
 }/*}}}*/
 
 static int cmd_n(char *args){/*{{{*/
+#ifdef CONFIG_DWARF
     int step = 1;
     bool legal_arg = 1;
     if (args) legal_arg = sscanf(strtok(NULL, " "),"%d",&step)==1;
@@ -83,6 +92,9 @@ static int cmd_n(char *args){/*{{{*/
         }
     }
     else print_description("n");
+#else 
+    printf("C level debugger not enable, please first enable it by \"make memuconfig\"\n");
+#endif 
     return 0;
 }/*}}}*/
 
@@ -94,6 +106,7 @@ static int cmd_b(char *args){/*{{{*/
         fmt::print("address break at " HEX_WORD "\n", addr);
     }
     else {
+#ifdef CONFIG_DWARF
         bool is_func = true;
         try{
             std::string info = strtok(nullptr, " ");
@@ -111,6 +124,9 @@ static int cmd_b(char *args){/*{{{*/
             fmt::print("{} is not function name or a address expressions\n", args);
             print_description("b");
         }
+#else 
+        printf("C level debugger not enable, please first enable it by \"make memuconfig\"\n");
+#endif 
     }
     return 0;
 }/*}}}*/
@@ -145,9 +161,9 @@ static int cmd_info(char *args) {/*{{{*/
     if (success){
         if (is_reg) nemu->isa_reg_display();
         if (is_watch) print_wp_info();
-        try{
-            if (is_variable) mips_dwarf.read_variables(nemu->inst_state.pc);
-        } catch(std::exception const& e) {fmt::print("read_variables exception:{}\n",e.what());}
+        // try{
+        //     if (is_variable) mips_dwarf.read_variables(nemu->inst_state.pc);
+        // } catch(std::exception const& e) {fmt::print("read_variables exception:{}\n",e.what());}
     }
     else print_description("info");
     return 0;
@@ -216,6 +232,7 @@ static int cmd_q(char *args) {/*{{{*/
 }/*}}}*/
 
 static int cmd_p(char *args) {/*{{{*/
+#ifdef CONFIG_DWARF
     bool success = false;
     word_t value = expr(args, &success);
     if (success) {
@@ -223,6 +240,9 @@ static int cmd_p(char *args) {/*{{{*/
         printf("Hexadecimal:" FMT_WORD "\n",value);
     }
     else print_description("p");
+#else 
+    printf("C level debugger not enable, please first enable it by \"make memuconfig\"\n");
+#endif 
     return 0;
 }/*}}}*/
 
@@ -260,16 +280,24 @@ static int cmd_pi(char* args){
 }
 
 static int cmd_fin(char* args){
+#ifdef CONFIG_DWARF
     step_out();
+#else 
+    printf("C level debugger not enable, please first enable it by \"make memuconfig\"\n");
+#endif 
     return 0;
 }
 
 static int cmd_l(char *args){
+#ifdef CONFIG_DWARF
     unsigned up = 5, down = 5;
     bool legal_arg = true;
     if (args) legal_arg = sscanf(args, "%d %d",&up, &down)==2;
     if (legal_arg) mips_dwarf.print_src_blk_at(nemu->inst_state.pc, up, down);
     else print_description("l");
+#else 
+    printf("C level debugger not enable, please first enable it by \"make memuconfig\"\n");
+#endif 
     return 0;
 }
 

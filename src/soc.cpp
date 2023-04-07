@@ -140,10 +140,19 @@ void chech_output(output* dut, output* ref){/*{{{*/
     else if (unlikely(dut->exist_tx())){
             dut->op_log->error(fmt::format("should not output " UART_CHAR,
                 dut->getc(),dut->getc()));
-            IFDEF(CONFIG_NEED_,nemu_state.state = NEMU_ABORT);
+            IFDEF(CONFIG_NEED_NEMU,nemu_state.state = NEMU_ABORT);
     }
 }/*}}}*/
 
+uint8_t dual_soc::ext_int(){/*{{{*/
+    uint8_t dut_int = puart[DUT]->irq() << 1; 
+    uint8_t ref_int = puart[REF]->irq() << 1; 
+    if (dut_int!=ref_int) {
+        puart[DUT]->log_pt->error("ext_int is %v diffierent from ref %v", dut_int, ref_int);
+        IFDEF(CONFIG_NEED_NEMU,nemu_state.state = NEMU_ABORT);
+    }
+    return ref_int;
+}/*}}}*/
 void dual_soc::tick(){ /*{{{*/
     IFDEF(CONFIG_HAS_CONFREG, pcfreg[DUT]->tick();pcfreg[REF]->tick();)
     IFDEF(CONFIG_HAS_CONFREG, chech_output(pcfreg[DUT], pcfreg[REF]));

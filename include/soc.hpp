@@ -15,6 +15,7 @@ class dual_soc {/*{{{*/
 
         void tick();
         void set_switch(uint8_t value);
+        uint8_t ext_int();
     private:
         PaddrTop*       ptop[2];
         PaddrConfreg*   pcfreg[2];

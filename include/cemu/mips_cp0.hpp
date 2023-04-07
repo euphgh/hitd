@@ -41,7 +41,7 @@ public:
         status = 0;
         cp0_status *status_reg = (cp0_status*)&status;
         status_reg->BEV = 1;
-        // status_reg->ERL = 1;
+        status_reg->ERL = 1;
         cause = 0;
         epc = 0;
         prid = 0x00018003;
