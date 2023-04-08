@@ -399,5 +399,5 @@ void init_sdb() {/*{{{*/
     init_regex();
 
     /* Initialize the watchpoint pool. */
-    init_wp_pool();
+    IFDEF(CONFIG_WATCH_POINT, init_wp_pool());
 }/*}}}*/

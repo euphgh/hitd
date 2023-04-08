@@ -126,7 +126,9 @@ ARGS += -b
 endif
 
 dirs:
+ifdef CONFIG_TRACE
 	mkdir -p $(dir $(LOG_FILE))
+endif
 
 elf: $(BINARY)
 

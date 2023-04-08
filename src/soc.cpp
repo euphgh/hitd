@@ -137,21 +137,29 @@ void loop_check(output* dut, output* ref){/*{{{*/
 }/*}}}*/
 
 void chech_output(output* dut, output* ref){/*{{{*/
+#ifdef CONFIG_DIFFTEST
     if (unlikely(ref->exist_tx())) loop_check(dut,ref);
     else if (unlikely(dut->exist_tx())){
             dut->op_log->error(fmt::format("should not output " UART_CHAR,
                 dut->getc(),dut->getc()));
             IFDEF(CONFIG_NEED_NEMU,nemu_state.state = NEMU_ABORT);
     }
+#else
+    while (dut->exist_tx()) {
+        putchar(dut->getc());
+        fflush(stdout);
+    }
+#endif 
 }/*}}}*/
 
 void dual_soc::tick(){ /*{{{*/
     IFDEF(CONFIG_HAS_CONFREG, pcfreg[DUT]->tick();pcfreg[REF]->tick();)
     IFDEF(CONFIG_HAS_CONFREG, chech_output(pcfreg[DUT], pcfreg[REF]));
     IFDEF(CONFIG_HAS_UART, chech_output(puart[DUT], puart[REF]));
-#ifdef CONFIG_HAS_UART
     ext_int[DUT] = puart[DUT]->irq() << 1; 
     ext_int[REF] = puart[REF]->irq() << 1; 
+#ifdef CONFIG_HAS_UART
+#ifdef CONFIG_DIFFTEST
     if (ext_int[DUT]!=ext_int[REF]) {
         puart[DUT]->log_pt->error("ext_int is %v diffierent from ref %v", ext_int[DUT], ext_int[REF]);
         IFDEF(CONFIG_NEED_NEMU,nemu_state.state = NEMU_ABORT);
@@ -174,6 +182,7 @@ void dual_soc::tick(){ /*{{{*/
                 ref->DLL, ref->DLM, ref->IER, ref->IIR, ref->LCR, ref->MCR,ref->thr_empty);
         raise(SIGTRAP);
     }
+#endif
 #endif
 }/*}}}*/
 void dual_soc::set_switch(uint8_t value){/*{{{*/
