@@ -169,13 +169,17 @@ class mips32_CPU_state{
         }/*}}}*/
         void inst_madd(word_t src1, word_t src2){/*{{{*/
             int64_t ans = ((uint64_t)arch_state.hi)<<32 | arch_state.lo;
-            ans += (int64_t)src1 * (int64_t)src2;
+            int64_t s1 = (signed)src1;
+            int64_t s2 = (signed)src2;
+            ans += s1 * s2;
             arch_state.lo = BITS(ans, 31, 0);
             arch_state.hi = BITS(ans, 63, 32);
         }/*}}}*/
         void inst_msub(word_t src1, word_t src2){/*{{{*/
             int64_t ans = ((uint64_t)arch_state.hi)<<32 | arch_state.lo;
-            ans -= (int64_t)src1 * (int64_t)src2;
+            int64_t s1 = (signed)src1;
+            int64_t s2 = (signed)src2;
+            ans -= s1 * s2;
             arch_state.lo = BITS(ans, 31, 0);
             arch_state.hi = BITS(ans, 63, 32);
         }/*}}}*/
