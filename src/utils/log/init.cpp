@@ -30,7 +30,7 @@ el::Logger* logger_init(std::string name){
 
     el::Configurations log_conf;
     log_conf.setToDefault();
-    log_conf.setGlobally(el::ConfigurationType::Enabled, MUXDEF(CONFIG_TRACE,"true","false"));
+    log_conf.setGlobally(el::ConfigurationType::Enabled, "true");
 
     log_conf.setGlobally(el::ConfigurationType::Format, "[" + name + "][%ticks][%pc][%levshort]:%msg");
     log_conf.setGlobally(el::ConfigurationType::ToFile, MUXDEF(CONFIG_TRACE,"true","false"));
