@@ -20,16 +20,21 @@
 #ifdef CONFIG_ETRACE
             const char *e_msg[16] = {
                 "INTERRUPT(Int:0x0)",
-                "(0x1)", "(0x2)", "(0x3)",
+                "(0x1)", 
+                "(0x2)", 
+                "(0x3)",
                 "(AdEL:0x4)",
                 "(AdES:0x5)",
-                "(0x6)", "(0x7)",
+                "(0x6)", 
+                "(0x7)",
                 "(Sys:0x8)",
                 "(Bp:0x9)",
                 "(RI:0xa)",
                 "(CpU:0xb)",
                 "(Ov:0xc)",
-                "(0xd)", "(0xe)", "(0xf)"
+                "(0xd)", 
+                "(0xe)", 
+                "(0xf)"
             };
 #endif
 #define EXPT_VECTOR 0xbfc00380

@@ -810,8 +810,9 @@ private:
                 // SWL
                 uint32_t vaddr = GPR[instr.i_type.rs] + instr.i_type.imm;
                 uint32_t buf;
-                mips32_exccode stat = mmu.va_read(vaddr ^ (vaddr & 3), 4, (unsigned char*)&buf, cp0.get_ksu(), cp0.get_asid(), tlb_invalid);
-                if (stat != EXC_OK) cp0.raise_trap(stat, vaddr, tlb_invalid);
+                uint32_t align_addr = vaddr ^ (vaddr & 3);
+                mips32_exccode stat = mmu.va_read(align_addr, 4, (unsigned char*)&buf, cp0.get_ksu(), cp0.get_asid(), tlb_invalid);
+                if (stat != EXC_OK) cp0.raise_trap(stat, align_addr, tlb_invalid);
                 else {
                     switch (vaddr % 4) {
                         case 0:
@@ -829,8 +830,8 @@ private:
                         default:
                             assert(false);
                     }
-                    stat = mmu.va_write(vaddr ^ (vaddr & 3), 4, (unsigned char*)&buf, cp0.get_ksu(), cp0.get_asid(), tlb_invalid);
-                    if (stat != EXC_OK) cp0.raise_trap(stat, vaddr, tlb_invalid);
+                    stat = mmu.va_write(align_addr, 4, (unsigned char*)&buf, cp0.get_ksu(), cp0.get_asid(), tlb_invalid);
+                    if (stat != EXC_OK) cp0.raise_trap(stat, align_addr, tlb_invalid);
                 }
                 break;
             }
@@ -838,8 +839,9 @@ private:
                 // SWR
                 uint32_t vaddr = GPR[instr.i_type.rs] + instr.i_type.imm;
                 uint32_t buf;
-                mips32_exccode stat = mmu.va_read(vaddr ^ (vaddr & 3), 4, (unsigned char*)&buf, cp0.get_ksu(), cp0.get_asid(), tlb_invalid);
-                if (stat != EXC_OK) cp0.raise_trap(stat, vaddr, tlb_invalid);
+                uint32_t align_addr = vaddr ^ (vaddr & 3);
+                mips32_exccode stat = mmu.va_read(align_addr, 4, (unsigned char*)&buf, cp0.get_ksu(), cp0.get_asid(), tlb_invalid);
+                if (stat != EXC_OK) cp0.raise_trap(stat, align_addr, tlb_invalid);
                 else {
                     switch (vaddr % 4) {
                         case 0:
@@ -857,8 +859,8 @@ private:
                         default:
                             assert(false);
                     }
-                    stat = mmu.va_write(vaddr ^ (vaddr & 3), 4, (unsigned char*)&buf, cp0.get_ksu(), cp0.get_asid(), tlb_invalid);
-                    if (stat != EXC_OK) cp0.raise_trap(stat, vaddr, tlb_invalid);
+                    stat = mmu.va_write(align_addr, 4, (unsigned char*)&buf, cp0.get_ksu(), cp0.get_asid(), tlb_invalid);
+                    if (stat != EXC_OK) cp0.raise_trap(stat, align_addr, tlb_invalid);
                 }
                 break;
             }
