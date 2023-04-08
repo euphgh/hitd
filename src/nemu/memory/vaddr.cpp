@@ -63,10 +63,14 @@ void CPU_state::vaddr_write(vaddr_t addr, int len, word_t data) {
         case MMU_DIRECT:
             paddr = addr & 0x1fffffff;
             break;
-        case MMU_TRANSLATE:
-            if (mmu_translate(addr,paddr,refill).hit==false) 
+        case MMU_TRANSLATE:{
+            const tlb_info& info =mmu_translate(addr,paddr,refill);
+            if (info.hit==false) 
                 isa_raise_intr(EC_TLBS, addr, refill);
+            if (info.dirty==false)
+                isa_raise_intr(EC_Mod, addr, refill);
             break;
+                           }
         case MMU_FAIL:
             isa_raise_intr(EC_AdES, addr);
             break;
