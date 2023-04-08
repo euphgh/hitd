@@ -12,7 +12,6 @@ void compare_exec(uint64_t n){
         // TIMED_SCOPE(exec_once, "compare exec once");
         extern uint64_t ticks;
         ++ticks;
-        if (ticks==206796567) raise(SIGTRAP);
         soc->tick();
         nemu->ref_tick_and_int(soc->dut_ext_int());
         nemu->exec_once();

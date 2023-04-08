@@ -73,8 +73,8 @@ void CPU_state::tlbp(){
         bool id_hit = tmp->g || (tmp->asid==cp0.entryhi.asid);
         if (vaddr_hit && id_hit) {
             cp0.index.index = i;
-            break;
             not_find = false;
+            break;
         }
     }
     cp0.index.p = not_find;
