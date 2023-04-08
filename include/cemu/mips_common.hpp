@@ -2,6 +2,7 @@
 #define MIPS_COMMON
 
 #include <cstdio>
+#include <fmt/core.h>
 
 union mips_instr {
     struct mips_i {
@@ -304,20 +305,11 @@ struct mips_tlb {
     unsigned int PFN1 : 20;
     unsigned int VPN2 : 19;
     unsigned int ASID : 8;
-    void print() {
-        printf("-----TLB Entry BEGIN-----\n");
-        printf("VPN2: %x\n", VPN2 << 13);
-        printf("ASID: %d\n",ASID);
-        printf("G: %d\n",G);
-        printf("V0: %d\n",V0);
-        printf("D0: %d\n",D0);
-        printf("C0: %d\n",C0);
-        printf("PFN0: %x\n", PFN0 << 12);
-        printf("V1: %d\n",V1);
-        printf("D1: %d\n",D1);
-        printf("C1: %d\n",C1);
-        printf("PFN1: %x\n", PFN1 << 12);
-        printf("-----TLB Entry  END -----\n");
+    void print() const {
+        fmt::print("{{VPN2:{}, ASID:{}, G:{}, PFN0:{}, V0:{}, D0:{}, C0:{}, PFN1:{}, V1:{}, D1:{}, C1:{}}}\n",
+                      VPN2<<13,(uint8_t)ASID, (bool)G, 
+                      PFN0<<12,(bool)V0,(bool)D0,(unsigned)C0,
+                      PFN1<<12,(bool)V1,(bool)D1,(unsigned)C1);
     }
 };
 

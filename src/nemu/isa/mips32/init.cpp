@@ -27,7 +27,7 @@ static std::map<int, const char*> name_to_elf = {
     // std::make_pair(TEST_NAME_UCORE, __UCORE_DIR__ ),
 };
 
-std::unique_ptr<CPU_state> nemu;
+mips32_CPU_state* nemu;
 void CPU_state::reset(word_t reset_pc) {/*{{{*/
     arch_state.pc = reset_pc;
     arch_state.llbit = 0;
@@ -53,6 +53,6 @@ CPU_state::mips32_CPU_state(PaddrTop* ptop_input):
 };
 
 void init_isa(PaddrTop* ptop_input) {
-    nemu.reset(new CPU_state(ptop_input));
+    nemu = new CPU_state(ptop_input);
     nemu->reset(CONFIG_RESET_PC);
 }

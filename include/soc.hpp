@@ -15,11 +15,13 @@ class dual_soc {/*{{{*/
 
         void tick();
         void set_switch(uint8_t value);
-        uint8_t ext_int();
+        inline uint8_t dut_ext_int() { return ext_int[DUT]; }
+        inline uint8_t ref_ext_int() { return ext_int[REF]; }
     private:
         PaddrTop*       ptop[2];
         PaddrConfreg*   pcfreg[2];
         Puart8250*      puart[2];
+        uint8_t         ext_int[2];
         bool has_confreg;
         void create_basic_soc();
         void create_boot_soc();

@@ -364,7 +364,7 @@ public:
         tlbe.PFN1 = entrylo1_reg->PFN;
         tlbe.VPN2 = entryhi_reg->VPN2;
         tlbe.ASID = entryhi_reg->ASID;
-        // printf("cyy TLBWI at pc %x, VPN2 = %05x, index = %x\n",pc, tlbe.VPN2, index);
+        // printf("cemu TLBWI at pc %x, VPN2 = %05x, index = %x\n",pc, tlbe.VPN2, index);
         mmu.tlbw(tlbe, index);
     }
     void tlbwr() {
@@ -384,7 +384,7 @@ public:
         tlbe.VPN2 = entryhi_reg->VPN2;
         tlbe.ASID = entryhi_reg->ASID;
         // tlbe.print();
-        // printf("cyy TLBWR at pc %x, VPN2 = %05x, index = %x\n",pc, tlbe.VPN2, index);
+        // printf("cemu TLBWR at pc %x, VPN2 = %05x, index = %x\n",pc, tlbe.VPN2, index);
         mmu.tlbw(tlbe, random);
     }
     mips32_ksu get_ksu() {

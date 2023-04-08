@@ -51,5 +51,3 @@ void CPU_state::isa_difftest_log_error(diff_state *ref_r){
     }
     print_reg_diff(ref_r->pc, arch_state.pc, "next-pc");
 }
-void isa_difftest_attach() {
-}

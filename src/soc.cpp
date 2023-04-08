@@ -2,6 +2,7 @@
 #include "debug.hpp"
 #include "macro.hpp"
 #include "utils.hpp"
+#include <csignal>
 #include <cstdio>
 #include "nemu/mytrace.hpp"
 #include <fmt/core.h>
@@ -144,19 +145,36 @@ void chech_output(output* dut, output* ref){/*{{{*/
     }
 }/*}}}*/
 
-uint8_t dual_soc::ext_int(){/*{{{*/
-    uint8_t dut_int = puart[DUT]->irq() << 1; 
-    uint8_t ref_int = puart[REF]->irq() << 1; 
-    if (dut_int!=ref_int) {
-        puart[DUT]->log_pt->error("ext_int is %v diffierent from ref %v", dut_int, ref_int);
-        IFDEF(CONFIG_NEED_NEMU,nemu_state.state = NEMU_ABORT);
-    }
-    return ref_int;
-}/*}}}*/
 void dual_soc::tick(){ /*{{{*/
     IFDEF(CONFIG_HAS_CONFREG, pcfreg[DUT]->tick();pcfreg[REF]->tick();)
     IFDEF(CONFIG_HAS_CONFREG, chech_output(pcfreg[DUT], pcfreg[REF]));
     IFDEF(CONFIG_HAS_UART, chech_output(puart[DUT], puart[REF]));
+#ifdef CONFIG_HAS_UART
+    ext_int[DUT] = puart[DUT]->irq() << 1; 
+    ext_int[REF] = puart[REF]->irq() << 1; 
+    if (ext_int[DUT]!=ext_int[REF]) {
+        puart[DUT]->log_pt->error("ext_int is %v diffierent from ref %v", ext_int[DUT], ext_int[REF]);
+        IFDEF(CONFIG_NEED_NEMU,nemu_state.state = NEMU_ABORT);
+    }
+    auto& dut = puart[DUT];
+    auto& ref = puart[REF];
+    bool error = false;
+    error |= dut->DLL != ref->DLL;
+    error |= dut->DLM != ref->DLM;
+    error |= dut->IER != ref->IER;
+    error |= dut->IIR != ref->IIR;
+    error |= dut->LCR != ref->LCR;
+    error |= dut->MCR != ref->MCR;
+    error |= dut->rx.empty()!= ref->rx.empty();
+    error |= dut->thr_empty != ref->thr_empty;
+    if (error){
+        fmt::print("dut:{{DLL:{}, DLM:{}, IER:{}, IIR:{}, LCR:{}, MCR:{}, thr_empty:{}}}\n",
+                dut->DLL, dut->DLM, dut->IER, dut->IIR, dut->LCR, dut->MCR,dut->thr_empty);
+        fmt::print("ref:{{DLL:{}, DLM:{}, IER:{}, IIR:{}, LCR:{}, MCR:{}, thr_empty:{}}}\n",
+                ref->DLL, ref->DLM, ref->IER, ref->IIR, ref->LCR, ref->MCR,ref->thr_empty);
+        raise(SIGTRAP);
+    }
+#endif
 }/*}}}*/
 void dual_soc::set_switch(uint8_t value){/*{{{*/
     IFDEF(CONFIG_HAS_CONFREG, pcfreg[0]->set_switch(value); pcfreg[1]->set_switch(value);)

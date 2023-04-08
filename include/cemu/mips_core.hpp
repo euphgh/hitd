@@ -978,8 +978,8 @@ private:
     bool next_control_trans = false;
     bool cur_control_trans = false;
     uint32_t delay_npc;
-    mips_mmu<16> mmu;
 public:
+    mips_mmu<16> mmu;
     mips_cp0<16> cp0;
 };
 

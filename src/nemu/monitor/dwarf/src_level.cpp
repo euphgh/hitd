@@ -8,7 +8,6 @@
 #include <vector>
 #include "common.hpp"
 #include "nemu/memory/vaddr.hpp"
-#include "sdb.hpp"
 #include "utils.hpp"
 #include "nemu/Debugger.hpp"
 

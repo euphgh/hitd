@@ -23,6 +23,7 @@ Puart8250::Puart8250(el::Logger* input_logger):
 
 bool Puart8250::do_read (word_t addr, wen_t info, word_t* data){/*{{{*/
     std::unique_lock<std::mutex> lock(rx_lock);
+    *data = 0;
     if (info.size != 1) log_pt->error("read uart8250 size not 1");
     switch (addr) {
         case UART8250_TX_RX_DLL: {

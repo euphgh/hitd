@@ -1,4 +1,5 @@
 #include "common.hpp"
+#include <fmt/core.h>
 class tlb_entry {
     public:
         bool g : 1;
@@ -37,20 +38,11 @@ class tlb_entry {
             vpn2(_vpn2),
             asid(_asid) {}
 
-        void log() {/*{{{*/
-            printf("-----TLB Entry BEGIN-----\n");
-            printf("VPN2: %x\n", vpn2 << 13);
-            printf("ASID: %d\n",asid);
-            printf("G: %d\n",g);
-            printf("V0: %d\n",v0);
-            printf("D0: %d\n",d0);
-            printf("C0: %d\n",c0);
-            printf("PFN0: %x\n", pfn0 << 12);
-            printf("V1: %d\n",v1);
-            printf("D1: %d\n",d1);
-            printf("C1: %d\n",c1);
-            printf("PFN1: %x\n", pfn1 << 12);
-            printf("-----TLB Entry  END -----\n");
-        }/*}}}*/
+        void print() const {
+            fmt::print("{{VPN2:{}, ASID:{}, G:{}, PFN0:{}, V0:{}, D0:{}, C0:{}, PFN1:{}, V1:{}, D1:{}, C1:{}}}\n",
+                    vpn2<<13,(uint8_t)asid, (bool)g, 
+                    pfn0<<12,(bool)v0,(bool)d0,(unsigned)c0,
+                    pfn1<<12,(bool)v1,(bool)d1,(unsigned)c1);
+        }
 };
 

@@ -216,6 +216,7 @@ class mips32_CPU_state{
         void isa_raise_intr(word_t NO, vaddr_t badva = 0, bool refill = false);
         bool isa_query_intr();
         // }}}
+    public:
         tlb_entry tlb[CONFIG_TLB_NR];
         enum mode_t { USER, SPVI, KRNL, };
         enum mmu_t { MMU_DIRECT, MMU_TRANSLATE, MMU_FAIL };
