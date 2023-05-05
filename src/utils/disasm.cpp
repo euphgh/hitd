@@ -37,10 +37,11 @@ disassemble_wrap::disassemble_wrap(const char *triple) {
     std::string isa = target->getName();
     gMII = target->createMCInstrInfo();
     gMRI = target->createMCRegInfo(gTriple);
-    auto AsmInfo = target->createMCAsmInfo(*gMRI, gTriple, MCOptions);
-    auto llvmTripleTwine = Twine(triple);
-    auto llvmtriple = llvm::Triple(llvmTripleTwine);
-    auto Ctx = new llvm::MCContext(llvmtriple, AsmInfo, gMRI, nullptr);
+    // auto AsmInfo = target->createMCAsmInfo(*gMRI, gTriple, MCOptions);
+    // auto llvmTripleTwine = Twine(triple);
+    // auto llvmtriple = llvm::Triple(llvmTripleTwine);
+    // auto Ctx = new llvm::MCContext(llvmtriple, AsmInfo, gMRI, nullptr);
+    auto Ctx = new llvm::MCContext(llvmtriple, gMRI, nullptr);
     gDisassembler = target->createMCDisassembler(*gSTI, *Ctx);
     gIP = target->createMCInstPrinter(llvm::Triple(gTriple),
             AsmInfo->getAssemblerDialect(), *AsmInfo,
