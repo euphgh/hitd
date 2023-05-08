@@ -127,7 +127,7 @@ endif
 
 dirs:
 ifdef CONFIG_TRACE
-	mkdir -p $(dir $(LOG_FILE))
+	@mkdir -p $(dir $(LOG_FILE))
 endif
 
 elf: $(BINARY)

@@ -156,8 +156,8 @@ void dual_soc::tick(){ /*{{{*/
     IFDEF(CONFIG_HAS_CONFREG, pcfreg[DUT]->tick();pcfreg[REF]->tick();)
     IFDEF(CONFIG_HAS_CONFREG, chech_output(pcfreg[DUT], pcfreg[REF]));
     IFDEF(CONFIG_HAS_UART, chech_output(puart[DUT], puart[REF]));
-    ext_int[DUT] = puart[DUT]->irq() << 1; 
-    ext_int[REF] = puart[REF]->irq() << 1; 
+    IFDEF(CONFIG_HAS_UART, ext_int[DUT] = puart[DUT]->irq() << 1); 
+    IFDEF(CONFIG_HAS_UART, ext_int[REF] = puart[REF]->irq() << 1); 
 #ifdef CONFIG_HAS_UART
 #ifdef CONFIG_DIFFTEST
     if (ext_int[DUT]!=ext_int[REF]) {

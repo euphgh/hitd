@@ -8,6 +8,7 @@
 #include <queue>
 #include <string>
 
+#define CONFREG_NULL        0x8ffc  //32'hbfaf_8ffc 
 #define CR0_ADDR            0x8000  //32'hbfaf_8000 
 #define CR1_ADDR            0x8004  //32'hbfaf_8004 
 #define CR2_ADDR            0x8008  //32'hbfaf_8008 
@@ -16,6 +17,7 @@
 #define CR5_ADDR            0x8014  //32'hbfaf_8014 
 #define CR6_ADDR            0x8018  //32'hbfaf_8018 
 #define CR7_ADDR            0x801c  //32'hbfaf_801c 
+
 #define LED_ADDR            0xf000  //32'hbfaf_f000 
 #define LED_RG0_ADDR        0xf004  //32'hbfaf_f004 
 #define LED_RG1_ADDR        0xf008  //32'hbfaf_f008 
@@ -25,6 +27,7 @@
 #define BTN_STEP_ADDR       0xf028  //32'hbfaf_f028
 #define SW_INTER_ADDR       0xf02c  //32'hbfaf_f02c 
 #define TIMER_ADDR          0xe000  //32'hbfaf_e000 
+
 #define IO_SIMU_ADDR        0xffec  //32'hbfaf_ffec
 #define VIRTUAL_UART_ADDR   0xfff0  //32'hbfaf_fff0
 #define SIMU_FLAG_ADDR      0xfff4  //32'hbfaf_fff4 
@@ -120,6 +123,9 @@ bool PaddrConfreg::do_read (word_t addr, wen_t info, word_t* data) {/*{{{*/
         case NUM_MONITOR_ADDR:
             *(uint32_t *)data = num_monitor;
             break;
+        case CONFREG_NULL:
+            *(uint32_t *)data = 0;
+            break;
         default:
             *(uint32_t *)data = 0;
             log_pt->warn(fmt::format("read  confreg not exist address: " HEX_WORD, addr));
@@ -156,6 +162,18 @@ bool PaddrConfreg::do_write(word_t addr, wen_t info, const word_t data){/*{{{*/
         case CR7_ADDR:
             cr[7] = data;
             break;
+        case LED_ADDR:
+            led = data;
+            log_pt->info(fmt::format("LED write {:#04x}", data));
+            break;
+        case LED_RG0_ADDR:
+            led_rg0 = data;
+            log_pt->info(fmt::format("LED_RG0 write {:#04x}", data));
+            break;
+        case LED_RG1_ADDR:
+            log_pt->info(fmt::format("LED_RG1 write {:#04x}", data));
+            led_rg1 = data;
+            break;
         case TIMER_ADDR:
             timer = data;
             break;
@@ -174,6 +192,8 @@ bool PaddrConfreg::do_write(word_t addr, wen_t info, const word_t data){/*{{{*/
             break;
         case NUM_ADDR:
             num = data;
+            break;
+        case CONFREG_NULL:
             break;
         default:
             log_pt->warn(fmt::format("write confreg not exist address: " HEX_WORD, addr));

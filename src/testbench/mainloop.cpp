@@ -5,12 +5,10 @@
 #include "nemu/isa.hpp"
 #include "Vmycpu_top.h"
 #include "soc.hpp"
-#include <cstdio>
 #include "generated/autoconf.h"
 #include "testbench/inst_timer.hpp"
 #include "testbench/sim_state.hpp"
 #include "testbench/dpic.hpp"
-#include "fmt/core.h"
 #include "testbench/cp0_checker.hpp"
 
 #define wave_file_t MUXDEF(CONFIG_EXT_FST,VerilatedFstC,VerilatedVcdC)
@@ -38,6 +36,7 @@ inline static void sim_ending(int nemu_end_state){/*{{{*/
             break;
     }
 }/*}}}*/
+
 static bool sim_end_statistics(){/*{{{*/
     bool res = false;
     switch (sim_status) {
@@ -60,33 +59,16 @@ static bool sim_end_statistics(){/*{{{*/
     }
     return res;
 }/*}}}*/
+
 static void check_cpu_state(diff_state* mycpu){/*{{{*/
     bool res = nemu->ref_checkregs(mycpu);
     if (!res){
-        __ASSERT_SIM__(0, "MyCPU execution{} error !!!",
+        __ASSERT_SIM__(0, "MyCPU execution\t{} error !!!",
                 nemu->isa_disasm_inst());
         nemu->ref_log_error(mycpu);
     }
 }/*}}}*/
-/* static void compare (debug_info_t *debug){
-    if (debug->wen != 0 && debug->wnum != 0) {
-        debug_info_t ref;
-        unsigned int check;
-        unsigned int wnum;
-        int res = fscanf(golden_trace, "%u %x %x %x",&check,&ref.pc,&wnum,&ref.wdata);
-        __ASSERT_NEMU__(res==4, "file read error");
-        if (!check) return;
-        ref.wnum = wnum;
-        if ((debug->pc != ref.pc) || (debug->wnum != ref.wnum) || (debug->wdata != ref.wdata)) {
-            __ASSERT_SIM__(((debug->pc == ref.pc) && (debug->wnum == ref.wnum) && (debug->wdata == ref.wdata)), \
-                    "Error!!!\n"  \
-                    "    mycpu    : PC = 0x%8x, wb_wnum = 0x%2x, wb_wdata = 0x%8x\n"  \
-                    "    reference: PC = 0x%8x, wb_wnum = 0x%2x, wb_wdata = 0x%8x\n", \
-                    debug->pc, debug->wnum, debug->wdata, ref.pc, ref.wnum, ref.wdata
-                    );
-        }
-    }
-r */
+
 bool mainloop(
         Vmycpu_top* top,
         axi_paddr* axi,
@@ -121,7 +103,7 @@ bool mainloop(
     top->aresetn = 1;
 
     while (!Verilated::gotFinish()) {
-        // TIMED_SCOPE(one_clk,"one_clk");
+        /* if need count perf_timer TIMED_SCOPE(one_clk,"one_clk"); */
         /* posedge edge comming {{{*/
         ++ticks;
         top->aclk = !top->aclk;
@@ -166,8 +148,9 @@ bool mainloop(
             check_cpu_state(&mycpu);
             IFDEF(CONFIG_COMMIT_WAIT, last_commit = ticks);
         }/*}}}*/
+
         /*}}}*/
-        /* negtive edge comming *//*{{{*/
+        /* negtive edge comming {{{*/
 negtive_edge: 
         ++ticks;
         top->aclk = !top->aclk;

@@ -6,26 +6,23 @@
 #include "testbench/sim_state.hpp"
 #include "testbench/axi.hpp"
 #include "testbench/dpic.hpp"
-#include <cstdio>
-#include <getopt.h>
-#include <utility>
 #include "soc.hpp"
 #include "testbench/cp0_checker.hpp"
 #include "testbench/inst_timer.hpp"
 
+INITIALIZE_EASYLOGGINGPP
+sim_status_t sim_status = SIM_RUN;
+
 el::Logger* nemu_log;
 el::Logger* mycpu_log;
-sim_status_t sim_status = SIM_RUN;
 uint64_t ticks = 0;
-uint32_t log_pc = 0xbfc00000;
+uint32_t log_pc = CONFIG_RESET_PC;
 extern bool mainloop(
         Vmycpu_top* top,
         axi_paddr* axi,
         std::string wave_name,
         dual_soc& soc
         );
-
-INITIALIZE_EASYLOGGINGPP
 
 void run_func(
         Vmycpu_top* top,
@@ -43,11 +40,21 @@ void run_perf(
         axi_paddr* axi,
         dual_soc& soc
         ){/*{{{*/
-    for (size_t i = 1; i <= 10; i++) {
+    for (size_t i = CONFIG_PERF_START; i <= CONFIG_PERF_END; i++) {
         soc.set_switch(i);
         if (!mainloop(top, axi, "perf-"+std::to_string(i), soc)) break;
     }
 }/*}}}*/
+
+void run_system(
+        Vmycpu_top* top,
+        axi_paddr* axi,
+        dual_soc& soc,
+        string test_name
+        ){/*{{{*/
+    mainloop(top, axi, test_name, soc);
+}/*}}}*/
+
 
 extern void parse_args(int argc, char *argv[]);
 int main (int argc, char *argv[]) {
@@ -73,6 +80,9 @@ int main (int argc, char *argv[]) {
 
     IFDEF(CONFIG_TEST_FUNC, run_func(top, axi, soc));
     IFDEF(CONFIG_TEST_PERF, run_perf(top, axi, soc));
+    IFDEF(CONFIG_TEST_SYS ,  run_system(top, axi, soc, "system"));
+    IFDEF(CONFIG_TEST_UBOOT, run_system(top, axi, soc, "uboot"));
+    IFDEF(CONFIG_TEST_LINUX, run_system(top, axi, soc, "linux"));
 
     top->final();
     nemu_log->flush();

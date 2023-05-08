@@ -46,20 +46,17 @@ enum {
     TEST_NAME_LINUX
 };
 
-#define __FUNC_DIR__ NSCSCC_HOME "/func_test_v0.01/soft/func/obj/"
-#define __PERF_DIR__ NSCSCC_HOME "/perf_test_v0.01/soft/perf_func/obj/allbench/"
-#define __SYST_DIR__ NSCSCC_HOME "/system_test_v0.01/supervisor-mips32/kernel/kernel.bin"
-#define __UBOOT_DIR__ "/home/hgh/cpu/cyy/u-boot/" 
-#define __LINUX_DIR__ "/home/hgh/cpu/cyy/linux/"
-// #define __LINUX_DIR__ "/home/hgh/cpu/nscscc2021_group_v0.01/soc_run_os_v0.01/soc_up/pmon_and_linux/linux-2.6.32/"
-#define __UCORE_DIR__ "current no ucore bin"
+#define __FUNC_DIR__  "./test/func/"
+#define __PERF_DIR__  "./test/perf/"
+#define __SYST_DIR__  "./test/system/"
+#define __UBOOT_DIR__ "./test/uboot/"
+#define __LINUX_DIR__ "./test/linux/"
 
 #define __FUNC_BIN__ __FUNC_DIR__ "main.bin"
 #define __PERF_BIN__ __PERF_DIR__ "inst_data.bin"
 #define __SYST_BIN__ __SYST_DIR__ "kernel.bin"
 #define __UBOOT_BIN__ __UBOOT_DIR__ "u-boot.bin"
-#define __LINUX_BIN__ "/home/hgh/cpu/cyy/cyy_vmlinux.bin"
-// #define __LINUX_BIN__ __LINUX_DIR__ "vmlinux.bin"
+#define __LINUX_BIN__ __LINUX_DIR__ "vmlinux.bin"
 
 #define __FUNC_ELF__ __FUNC_DIR__ "main.elf"  
 #define __PERF_ELF__ __PERF_DIR__ "main.elf"  
