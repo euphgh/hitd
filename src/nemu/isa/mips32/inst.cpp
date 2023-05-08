@@ -235,7 +235,6 @@ int mips32_CPU_state::isa_exec_once(bool has_int) {
     // TIMED_FUNC(isa_exec_once);
     inst_state.wnum = 0;
     inst_state.flag = 0;
-    have_dised = false;
 
     inst_state.snpc = inst_state.pc = arch_state.pc;
     word_t this_pc = inst_state.snpc;

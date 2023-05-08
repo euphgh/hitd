@@ -121,7 +121,7 @@ bool mainloop(
     top->aresetn = 1;
 
     while (!Verilated::gotFinish()) {
-        TIMED_SCOPE(one_clk,"one_clk");
+        // TIMED_SCOPE(one_clk,"one_clk");
         /* posedge edge comming {{{*/
         ++ticks;
         top->aclk = !top->aclk;
@@ -151,7 +151,7 @@ bool mainloop(
         if (commit_num > 0) {
             uint8_t mycpu_int = dpi_interrupt_seq();
             for (size_t i = 0; i < commit_num; i++) {
-                TIMED_SCOPE(nemu_once, "nemu_once");
+                // TIMED_SCOPE(nemu_once, "nemu_once");
                 if (!nemu->ref_exec_once(i+1 == mycpu_int)) {
                     sim_ending(nemu_state.state);
                     goto negtive_edge;

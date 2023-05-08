@@ -27,7 +27,7 @@ extern bool mainloop(
 
 INITIALIZE_EASYLOGGINGPP
 
-static void run_func(
+void run_func(
         Vmycpu_top* top,
         axi_paddr* axi,
         dual_soc& soc
@@ -38,7 +38,7 @@ static void run_func(
     }
 }/*}}}*/
 
-static void run_perf(
+void run_perf(
         Vmycpu_top* top,
         axi_paddr* axi,
         dual_soc& soc
@@ -50,7 +50,6 @@ static void run_perf(
 }/*}}}*/
 
 extern void parse_args(int argc, char *argv[]);
-extern int arg_img_code;
 int main (int argc, char *argv[]) {
     parse_args(argc, argv);
 
@@ -60,7 +59,7 @@ int main (int argc, char *argv[]) {
 
     std::signal(SIGINT, [](int) {sim_status = SIM_INT;});
 
-    dual_soc soc(arg_img_code);
+    dual_soc soc {};
     Vmycpu_top* top = new Vmycpu_top();
     dpi_init();
     axi_paddr* axi = new axi_paddr(top);
@@ -72,14 +71,9 @@ int main (int argc, char *argv[]) {
     IFDEF(CONFIG_MEM_DIFF, axi->set_diff_mem(nemu_paddr_top));
     init_isa(nemu_paddr_top);
 
-    switch (arg_img_code) {
-        case TEST_NAME_FUNC:
-            run_func(top, axi, soc);
-            break;
-        case TEST_NAME_PERF:
-            run_perf(top, axi, soc);
-            break;
-    }
+    IFDEF(CONFIG_TEST_FUNC, run_func(top, axi, soc));
+    IFDEF(CONFIG_TEST_PERF, run_perf(top, axi, soc));
+
     top->final();
     nemu_log->flush();
     mycpu_log->flush();

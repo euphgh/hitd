@@ -3,9 +3,12 @@ VSRC_SUB_DIR = $(shell fd -t d . $(VSRC_HOME))
 VINCLUDE = $(addprefix -I, $(VSRC_SUB_DIR))
 
 TB_SRCS     := $(shell find src/testbench -name "*.cpp")
-TB_CFLAGS   += $(CFLAGS_BUILD) -D__GUEST_ISA__=$(GUEST_ISA)
 TB_INCLUDES  = $(addprefix -I, $(TB_INC_PATH) $(NEMU_INC_PATH))
-TB_CFLAGS   := $(COM_FLAG) $(TB_INCLUDES) $(TB_CFLAGS)
+
+TB_CFLAGS 	:= -MMD -Wall -Werror -std=gnu++17 -I$(HITD_HOME)/include
+TB_CFLAGS 	+= -DNSCSCC_HOME=\\\"$(NSCSCC_HOME)\\\" -DHITD_HOME=\\\"$(HITD_HOME)\\\" 
+TB_CFLAGS   += $(CFLAGS_BUILD) -D__GUEST_ISA__=$(GUEST_ISA)
+TB_CFLAGS   += $(TB_INCLUDES)
 
 # verilator -Mdir Name of output object directory
 VXX_MDIR = $(HITD_HOME)/build
@@ -32,9 +35,11 @@ endif
 
 VSRC_TOP := $(VSRC_HOME)/$(TOP_NAME).v
 VSRC_ALL := $(shell find -L $(VSRC_HOME) -type f -name "*.v")
+LD_LOG := $(BUILD_DIR)/$(BINARY).log
 
 elf:$(BINARY)
 
 $(BINARY): $(VSRC_ALL) $(TB_SRCS) $(OBJ_ALL)
-	-rm $(BINARY)
-	@verilator $(VXXFLAGS) $(VSRC_TOP) $(TB_SRCS) $(OBJ_ALL)
+	@-rm -f $(BINARY)
+	@echo + VERILATOR $(BINARY)
+	@verilator $(VXXFLAGS) $(VSRC_TOP) $(TB_SRCS) $(OBJ_ALL) > /dev/null

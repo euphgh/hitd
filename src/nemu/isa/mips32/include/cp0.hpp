@@ -174,10 +174,10 @@ class CP0_t {
     public:
         CP0_t (bool dpic = false) {}
         void reset();
-        bool read (uint8_t rd_sel, word_t& data);
+        bool read (uint8_t rd_sel, word_t& data)const ;
         bool write(uint8_t rd_sel, word_t  data); // write writable field 
-        bool check(CP0_t& ref);
-        void log_error(CP0_t& ref);
+        bool check(const CP0_t& ref);
+        void log_error(const CP0_t& ref);
         __cp0_info__(__cp0_reg_def__,)
         uint8_t clock_tick;
         static const char* find_name(uint8_t rd_sel){

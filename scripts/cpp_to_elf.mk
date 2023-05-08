@@ -38,7 +38,7 @@ ELFIN_AR += tools/libelfin/elf/libelf++.a
 ELFIN_AR += tools/libelfin/dwarf/libdwarf++.a
 # OBJ_ALL  += tools/libelfin/elf/test.a
 $(ELFIN_AR):
-	make -C tools/libelfin -j $(nproc)
+	make -C tools/libelfin
 endif
 OBJ_ALL += $(NEMU_OBJS)
 endif
@@ -70,7 +70,7 @@ $(SOC_OBJS): $(OBJ_DIR)/%.o: %.cpp
 	$(call call_fixdep, $(@:.o=.d), $@)
 OBJ_ALL += $(SOC_OBJS) # }}}
 
-DIS_SRCS    = src/utils/disasm.cpp #{{{
+DIS_SRCS    = src/utils/disassemble.cpp #{{{
 DIS_CFLAGS  += $(COM_FLAG) $(CFLAGS_BUILD) $(shell llvm-config --cxxflags)
 LIBS += $(shell llvm-config --libs)
 DIS_OBJS = $(DIS_SRCS:%.cpp=$(OBJ_DIR)/%.o)

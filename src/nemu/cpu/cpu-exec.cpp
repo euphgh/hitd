@@ -52,7 +52,7 @@ void trace_and_difftest(Decode *_this) {
     IFDEF(CONFIG_ITRACE, nemu->log_pt->trace("[I] %v", nemu->isa_disasm_inst()));
     IFDEF(CONFIG_DIFFTEST, extern std::unique_ptr<dual_soc> soc;
             difftest_step(soc->ref_ext_int()));
-    IFDEF(CONFIG_WATCH_POINT, if(is_wp_change())nemu_state.state=NEMU_STOP); //TODO: make watch point a class with methor
+    IFDEF(CONFIG_WATCH_POINT, if(is_wp_change())nemu_state.state=NEMU_STOP);
     IFDEF(CONFIG_DEADLOOP, check_deadloop(_this->pc));
 #ifdef CONFIG_DWARD
     uint8_t flag = _this->flag;

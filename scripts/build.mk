@@ -1,5 +1,12 @@
 .DEFAULT_GOAL = app
 
+# Add necessary options if the target is a shared library
+ifeq ($(SHARE),1)
+SO = -so
+CFLAGS  += -fPIC -fvisibility=hidden
+LDFLAGS += -shared -fPIC
+endif
+
 WORK_DIR  = $(shell pwd)
 BUILD_DIR = $(WORK_DIR)/build
 
@@ -7,33 +14,14 @@ INC_PATH := $(WORK_DIR)/include $(INC_PATH)
 OBJ_DIR  = $(BUILD_DIR)/obj-$(NAME)$(SO)
 BINARY   = $(BUILD_DIR)/$(NAME)$(SO)
 
-# Add necessary options if the target is a shared library
-ifeq ($(SHARE),1)
-SO = -so
-CFLAGS  += -fPIC
-LDFLAGS += -rdynamic -shared -fPIC
-endif
-
-# Compilation flags
-ifeq ($(CC),clang)
-CXX := clang++
-else
+CC := gcc
 CXX := g++
-endif
 LD := $(CXX)
 INCLUDES = $(addprefix -I, $(INC_PATH))
-CFLAGS  := -MMD -Wall -Werror $(INCLUDES) $(CFLAGS)
-
-ifdef CFLAGFILE
-CFLAGS  += $(CFLAGS) @$(CFLAGFILE)
-endif
-
+CFLAGS  := -O2 -MMD -Wall -Werror $(INCLUDES) $(CFLAGS)
 LDFLAGS := -O2 $(LDFLAGS)
 
-OBJS = $(SRCS:%.c=$(OBJ_DIR)/%.o) 
-OBJS += $(CXXSRC:%.cc=$(OBJ_DIR)/%.o) 
-OBJS += $(CPPSRC:%.cpp=$(OBJ_DIR)/%.o)
-
+OBJS = $(SRCS:%.c=$(OBJ_DIR)/%.o) $(CXXSRC:%.cc=$(OBJ_DIR)/%.o)
 
 # Compilation patterns
 $(OBJ_DIR)/%.o: %.c
@@ -48,11 +36,6 @@ $(OBJ_DIR)/%.o: %.cc
 	@$(CXX) $(CFLAGS) $(CXXFLAGS) -c -o $@ $<
 	$(call call_fixdep, $(@:.o=.d), $@)
 
-$(OBJ_DIR)/%.o: %.cpp $(SRCS_APPEND)
-	@echo + CXX $<
-	@mkdir -p $(dir $@)
-	@$(CXX) $(CFLAGS) $(CXXFLAGS) -c -o $@ $<
-
 # Depencies
 -include $(OBJS:.o=.d)
 
@@ -62,9 +45,9 @@ $(OBJ_DIR)/%.o: %.cpp $(SRCS_APPEND)
 
 app: $(BINARY)
 
-$(BINARY): $(OBJS) $(OBJS_APPEND) $(ARCHIVES)
+$(BINARY): $(OBJS) $(ARCHIVES)
 	@echo + LD $@
-	@$(LD) -o $@ $(OBJS) $(OBJS_APPEND) $(LDFLAGS) $(ARCHIVES) $(LIBS)
+	@$(LD) -o $@ $(OBJS) $(LDFLAGS) $(ARCHIVES) $(LIBS)
 
 clean:
-	rm -rf $(BUILD_DIR)
+	-rm -rf $(BUILD_DIR)

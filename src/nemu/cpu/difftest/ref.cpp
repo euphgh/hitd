@@ -44,7 +44,7 @@ void nemu_ref_end_statistics(int state, el::Logger* log_pt){/*{{{*/
             break;
         case NEMU_ABORT: 
             log_pt->error("Fail to execute %v", 
-                    mips_disassemble.get_disassemble(nemu->inst_state.pc, nemu->inst_state.inst));
+                    llvm_disassemble(nemu->inst_state.pc, nemu->inst_state.inst));
             break;
         default:
             __ASSERT_NEMU__(0, "unexpected quit state {}", state);

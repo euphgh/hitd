@@ -13,7 +13,7 @@ pkgs.mkShell {
   ];
   shellHook = ''
     export HITD_HOME=$(pwd)
-    export VSRC_HOME="/home/hgh/workspace/mycpu"
-    export NSCSCC_HOME="/home/hgh/nscscc"
+    export VSRC_HOME="/home/hgh/cpu/cpuref/mycpu"
+    export NSCSCC_HOME="/home/hgh/cpu/nscscc2021_group_v0.01"
   '';
 }

@@ -13,6 +13,7 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
+#include "disassemble.hpp"
 #include "nemu/isa.hpp"
 #include "utils.hpp"
 #include "macro.hpp"
@@ -55,4 +56,5 @@ CPU_state::mips32_CPU_state(PaddrTop* ptop_input):
 void init_isa(PaddrTop* ptop_input) {
     nemu = new CPU_state(ptop_input);
     nemu->reset(CONFIG_RESET_PC);
+    llvm_disasm_init();
 }

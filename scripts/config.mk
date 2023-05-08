@@ -28,6 +28,7 @@ Kconfig      ?= $(HITD_HOME)/Kconfig
 rm-distclean += include/generated include/config .config .config.old
 silent := -s
 
+
 CONF   := $(KCONFIG_PATH)/build/conf
 MCONF  := $(KCONFIG_PATH)/build/mconf
 FIXDEP := $(FIXDEP_PATH)/build/fixdep

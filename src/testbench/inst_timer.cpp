@@ -26,7 +26,7 @@ bool inst_timer::save_date(std::string filename){/*{{{*/
         bool res = outfile.is_open();
         if (!res) LOG(ERROR) << "inst_timer fail to write " << filename;
         else {
-            for (index_t index=0; index<=item_nr; index++) {
+            for (iindex_t index=0; index<=item_nr; index++) {
                 inst_info& it = data[index];
                 if (it.runtime){
                     word_t pc = index2pc(index);

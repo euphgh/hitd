@@ -274,7 +274,7 @@ static int cmd_pi(char* args){
     nemu->e_protect = true;
     word_t arch_pc = nemu->arch_state.pc;
     fmt::print("pc:\t" HEX_WORD "\t{}\n", arch_pc, 
-            mips_disassemble.get_disassemble(arch_pc,nemu->isa_vaddr_read(arch_pc, 4)));
+            llvm_disassemble(arch_pc,nemu->isa_vaddr_read(arch_pc, 4)));
     nemu->e_protect = false;
     return 0;
 }
