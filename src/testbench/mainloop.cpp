@@ -82,7 +82,7 @@ bool mainloop(
     IFDEF(CONFIG_WAVE_ON,Verilated::traceEverOn(true));
     IFDEF(CONFIG_WAVE_ON,wave_file_t tfp);
     IFDEF(CONFIG_WAVE_ON,top->trace(&tfp,0));
-    IFDEF(CONFIG_WAVE_ON,tfp.open((__WAVE_DIR__ + wave_name + "." + CONFIG_WAVE_EXT).c_str()));
+    IFDEF(CONFIG_WAVE_ON,tfp.open((CONFIG_WAVE_DIR"/"+wave_name + "." + CONFIG_WAVE_EXT).c_str()));
     IFDEF(CONFIG_CP0_DIFF, cp0_checker mycpu_cp0_checker);
 
     ticks = 0;

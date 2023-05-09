@@ -18,5 +18,4 @@ extern sim_status_t sim_status;
             sim_status = SIM_ABORT; \
         } \
   } while (0)
-#define __WAVE_DIR__ HITD_HOME "/vlogs/wave/"
 #endif /* !__DIFF_SIM__ */

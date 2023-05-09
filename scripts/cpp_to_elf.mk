@@ -114,12 +114,13 @@ $(BINARY): $(OBJ_ALL) $(ELFIN_AR)
 	@$(LD) $(OBJ_ALL) $(ELFIN_AR) $(LIBS) -o $@ 
 endif
 
-
-
 # Some convenient rules
 .PHONY: elf gdb sim
 
-LOG_FILE = $(call remove_quote, $(CONFIG_TRACE_FILE))
+LOG_FILE = 	$(call remove_quote, $(CONFIG_TRACE_FILE))
+LOG_DIR  = 	$(dir $(LOG_FILE))
+WAVE_DIR = 	$(call remove_quote, $(CONFIG_WAVE_DIR))
+
 ARGS = --log=$(LOG_FILE)
 ifdef CONFIG_NEMU_BAT
 ARGS += -b
@@ -129,13 +130,16 @@ dirs:
 ifdef CONFIG_TRACE
 	@mkdir -p $(dir $(LOG_FILE))
 endif
+ifdef CONFIG_WAVE_ON
+	@mkdir -p $(WAVE_DIR)
+endif
 
 elf: $(BINARY)
 
+TB_EXEC := $(BINARY) $(ARGS)
 sim: elf dirs
 	$(TB_EXEC)
 
-TB_EXEC := $(BINARY) $(ARGS)
 gdb: elf
 	gdb -s $(BINARY) --args $(TB_EXEC)
 
@@ -144,3 +148,9 @@ log:
 
 clean:
 	rm -rf $(BUILD_DIR)
+ifdef CONFIG_TRACE
+	rm -f $(LOG_FILE)
+endif
+ifdef CONFIG_WAVE_ON
+	rm -rf $(WAVE_DIR)
+endif

@@ -17,6 +17,7 @@
 #include "nemu/isa.hpp"
 #include "utils.hpp"
 #include "macro.hpp"
+#include "path.hh"
 #include <memory>
 
 static std::map<int, const char*> name_to_elf = {

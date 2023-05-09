@@ -1,8 +1,8 @@
 include/config
 include/generated
 build
-vlogs
 *.log
+wave
 .*/
 .*
 !.gitignore

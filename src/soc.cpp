@@ -4,6 +4,7 @@
 #include "utils.hpp"
 #include <csignal>
 #include <cstdio>
+#include "path.hh"
 #include "nemu/mytrace.hpp"
 #include <fmt/core.h>
 #include "testbench/sim_state.hpp"

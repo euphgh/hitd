@@ -37,6 +37,15 @@ config WAVE_ON
 bool "trace wave file"
 default y
 
+config WAVE_DIR
+    depends on WAVE_ON
+    string "Wave file absolutely path"
+    default "$(HITD_HOME)/wave"
+    help 
+        the absolute path or relative path of wave diretory,
+        can use environment variable with makefile grammer.
+        can not add the last "\".
+
 choice
   prompt "Wave file extension"
   depends on WAVE_ON

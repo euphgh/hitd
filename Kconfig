@@ -129,8 +129,11 @@ config TRACE
 
 config TRACE_FILE
     depends on TRACE
-    string "log file absolutely path"
-    default "$(HITD_HOME)/vlogs/tb-trace.log"
+    string "log file path and name"
+    default "$(HITD_HOME)/tb-trace.log"
+    help 
+        the absolute path or relative path of log file,
+        can use environment variable with makefile grammer
 
 config TRACE_FILE_SIZE
     depends on TRACE
