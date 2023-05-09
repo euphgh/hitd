@@ -24,15 +24,14 @@ int "Stop perference test after run which program"
 range PERF_START 10
 default 1
 
+config PERF_ANALISES
+depends on TEST_PERF
+bool "Record every instruction execute time"
+default n
 endmenu# }}}
 
 
 menu "Wave and Debugging"
-
-config PERF_ANALISES
-bool "Record every instruction execute time"
-default n
-
 config WAVE_ON
 bool "trace wave file"
 default y
@@ -44,7 +43,7 @@ config WAVE_DIR
     help 
         the absolute path or relative path of wave diretory,
         can use environment variable with makefile grammer.
-        can not add the last "\".
+        can not add the last "/".
 
 choice
   prompt "Wave file extension"

@@ -6,3 +6,4 @@ wave
 .*/
 .*
 !.gitignore
+compile_commands.json
