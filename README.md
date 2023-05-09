@@ -23,6 +23,7 @@
 ## 环境说明
 该测试环境是一个linux系统下的cpp工程，使用了多方库文件。
 为了确保能够编译该工程，需要配置一定的编译环境。
+编译时需要V源码，若没有V源码，可使用github110037/mycpu.git的difftest分支。
 预计支持如下三种环境配置方式，已实现两种：
 ### 手动配置
 1. 安装以下软件包：
@@ -80,8 +81,25 @@ make vtest ## 测试v代码不会有编译报错。 编译命令详见scripts/ve
 1. 适配V源码
 2. 配置编译选项
 3. 编译运行。
+运行需要V源码，若没有V源码，可使用github110037/mycpu.git的difftest分支。
 
 ### 适配V源码
+difftest运行需要获取V代码变量值，其中必须获取通用寄存器，退休指令PC等数据。
+更具体而言，必须实现```src/testbench/dpic/export.cpp```下的如下函数：
+```cpp
+/* initalize dpi */
+void dpi_init();
+/* pass regfile num and get the value of arch regfile in this cycle */
+uint32_t dpi_regfile(uint8_t num);
+/* return the number of retire instruction in this cycle */
+uint8_t dpi_retire();
+/* return the PC value of the last retire instruction in this cycle */
+uint32_t dpi_retirePC();
+```
+每个时钟周期，testbench都会调用dpi_retire判断是否有指令退休。
+如果有，则会在该周期调用另外的api，并让模拟器执行相同的指令数目，比对寄存器是否正确。
+关于函数的实现，具体参考github110037/mycpu.git的difftest分支和本项目的mycpu分支。
+C代码获取V代码数据的方式采用dpi，详见verilator的相关部分。
 
 ### 配置编译选项
 本项目使用Kconfig配置编译选项，使用```make menuconfig```打开界面更改配置。

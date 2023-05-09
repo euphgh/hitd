@@ -1,7 +1,6 @@
 #include "testbench/dpic.hpp"
 #include "Vmycpu_top__Dpi.h"
 #include "debug.hpp"
-#include "testbench/dpic.hpp"
 #include "cp0.hpp"
 
 static svScope RegFile_u ; 
