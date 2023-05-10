@@ -15,9 +15,6 @@ void dpi_init(){
     u_PrimaryExceptionProcessor = svGetScopeFromName("TOP.mycpu_top.u_Main.u_PrimaryExceptionProcessor"); 
 }
 
-uint64_t dpi_get_hilo(){
-    TODO();
-}
 uint32_t dpi_regfile(uint8_t num){
     svSetScope(RegFile_u);
     return get_regfile(num);
@@ -56,6 +53,10 @@ void dpi_get_debug_info1(debug_info_t & debug_info){
     debug_info.wen = commitWEN1();
     debug_info.wnum = commitWNUM1();
     debug_info.wdata = commitWDATA1();
+}
+
+uint64_t dpi_get_hilo(){
+    TODO();
 }
 
 uint8_t dpi_interrupt_seq(){

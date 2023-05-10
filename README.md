@@ -1,30 +1,36 @@
 # HIT-Difftest：支持NSCSCC的MIPS32差分测试
 哈尔滨工业大学(本部)开发，用于测试verlog/systemverilog编写的MIPS32-Release1处理器的差分测试环境，
-可仿真NSCSCC大赛官方提供的SoC，需使用verilator编译v代码。
+可仿真NSCSCC大赛官方提供的SoC，需使用verilator编译V代码。
 
 可仿真如下测试：
-* NSCSCC功能测试
-* NSCSCC性能测试
-* NSCSCC系统测试(待完善)
-* uboot仿真至进入shell
-* linux仿真至进入shell
+- [x]  NSCSCC功能测试
+- [x]  NSCSCC性能测试
+- [ ]  NSCSCC系统测试(待完善)
+- [x]  uboot仿真至进入shell
+- [x]  linux仿真至进入shell
 
 可支持如下功能
-* 比对通用寄存器
-* 比对HILO寄存器
-* 比对CP0寄存器
-* 比对内存数据
-* 生成波形文件，支持fst和vcd格式
-* 生成log文件，自动分析AXI协议
-* 性能测试的数据统计(待完善)
-* 死循环检测(待完善)
-* linux内核源码的C调试器(待完善)
+- [x] 比对通用寄存器
+- [x] 比对HILO寄存器
+- [x] 比对CP0寄存器
+- [x] 比对内存数据
+- [x] 生成波形文件，支持fst和vcd格式
+- [x] 生成log文件，自动分析AXI协议
+- [ ] 性能测试的数据统计(待完善)
+- [ ] 死循环检测(待完善)
+- [ ] linux内核源码的C调试器(待完善)
 
 ## 环境说明
-该测试环境是一个linux系统下的cpp工程，使用了多方库文件。
+该测试环境，即testbench，是一个**Linux系统下的cpp工程**，使用了多方库文件。
 为了确保能够编译该工程，需要配置一定的编译环境。
-编译时需要V源码，若没有V源码，可使用github110037/mycpu.git的difftest分支。
-预计支持如下三种环境配置方式，已实现两种：
+编译和运行本项目需要V源码，并结合V代码对cpp的API进行一定的实现。
+
+项目的**master分支**是一个模板，定义了运行testbench必须实现的函数，
+但**未提供实现**，函数需要根据不同的V代码进行不同实现。
+项目的**mycpu分支提供了一个实现，对应的V代码是github110037/mycpu.git的difftest分支。**
+该仓库的V代码是一个实现了NSCSCC基本集的CPU，无法运行uboot和Linux。
+
+***建议使用这两个仓库的对应分支进行初次编译以熟悉流程。***
 ### 手动配置
 1. 安装以下软件包：
 * fd
@@ -35,17 +41,19 @@
 * readline  (若无头文件则需单独安装)
 * verilator
 * libncurses(若无头文件则需单独安装)
-2. 克隆仓库到任意路径
+2. 克隆HITD仓库到任意路径
 ```bash
-git clone https://github.com/github1100037/HITD.git
-cd HITD
-```
-3. 导入环境变量，通过环境变量指定v代码文件夹，测试v代码通过verilator编译
-```bash
+git clone https://github.com/github1100037/HITD.git 
+cd HITD ##若使用mycpu请自行使用git switch mycpu切换到对应分支
 export HITD_HOME=$(pwd) ##导入该仓库路径作为环境变量，编译时会使用
-export VSRC_HOME=/you/verilog/path ##导入v代码仓库路径作为环境变量，编译时会使用
 ```
-注意，确保使用命令```make vtest```v代码不会有编译报错。 编译命令详见```scripts/ver_to_cpp.mk```
+3. 指定V代码文件夹，测试V代码通过verilator编译
+```bash
+## 若使用mycpu仓库，请先git clone https://github.com/github1100037/mycpu.git获取仓库到任意路径
+## 并使用cd mycpu; git switch difftest切换到对应分支
+export VSRC_HOME=/you/verilog/path ##导入v代码仓库路径作为环境变量，编译时会使用
+make vtest ##确保V代码能通过编译，具体编译命令详见scripts/ver_to_cpp.mk，可自行修改编译选项
+```
 
 4. 编译工程，生成可执行ELF文件
 ```bash
@@ -55,37 +63,31 @@ make elf ##编译全部源代码
 如果执行上述命令没有报错，则编译成功，会生成可执行文件```build/Vmycpu_top```。
 执行```make sim```运行该文件。
 ### Nix配置(推荐)
-Nix是一个包管理器，提供了一种滚动发行和xxx的特殊折衷。
-非常适合进行包安装，环境变量、文件管理等等。
-1. 阅读官方手册安装Nix包管理器，较新的Linux发行版都可支持。
+Nix是一个包管理器和构建系统，它解析Nix表达式语言中指定的可重现构建指令，
+创建一个不可变的包存储，允许原子升级、回滚和并发安装不同版本的包，从根本上消除依赖地狱。
+
+Nix非常适合进行包安装，环境变量、文件管理等，可利用它**简化手动安装中的第1、2步，其他步骤不变**。
+
+1. 阅读[Nix官方网站](https://nixos.org/download.html)安装Nix包管理器，较新的Linux发行版都可支持。
 2. 克隆仓库到任意路径
 ```bash
 git clone https://github.com/github1100037/HITD.git
 cd HITD
 ```
 3. 生成环境。只需执行命令：```nix-shell```
-
-该指令会自动将软件包下载到缓存中，进行环境变量配置等。
-该指令执行完毕后会开一个新的shell，在该shell里拥有所有编译改项目所需的软件包和环境变量。
-但退出该Shell后，软件包不再可用，环境变量也恢复原。
-
-4. 指定v代码文件夹，测试v代码通过verilator编译
-```bash
-export VSRC_HOME=/you/verilog/path ##导入v代码仓库路径作为环境变量，编译时会使用
-make vtest ## 测试v代码不会有编译报错。 编译命令详见scripts/ver_to_cpp.mk
-```
-5. 编译工程，同手动编译
 ### Docker配置(未实现)
 ## 使用说明
 使用分为三步
 1. 适配V源码
 2. 配置编译选项
 3. 编译运行。
-运行需要V源码，若没有V源码，可使用github110037/mycpu.git的difftest分支。
 
 ### 适配V源码
-difftest运行需要获取V代码变量值，其中必须获取通用寄存器，退休指令PC等数据。
-更具体而言，必须实现```src/testbench/dpic/export.cpp```下的如下函数：
+运行testbench需要V源码，并针对对特定的V代码编写cpp函数，使得cpp的testbench能获取V代码变量值。
+必须获取的变量值有通用寄存器，退休指令PC等数据。
+cpp获取V代码数据的方法是使用verilator的dpi功能获取V代码变量数据，
+使用方法可参考[verilator官方手册](https://verilator.org/guide/latest/connecting.html#direct-programming-interface-dpi)。
+对本项目而言，必须使用dpi实现```src/testbench/dpic/export.cpp```下的如下函数：
 ```cpp
 /* initalize dpi */
 void dpi_init();
@@ -97,9 +99,21 @@ uint8_t dpi_retire();
 uint32_t dpi_retirePC();
 ```
 每个时钟周期，testbench都会调用dpi_retire判断是否有指令退休。
-如果有，则会在该周期调用另外的api，并让模拟器执行相同的指令数目，比对寄存器是否正确。
-关于函数的实现，具体参考github110037/mycpu.git的difftest分支和本项目的mycpu分支。
-C代码获取V代码数据的方式采用dpi，详见verilator的相关部分。
+如果有，则会在该周期调用另外的函数，并让模拟器执行相同的指令数目，比对寄存器是否正确。
+实现样例可参考github110037/mycpu.git的difftest分支和本项目的mycpu分支。
+如果实现了如上的函数，可以实现如下功能：
+- [x] 比对通用寄存器
+- [x] 比对内存数据
+- [x] 生成波形文件，支持fst和vcd格式
+- [x] 生成log文件，自动分析AXI协议
+
+在文件```src/testbench/dpic/export.cpp```中，还有其他以dpi开头的函数，是为了实现附加功能设计的。
+如果需要如下附加功能，则必须实现：
+- [x] 实时检查HILO寄存器
+- [x] 实时检查CP0寄存器
+这两种实时比对功能一不同的方式实现。
+1. 类似通用寄存器，如果指令退休，则根据手册判断指令是否会修改特殊寄存器，会修改则比对。
+2. 比对依赖于V代码生成一个比对特殊寄存器的信号，testbench在每个时钟周期检查该信号，如果置起则比对。每个时钟周期
 
 ### 配置编译选项
 本项目使用Kconfig配置编译选项，使用```make menuconfig```打开界面更改配置。
@@ -153,14 +167,14 @@ C代码获取V代码数据的方式采用dpi，详见verilator的相关部分。
 关于本项目提交的issue，**请统一以Nix方式复现并汇报**，有助于开发人员减少环境配置方面的工作。
 对于有意合作开发并提交pr者，如果能先通过email联系，本人将感激不尽。
 
-目前有以下优先待完成的事项
-* 可视化性能测试分析数据
-* 虚拟内存的MTrace
-* 基于Chisel语言的适配
-* 开发者模式的相关文档说明
-* 系统测试的shell操作
-* Docker方式环境配置
-* linux内核源码的C调试器，显示变量
+目前有以下优先待完成的事项：
+- [ ] 编写可视化性能测试分析数据脚本
+- [ ] 编写开发者模式的说明文档
+- [ ] 实现虚拟内存的MTrace
+- [ ] 适配基于Chisel语言环境
+- [ ] 实现NSCSCC系统测试的shell操作
+- [ ] 实现Docker方式环境配置
+- [ ] 修复Linux内核源码的C调试器，显示变量
 
 ## 感谢
 本项目参考或使用了如下项目：
