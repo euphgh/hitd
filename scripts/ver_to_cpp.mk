@@ -20,8 +20,9 @@ VXX_WNO = -Wno-caseincomplete \
 
 NPROC = $(shell nproc)
 
-VXXFLAGS := --cc --exe --build
-VXXFLAGS += --Mdir $(VXX_MDIR) 
+VXX_BUILD := --cc --exe --build
+VXX_BUILD += --Mdir $(VXX_MDIR)
+
 VXXFLAGS += $(VXX_WNO) 
 VXXFLAGS += --relative-includes 
 VXXFLAGS += $(VINCLUDE)
@@ -37,9 +38,13 @@ VSRC_TOP := $(VSRC_HOME)/$(TOP_NAME).v
 VSRC_ALL := $(shell find -L $(VSRC_HOME) -type f -name "*.v")
 LD_LOG := $(BUILD_DIR)/$(BINARY).log
 
+vtest:
+	@echo + VERILATOR LINT $(VSRC_HOME)
+	@verilator --lint-only $(VXXFLAGS) $(VSRC_TOP) > /dev/null
+
 elf:$(BINARY)
 
 $(BINARY): $(VSRC_ALL) $(TB_SRCS) $(OBJ_ALL)
 	@-rm -f $(BINARY)
 	@echo + VERILATOR $(BINARY)
-	@verilator $(VXXFLAGS) $(VSRC_TOP) $(TB_SRCS) $(OBJ_ALL) > /dev/null
+	@verilator $(VXX_BUILD) $(VXXFLAGS) $(VSRC_TOP) $(TB_SRCS) $(OBJ_ALL) > /dev/null

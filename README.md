@@ -1,6 +1,8 @@
 # HIT-Difftest：支持NSCSCC的MIPS32差分测试
-哈尔滨工业大学(本部)开发，用于测试verlog/systemverilog编写的MIPS32-Release1处理器的差分测试环境，
+哈尔滨工业大学(本部)开发，
+用于测试verlog/systemverilog编写的MIPS32-Release1处理器的差分测试环境，
 可仿真NSCSCC大赛官方提供的SoC，需使用verilator编译V代码。
+借鉴了南京大学的模拟器框架Nemu、重庆大学的模拟器cemu和soc-simulator。
 
 可仿真如下测试：
 - [x]  NSCSCC功能测试
@@ -93,14 +95,31 @@ cpp获取V代码数据的方法是使用verilator的dpi功能获取V代码变量
 void dpi_init();
 /* pass regfile num and get the value of arch regfile in this cycle */
 uint32_t dpi_regfile(uint8_t num);
-/* return the number of retire instruction in this cycle */
+/* return the number of retire instructions in this cycle */
 uint8_t dpi_retire();
 /* return the PC value of the last retire instruction in this cycle */
 uint32_t dpi_retirePC();
+/* return 0 if all retire instruction is not interrrupted 
+ * else return which instruction is interrrupted */
+uint8_t dpi_interrupt_seq();
 ```
-每个时钟周期，testbench都会调用dpi_retire判断是否有指令退休。
-如果有，则会在该周期调用另外的函数，并让模拟器执行相同的指令数目，比对寄存器是否正确。
-实现样例可参考github110037/mycpu.git的difftest分支和本项目的mycpu分支。
+dpi_init用于赋值一些全局静态变量，即verilator的dpi函数所需要的模块范围变量。
+因为调用dpi函数获取V代码变量时，需要指定变量所在的模块。
+指定变量所在模块使用```svSetScope```函数，传入一个verilator定义的模块范围类型```svScope```的变量，返回之前设定的模块范围变量。
+获取模块范围变量通过函数```svGetScopeFromName```函数，传入模块名的字符串。
+通过使用全局变量保存以减少函数调用。
+```cpp
+XXTERN svScope svSetScope(const svScope scope);
+XXTERN svScope svGetScopeFromName(const char* scopeName);
+```
+
+每个时钟周期，testbench都会调用dpi_retire判断是否有指令退休和退休数。
+如果有，会再调用dpi_interrupt_seq获取是否有异常，让模拟器执行相同的指令数目，
+并在模拟器执行出现中断的指令时，要求模拟器读取中断信号。
+最后，会在该周期调用dpi_retirePC和dpi_regfile函数，比对寄存器是否正确。
+该部分代码位于src/testbench/mainloop.cpp的113行。
+
+接口函数的实现样例可参考github110037/mycpu.git的difftest分支和本项目的mycpu分支。
 如果实现了如上的函数，可以实现如下功能：
 - [x] 比对通用寄存器
 - [x] 比对内存数据
@@ -111,9 +130,25 @@ uint32_t dpi_retirePC();
 如果需要如下附加功能，则必须实现：
 - [x] 实时检查HILO寄存器
 - [x] 实时检查CP0寄存器
+
 这两种实时比对功能一不同的方式实现。
-1. 类似通用寄存器，如果指令退休，则根据手册判断指令是否会修改特殊寄存器，会修改则比对。
-2. 比对依赖于V代码生成一个比对特殊寄存器的信号，testbench在每个时钟周期检查该信号，如果置起则比对。每个时钟周期
+* 类似通用寄存器，如果指令退休，则根据手册判断指令是否会修改特殊寄存器，会修改则比对
+* 比对时机依赖于V代码生成的比对信号，testbench在每个时钟周期检查该信号，如果置起则比对
+
+HILO寄存器实时比对种采用方式一实现，因此只需要一个函数：
+```cpp
+/* return the two regiter value: cat(hi,lo) */
+uint64_t dpi_get_hilo();
+```
+CP0寄存器实时比对采用方式二实现，因此需要两个函数：
+```cpp
+/* return true if cp0 change in this cycle
+ * and write the PC of instruction who
+ * change the cp0 */
+bool dpi_is_cp0_change(uint32_t* changed_pc);
+/* get CP0 value by rd and select */
+uint32_t dpi_get_cp0(int rd, int sel);
+```
 
 ### 配置编译选项
 本项目使用Kconfig配置编译选项，使用```make menuconfig```打开界面更改配置。
@@ -165,7 +200,11 @@ uint32_t dpi_retirePC();
 代码不符合开源社区开发规范等， 欢迎提出批评意见，本人会积极改正指正，与各位一同交流探讨。***
 
 关于本项目提交的issue，**请统一以Nix方式复现并汇报**，有助于开发人员减少环境配置方面的工作。
-对于有意合作开发并提交pr者，如果能先通过email联系，本人将感激不尽。
+对于有意合作开发并提交PR者，如果能先通过email联系，本人将感激不尽。
+
+由于本项目继承与Nemu，因此使用Makefile编译。
+编写代码建议使用的lsp是[clangd](https://clangd.llvm.org)，
+可以使用[bear](https://github.com/rizsotto/Bear)工具生成compile_commands.json。
 
 目前有以下优先待完成的事项：
 - [ ] 编写可视化性能测试分析数据脚本
@@ -178,10 +217,11 @@ uint32_t dpi_retirePC();
 
 ## 感谢
 本项目参考或使用了如下项目：
-* NJU-ProjectN/nemu：使用并修改了Nemu的框架，使用cpp进行了部分重写。
-* cyyself/cemu和cyyself/soc-simulator：借鉴了soc-simulator的框架，使用cpp进行了大部分重写。
+* [NJU-ProjectN/nemu](https://github.com/NJU-ProjectN/nemu)：使用并修改了Nemu的框架，使用cpp进行了部分重写。
+* [cyyself/cemu](https://github.com/cyyself/cemu)和[cyyself/soc-simulator](https://github.com/cyyself/soc-simulator)：
+借鉴了soc-simulator的框架，使用cpp进行了大部分重写。
     并使用cemu作为nemu的difftest模拟器。
-    在此十分感谢cyyself本人，不胜其烦的为我解答了仿真linux的问题。
-* aclements/libelfin：使用了该库编译出的a文件，帮助解析Dwarf文件格式。
+    在此十分感谢@cyyself本人，不胜其烦的为我解答了仿真linux的问题。
+* [aclements/libelfin](https://github.com/aclements/libelfin)：使用了该库编译出的a文件，帮助解析Dwarf文件格式。
     在开发者模式的时，实现了linux内核源码的C调试器
-* amrayn/easyloggingpp：使用了该log库，才能够打印出漂亮格式化的log
+* [amrayn/easyloggingpp](https://github.com/amrayn/easyloggingpp)：使用了该log库，才能够打印出漂亮格式化的log
