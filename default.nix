@@ -7,6 +7,7 @@ pkgs.mkShell {
     bison
     flex
     fmt
+    fd
   ];
   nativeBuildInputs = with pkgs; [
     llvmPackages_15.libllvm
