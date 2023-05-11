@@ -12,9 +12,10 @@ pkgs.mkShell {
   nativeBuildInputs = with pkgs; [
     llvmPackages_15.libllvm
   ];
+
+# you can write ```export VSRC_HOME="/you/vcode/path"```
+# to shellHook for exporting manually every times
   shellHook = ''
     export HITD_HOME=$(pwd)
-    export VSRC_HOME="/home/hgh/cpu/cpuref/mycpu"
-    export NSCSCC_HOME="/home/hgh/cpu/nscscc2021_group_v0.01"
   '';
 }
