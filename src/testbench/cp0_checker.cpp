@@ -20,14 +20,14 @@ void cp0_checker::check_change(){
         };
 #define __cp0_field_load__(name,msb,lsb,reset,writable,check) \
         .name = static_cast<unsigned int>((data & BITMASK(msb+1)) >> lsb),
-        __cp0_info__(__cp0_reg_load__, __cp0_field_load__);
+        __cp0_info__(__cp0_reg_load__, __cp0_field_load__, );
         saved_cp0.push(std::move(cnt_cp0));
     }
 }
 void cp0_checker::check_value(word_t pc, const CP0_t& ref){
     if (pc_when_changed.empty()) return;
     if (pc == pc_when_changed.front()){
-        bool res = saved_cp0.front()->check(ref);
+        bool res = saved_cp0.front()->check(&ref);
         if (res){
             pc_when_changed.pop();
             saved_cp0.pop();

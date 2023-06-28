@@ -11,8 +11,9 @@ bool CP0_t::read (uint8_t rd_sel, word_t& data) const {/*{{{*/
                      }
 #define __cp0_field_read__(name,msb,lsb,reset,writable,check) \
     (tmp.name << lsb) |
-        __cp0_info__(__cp0_reg_read__, __cp0_field_read__)
-        default:res = false;
+      __cp0_info__(__cp0_reg_read__, __cp0_field_read__, );
+    default:
+      res = false;
     }
     return res;
 }/*}}}*/
@@ -31,21 +32,20 @@ bool CP0_t::write(uint8_t rd_sel, word_t data){/*{{{*/
                      } 
 #define __cp0_field_write__(name,msb,lsb,reset,writable,check) \
     .name = static_cast<unsigned int>(writable ? ((data & BITMASK(msb+1)) >> lsb) : old->name),
-        __cp0_info__(__cp0_reg_write__,__cp0_field_write__)
-        default: 
-            res = false;
-            break;
+      __cp0_info__(__cp0_reg_write__, __cp0_field_write__, );
+    default:
+      res = false;
+      break;
     }
     return res;
 }/*}}}*/
 
-bool CP0_t::check(const CP0_t &ref){/*{{{*/
+bool CP0_t::check(const CP0_t *ref) { /*{{{*/
     bool res = true;
-#define __cp0_reg_check__(regname,rd,sel,...) \
-    res &= regname.equals(ref.regname);
-    __cp0_info__(__cp0_reg_check__,)
-    return res;
-}/*}}}*/
+#define __cp0_reg_check__(regname, rd, sel, ...)                               \
+  res &= regname.equals(ref->regname);
+    __cp0_info__(__cp0_reg_check__, , ) return res;
+} /*}}}*/
 
 #define __cp0_reg_equals__(regname,rd,sel,...) \
     bool regname##_t::equals(const regname##_t obj){ \
@@ -55,10 +55,9 @@ bool CP0_t::check(const CP0_t &ref){/*{{{*/
     }
 #define __cp0_field_equals__(name,msb,lsb,reset,writable,check) \
     res &= check ? (name==obj.name) : 1;
-__cp0_info__(__cp0_reg_equals__, __cp0_field_equals__)
+__cp0_info__(__cp0_reg_equals__, __cp0_field_equals__, )
 
-
-void CP0_t::log_error(const CP0_t& ref) {/*{{{*/
+    void CP0_t::log_error(const CP0_t &ref) { /*{{{*/
     extern void print_reg_diff(word_t ref, word_t my_ans, const char* name);
     word_t the_value, ref_value;
 #define __cp0_reg_log__(regname,rd,sel,...) \
@@ -67,8 +66,8 @@ void CP0_t::log_error(const CP0_t& ref) {/*{{{*/
         ref.read((rd<<3|sel), ref_value); \
         print_reg_diff(ref_value, the_value, #regname); \
     }
-    __cp0_info__(__cp0_reg_log__,)
-}/*}}}*/
+    __cp0_info__(__cp0_reg_log__, , );
+} /*}}}*/
 
 void CP0_t::reset(){/*{{{*/
     clock_tick = false;
@@ -78,5 +77,5 @@ void CP0_t::reset(){/*{{{*/
         __VA_ARGS__ \
     };
 #define __cp0_field_init__(name,msb,lsb,reset,writable,check) .name = reset,
-    __cp0_info__(__cp0_reg_init__, __cp0_field_init__)
+    __cp0_info__(__cp0_reg_init__, __cp0_field_init__, );
 }/*}}}*/

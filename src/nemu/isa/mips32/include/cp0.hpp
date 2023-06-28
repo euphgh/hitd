@@ -4,22 +4,25 @@
 #include "easylogging++.h"
 #include <fmt/core.h>
 
+// clang-format off
 /* CP0 List{{{*/
 #define __W__ 1
 #define __R__ 0
 // anything about hard interrupt can not check
 #define __c__ 1
 #define __n__ 0
-#define __cp0_info__(f2,f1) \
+#define __cp0_info__(f2,f1,inter) \
     f2(index, 0, 0,\
             f1(p        ,31 ,31  ,0x0  ,__R__, __c__)\
             f1(z30_n    ,30 ,LOG2(CONFIG_TLB_NR)     ,0x0  ,__R__, __c__)\
             f1(index    ,(LOG2(CONFIG_TLB_NR)-1) ,0  ,0x0  ,__W__, __c__)\
     )\
+    inter \
     f2(random, 1, 0,\
             f1(z31_n    ,31 ,LOG2(CONFIG_TLB_NR)     ,0x0  ,__R__, __c__)\
             f1(random   ,(LOG2(CONFIG_TLB_NR)-1) ,0  ,(CONFIG_TLB_NR-1)  ,__R__, __c__)\
     )\
+    inter \
     f2(entrylo0, 2, 0,\
             f1(fill     ,31 ,26 ,0x0  ,__R__, __c__) /* 26 = (30-(36-pabits)), pabits=32  */ \
             f1(pfn      ,25 ,6  ,0x0  ,__W__, __c__) /* 25 = (29-(36-pabits)), pabits=32  */ \
@@ -28,6 +31,7 @@
             f1(v        ,1  ,1  ,0x0  ,__W__, __c__)\
             f1(g        ,0  ,0  ,0x0  ,__W__, __c__)\
     )\
+    inter \
     f2(entrylo1, 3, 0,\
             f1(fill     ,31 ,26 ,0x0  ,__R__, __c__)\
             f1(pfn      ,25 ,6  ,0x0  ,__W__, __c__)\
@@ -36,36 +40,44 @@
             f1(v        ,1  ,1  ,0x0  ,__W__, __c__)\
             f1(g        ,0  ,0  ,0x0  ,__W__, __c__)\
     )\
+    inter \
     f2(context, 4, 0,\
             f1(ptebase  ,31 ,23 ,0x0  ,__W__, __c__)\
             f1(badvpn2  ,22 ,4  ,0x0  ,__R__, __c__)\
             f1(z3_0     ,3  ,0  ,0x0  ,__W__, __c__)\
     )\
+    inter \
     f2(pagemask, 5, 0,\
             f1(z31_29   ,31 ,29 ,0x0  ,__R__, __c__)\
             f1(mask     ,28 ,13 ,0x0  ,__R__, __c__) /* 4K page require 0 */ \
             f1(maskx    ,12 ,11 ,0x0  ,__R__, __c__) /* require 0 read for release1 */ \
             f1(z10_0    ,10 ,0  ,0x0  ,__R__, __c__)\
     )\
+    inter \
     f2(wire, 6, 0,\
             f1(z31_n    ,31 ,LOG2(CONFIG_TLB_NR)     ,0x0  ,__R__, __c__)\
             f1(wire     ,LOG2(CONFIG_TLB_NR)-1 ,0    ,(CONFIG_TLB_NR-1)  ,__W__, __c__)\
     )\
+    inter \
     f2(badvaddr, 8, 0,\
             f1(all      ,31 ,0  ,0x0  ,__R__, __c__)\
     )\
+    inter \
     f2(count, 9, 0,\
             f1(all      ,31 ,0  ,0x0  ,__W__, __n__)\
     )\
+    inter \
     f2(entryhi, 10, 0,\
             f1(vpn2     ,31 ,13 ,0x0 ,__W__,  __c__)\
             f1(vpn2x    ,12 ,11 ,0x0 ,__R__,  __c__)\
             f1(z10_8    ,10 ,8  ,0x0 ,__R__,  __c__)\
             f1(asid     ,7  ,0  ,0x0 ,__W__,  __c__)\
     )\
+    inter \
     f2(compare, 11, 0,\
             f1(all      ,31 ,0  ,0x0  ,__W__, __c__)\
     )\
+    inter \
     f2(status, 12, 0,\
             f1(cu321    ,31 ,29 ,0x0  ,__R__, __n__)\
             f1(cu0      ,28 ,28 ,0x0  ,__W__, __n__)\
@@ -79,6 +91,7 @@
             f1(exl      ,1  ,1  ,0x0  ,__W__, __c__)\
             f1(ie       ,0  ,0  ,0x0  ,__W__, __c__)\
     )\
+    inter \
     f2(cause, 13, 0,\
             f1(bd       ,31 ,31 ,0x0  ,__R__, __c__)\
             f1(ti       ,30 ,30 ,0x0  ,__R__, __n__)\
@@ -91,15 +104,18 @@
             f1(exccode  ,6  ,2  ,0x0  ,__R__, __c__)\
             f1(z1_0     ,1  ,0  ,0x0  ,__R__, __n__)\
     )\
+    inter \
     f2(epc,14,0,\
             f1(all      ,31 ,0  ,0x0  ,__W__, __c__)\
     )\
+    inter \
     f2(prid,15,0,\
             f1(cpo      ,31 ,24 ,0x0  ,__R__, __c__)\
             f1(cpid     ,23 ,16 ,0x1  ,__R__, __c__)\
             f1(prid     ,15 ,8  ,0x80 ,__R__, __c__)\
             f1(revs     ,7  ,0  ,0x3  ,__R__, __c__)\
     )\
+    inter \
     f2(ebase,15,1,\
             f1(z31      ,31 ,31 ,0x1 ,__R__, __c__)\
             f1(z30      ,30 ,30 ,0x0 ,__R__, __c__)\
@@ -107,6 +123,7 @@
             f1(z11_10   ,11 ,10 ,0x0 ,__R__, __c__)\
             f1(cpunum   ,9  ,0  ,0x0 ,__R__, __c__)\
     )\
+    inter \
     f2(config0,16,0,\
             f1(m        ,31 ,31 ,0x1 ,__R__, __c__)\
             f1(k23      ,30 ,28 ,0x0 ,__R__, __c__)\
@@ -120,6 +137,7 @@
             f1(vi       ,3  ,3  ,0x0 ,__R__, __c__) /* 0: pIcache    */ \
             f1(k0       ,2  ,0  ,0x3 ,__W__, __c__) /* 3: kseg0 cached   */ \
     )\
+    inter \
     f2(config1,16,1,\
             f1(m        ,31 ,31 ,0x0 ,__R__, __c__) /* 0: no config2 */ \
             f1(ms       ,30 ,25 ,0xf ,__R__, __c__) /* 15: 16 tle item */ \
@@ -168,7 +186,7 @@ typedef enum{/*{{{*/
 #define __cp0_field_def__(name,msb,lsb,reset,writable,check) \
     unsigned int name: msb-lsb+1; \
 
-__cp0_info__(__cp0_reg_type__,__cp0_field_def__)
+__cp0_info__(__cp0_reg_type__,__cp0_field_def__,)
 #include <csignal>
 class CP0_t {
     public:
@@ -176,15 +194,15 @@ class CP0_t {
         void reset();
         bool read (uint8_t rd_sel, word_t& data)const ;
         bool write(uint8_t rd_sel, word_t  data); // write writable field 
-        bool check(const CP0_t& ref);
+        bool check(const CP0_t* ref);
         void log_error(const CP0_t& ref);
-        __cp0_info__(__cp0_reg_def__,)
+        __cp0_info__(__cp0_reg_def__,,)
         uint8_t clock_tick;
         static const char* find_name(uint8_t rd_sel){
             const char* res = "unknow";
 #define __cp0_pos_map_name__(regname,rd,sel,...) \
             if ((rd<<3|sel)==rd_sel) res = #regname;
-            __cp0_info__(__cp0_pos_map_name__,)
+            __cp0_info__(__cp0_pos_map_name__,,)
             return res;
         }
     private:
