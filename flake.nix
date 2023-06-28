@@ -10,6 +10,7 @@
       {
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
+            clang-tools_15
             verilator
             readline
             ncurses
@@ -25,6 +26,8 @@
           # to shellHook for exporting manually every times
           shellHook = ''
             export HITD_HOME=$(pwd)
+            export VSRC_HOME=$(pwd)/../build
+            export PATH="${pkgs.clang-tools_15}/bin:$PATH"
           '';
         };
       });
