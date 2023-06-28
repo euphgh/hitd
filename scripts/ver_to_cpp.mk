@@ -42,6 +42,10 @@ vtest:
 	@echo + VERILATOR LINT $(VSRC_HOME)
 	@verilator --lint-only $(VXXFLAGS) $(VSRC_TOP) > /dev/null
 
+vhead:
+	@echo + VERILATOR HEAD $(VSRC_HOME)
+	@verilator --cc --Mdir $(VXX_MDIR) $(VXXFLAGS) $(VSRC_TOP) > /dev/null
+
 elf:$(BINARY)
 
 $(BINARY): $(VSRC_ALL) $(TB_SRCS) $(OBJ_ALL)
