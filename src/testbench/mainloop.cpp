@@ -1,15 +1,15 @@
-#include "easylogging++.h"
-#include "macro.hpp"
-#include "paddr/paddr_interface.hpp"
-#include "testbench/axi.hpp"
-#include "nemu/isa.hpp"
 #include "Vmycpu_top.h"
-#include "soc.hpp"
+#include "easylogging++.h"
 #include "generated/autoconf.h"
+#include "nemu/isa.hpp"
+#include "paddr/paddr_interface.hpp"
+#include "soc.hpp"
+#include "testbench/axi.hpp"
+#include "testbench/cp0_checker.hpp"
+#include "testbench/difftest/struct.hpp"
+#include "testbench/dpic.hpp"
 #include "testbench/inst_timer.hpp"
 #include "testbench/sim_state.hpp"
-#include "testbench/dpic.hpp"
-#include "testbench/cp0_checker.hpp"
 
 #define wave_file_t MUXDEF(CONFIG_EXT_FST,VerilatedFstC,VerilatedVcdC)
 #define __WAVE_INC__ MUXDEF(CONFIG_EXT_FST,"verilated_fst_c.h","verilated_vcd_c.h")
@@ -21,6 +21,7 @@ extern uint64_t ticks;
 extern uint64_t total_times;
 extern el::Logger* mycpu_log;
 extern FILE* golden_trace;
+diff_state *dut_ptr;
 #define RST_TIME 128
 
 inline static void sim_ending(int nemu_end_state){/*{{{*/
@@ -77,13 +78,17 @@ bool mainloop(
         ){/*{{{*/
 
     diff_state mycpu;
+    mycpu.ArchCop = std::make_unique<CP0_t>();
+    dut_ptr = &mycpu;
     sim_status = SIM_RUN;
 
     IFDEF(CONFIG_WAVE_ON,Verilated::traceEverOn(true));
     IFDEF(CONFIG_WAVE_ON,wave_file_t tfp);
     IFDEF(CONFIG_WAVE_ON,top->trace(&tfp,0));
-    IFDEF(CONFIG_WAVE_ON,tfp.open((CONFIG_WAVE_DIR"/"+wave_name + "." + CONFIG_WAVE_EXT).c_str()));
-    IFDEF(CONFIG_CP0_DIFF, cp0_checker mycpu_cp0_checker);
+    IFDEF(
+        CONFIG_WAVE_ON,
+        tfp.open(
+            (CONFIG_WAVE_DIR "/" + wave_name + "." + CONFIG_WAVE_EXT).c_str()));
 
     ticks = 0;
     top->aclk = 0;
@@ -123,29 +128,28 @@ bool mainloop(
         /* check mainloop condition */
         if (sim_status!=SIM_RUN) break;
 
-        /* record coprocessor 0 change for later difftest */
-        IFDEF(CONFIG_CP0_DIFF, mycpu_cp0_checker.check_change());
-
         /* get mycpu instructions commit status */
-        uint8_t commit_num = dpi_retire();
+        uint8_t commit_num = mycpu.commitNum;
 
         /* run nemu and check difference {{{*/
         if (commit_num > 0) {
-            uint8_t mycpu_int = dpi_interrupt_seq();
-            for (size_t i = 0; i < commit_num; i++) {
-                // TIMED_SCOPE(nemu_once, "nemu_once");
-                if (!nemu->ref_exec_once(i+1 == mycpu_int)) {
-                    sim_ending(nemu_state.state);
-                    goto negtive_edge;
-                }
-                Decode& inst = nemu->inst_state;
-                if (inst.skip) nemu->arch_state.gpr[inst.wnum] = dpi_regfile(inst.wnum);
-                IFDEF(CONFIG_CP0_DIFF, mycpu_cp0_checker.check_value(inst.pc, nemu->cp0));
-                IFDEF(CONFIG_PERF_ANALYSES, if (nemu->analysis) \
-                    perf_timer.add_inst(nemu->inst_state, ((consume_t)(ticks-last_commit))/commit_num, ticks));
+          uint8_t mycpu_int = mycpu.interruptSeq;
+          for (size_t i = 0; i < commit_num; i++) {
+            // TIMED_SCOPE(nemu_once, "nemu_once");
+            if (!nemu->ref_exec_once(i == mycpu_int)) {
+              sim_ending(nemu_state.state);
+              goto negtive_edge;
             }
-            dpi_api_get_state(&mycpu);
+            Decode &inst = nemu->inst_state;
+            if (inst.skip)
+              nemu->arch_state.gpr[inst.wnum] = mycpu.gpr[inst.wnum];
+            IFDEF(CONFIG_PERF_ANALYSES,
+                  if (nemu->analysis) perf_timer.add_inst(
+                      nemu->inst_state,
+                      ((consume_t)(ticks - last_commit)) / commit_num, ticks));
+          }
             check_cpu_state(&mycpu);
+            IFDEF(CONFIG_CP0_DIFF, nemu->cp0.check(mycpu.ArchCop.get()))
             IFDEF(CONFIG_COMMIT_WAIT, last_commit = ticks);
         }/*}}}*/
 
