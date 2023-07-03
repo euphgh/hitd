@@ -147,7 +147,7 @@ bool mainloop(
                       ((consume_t)(ticks - last_commit)) / commit_num, ticks));
           }
             check_cpu_state(&mycpu);
-            IFDEF(CONFIG_CP0_DIFF, nemu->cp0.check(mycpu.ArchCop.get()))
+            IFDEF(CONFIG_CP0_DIFF, nemu->cp0.check(mycpu.ArchCop.get()));
             IFDEF(CONFIG_COMMIT_WAIT, last_commit = ticks);
         }/*}}}*/
 
