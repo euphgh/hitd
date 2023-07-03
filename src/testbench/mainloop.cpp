@@ -5,9 +5,7 @@
 #include "paddr/paddr_interface.hpp"
 #include "soc.hpp"
 #include "testbench/axi.hpp"
-#include "testbench/cp0_checker.hpp"
 #include "testbench/difftest/struct.hpp"
-#include "testbench/dpic.hpp"
 #include "testbench/inst_timer.hpp"
 #include "testbench/sim_state.hpp"
 

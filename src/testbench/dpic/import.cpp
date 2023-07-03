@@ -1,23 +1,24 @@
 #include "common.hpp"
-#include "cp0.hpp"
+#include "isa/cp0.hpp"
 #include "testbench/difftest/struct.hpp"
 #include <cstdint>
 
 extern diff_state *dut_ptr;
 
-void v_difftest_commit(char retire_num, int last_retire_pc) {
+extern "C" void v_difftest_InstrCommit(char retire_num, int last_retire_pc,
+                                       char interr_seq) {
   dut_ptr->commitNum = retire_num;
   dut_ptr->lastPC = last_retire_pc;
+  dut_ptr->interruptSeq = interr_seq;
 }
 
-void v_difftest_archGPR(int gpr_0, int gpr_1, int gpr_2, int gpr_3, int gpr_4,
-                        int gpr_5, int gpr_6, int gpr_7, int gpr_8, int gpr_9,
-                        int gpr_10, int gpr_11, int gpr_12, int gpr_13,
-                        int gpr_14, int gpr_15, int gpr_16, int gpr_17,
-                        int gpr_18, int gpr_19, int gpr_20, int gpr_21,
-                        int gpr_22, int gpr_23, int gpr_24, int gpr_25,
-                        int gpr_26, int gpr_27, int gpr_28, int gpr_29,
-                        int gpr_30, int gpr_31) {
+extern "C" void v_difftest_ArchIntRegState(
+    int gpr_0, int gpr_1, int gpr_2, int gpr_3, int gpr_4, int gpr_5, int gpr_6,
+    int gpr_7, int gpr_8, int gpr_9, int gpr_10, int gpr_11, int gpr_12,
+    int gpr_13, int gpr_14, int gpr_15, int gpr_16, int gpr_17, int gpr_18,
+    int gpr_19, int gpr_20, int gpr_21, int gpr_22, int gpr_23, int gpr_24,
+    int gpr_25, int gpr_26, int gpr_27, int gpr_28, int gpr_29, int gpr_30,
+    int gpr_31) {
   dut_ptr->gpr[0] = gpr_0;
   dut_ptr->gpr[1] = gpr_1;
   dut_ptr->gpr[2] = gpr_2;
@@ -52,14 +53,14 @@ void v_difftest_archGPR(int gpr_0, int gpr_1, int gpr_2, int gpr_3, int gpr_4,
   dut_ptr->gpr[31] = gpr_31;
 }
 
-void v_difftest_archHILO(int hi, int lo) {
+extern "C" void v_difftest_ArchHILO(int hi, int lo) {
   dut_ptr->hi = hi;
   dut_ptr->lo = hi;
 }
 
 #define COMMON ,
 #define __cp0_reg_arg__(regname, rd, sel, ...) int regname
-void v_difftest_archCP0(__cp0_info__(__cp0_reg_arg__, , COMMON)) {
+extern "C" void v_difftest_ArchCP0(__cp0_info__(__cp0_reg_arg__, , COMMON)) {
   auto cp0_ptr = dut_ptr->ArchCop.get();
   word_t data;
 #define __cp0_reg_load__(regname, rd, sel, ...)                                \

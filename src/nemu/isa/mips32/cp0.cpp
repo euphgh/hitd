@@ -1,4 +1,4 @@
-#include "cp0.hpp"
+#include "isa/cp0.hpp"
 bool CP0_t::read (uint8_t rd_sel, word_t& data) const {/*{{{*/
     bool res = true;
     switch (rd_sel) {

@@ -13,24 +13,23 @@
  * See the Mulan PSL v2 for more details.
  ***************************************************************************************/
 
+#include "common.hpp"
+#include "easylogging++.h"
+#include "fmt/core.h"
+#include "isa-def.hpp"
+#include "macro.hpp"
+#include "nemu/Debugger.hpp"
+#include "nemu/cpu/cpu.hpp"
+#include "nemu/cpu/decode.hpp"
+#include "nemu/cpu/difftest.hpp"
+#include "nemu/deadloop.hpp"
+#include "nemu/isa.hpp"
+#include "nemu/mytrace.hpp"
+#include "soc.hpp"
+#include "utils.hpp"
 #include <csignal>
 #include <memory>
 #include <sstream>
-#include "common.hpp"
-#include "easylogging++.h"
-#include "nemu/cpu/cpu.hpp"
-#include "nemu/isa.hpp"
-#include "nemu/cpu/decode.hpp"
-#include "fmt/core.h"
-#include "cp0.hpp"
-#include "macro.hpp"
-#include "nemu/mytrace.hpp"
-#include "nemu/deadloop.hpp"
-#include "isa-def.hpp"
-#include "nemu/cpu/difftest.hpp"
-#include "soc.hpp"
-#include "utils.hpp"
-#include "nemu/Debugger.hpp"
 /* The assembly code of instructions executed is only output to the screen
  * when the number of instructions executed is less than this value.
  * This is useful when you use the `si' command.

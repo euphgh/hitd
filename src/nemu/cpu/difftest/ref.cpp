@@ -12,15 +12,14 @@
 *
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
-#include "disassemble.hpp"
-#include <nemu/isa.hpp>
-#include "common.hpp"
-#include <nemu/cpu/cpu.hpp>
-#include "paddr/nemu_paddr.hpp"
-#include "nemu/cpu/decode.hpp"
 #include "../local-include/reg.hpp"
+#include "common.hpp"
+#include "disassemble.hpp"
+#include "nemu/cpu/decode.hpp"
+#include "paddr/nemu_paddr.hpp"
 #include "testbench/sim_state.hpp"
-#include "testbench/dpic.hpp"
+#include <nemu/cpu/cpu.hpp>
+#include <nemu/isa.hpp>
 
 void CPU_state::ref_tick_and_int(uint8_t ext_int){/*{{{*/
     // must first change count then check compare

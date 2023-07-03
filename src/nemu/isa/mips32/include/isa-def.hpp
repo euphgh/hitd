@@ -17,11 +17,11 @@
 #define __ISA_MIPS32_H__
 
 #include "common.hpp"
-#include "cp0.hpp"
 #include "disassemble.hpp"
 #include "easylogging++.h"
+#include "isa/cp0.hpp"
+#include "isa/mmu.hpp"
 #include "macro.hpp"
-#include "mmu.hpp"
 #include "nemu/cpu/decode.hpp"
 #include "nemu/memory/vaddr.hpp"
 #include "nemu/mytrace.hpp"

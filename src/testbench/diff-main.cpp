@@ -1,14 +1,12 @@
 #include "common.hpp"
 #include "debug.hpp"
 #include "easylogging++.h"
-#include "nemu/isa.hpp"
 #include "generated/autoconf.h"
-#include "testbench/sim_state.hpp"
-#include "testbench/axi.hpp"
-#include "testbench/dpic.hpp"
+#include "nemu/isa.hpp"
 #include "soc.hpp"
-#include "testbench/cp0_checker.hpp"
+#include "testbench/axi.hpp"
 #include "testbench/inst_timer.hpp"
+#include "testbench/sim_state.hpp"
 
 INITIALIZE_EASYLOGGINGPP
 sim_status_t sim_status = SIM_RUN;
@@ -67,8 +65,7 @@ int main (int argc, char *argv[]) {
     std::signal(SIGINT, [](int) {sim_status = SIM_INT;});
 
     dual_soc soc {};
-    Vmycpu_top* top = new Vmycpu_top();
-    dpi_init();
+    Vmycpu_top *top = new Vmycpu_top();
     axi_paddr* axi = new axi_paddr(top);
     axi->paddr_top = soc.get_dut_soc();
     axi->paddr_top->set_logger(mycpu_log);

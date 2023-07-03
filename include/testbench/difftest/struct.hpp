@@ -2,7 +2,7 @@
 #define __DIFF_STRUCT__
 
 #include "common.hpp"
-#include "cp0.hpp"
+#include "isa/cp0.hpp"
 
 typedef struct{
     word_t pc;

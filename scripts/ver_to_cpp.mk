@@ -26,7 +26,7 @@ VXX_BUILD += --Mdir $(VXX_MDIR)
 VXXFLAGS += $(VXX_WNO) 
 VXXFLAGS += --relative-includes 
 VXXFLAGS += $(VINCLUDE)
-# VXXFLAGS += -j $(NPROC)
+VXXFLAGS += -j 64
 VXXFLAGS += -CFLAGS "$(TB_CFLAGS)"
 VXXFLAGS += -LDFLAGS "$(LIBS)"
 

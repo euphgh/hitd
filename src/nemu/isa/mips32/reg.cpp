@@ -14,9 +14,6 @@
 ***************************************************************************************/
 
 #include "nemu/isa.hpp"
-#include "cp0.hpp"
-#include "local-include/reg.hpp"
-#include <cstdlib>
 
 const char *regs[] = {
   "$0", "at", "v0", "v1", "a0", "a1", "a2", "a3",
@@ -61,6 +58,6 @@ word_t CPU_state::isa_reg_str2val(const char *s, bool *success) {/*{{{*/
     if (*success==false && strcmp(#regname,s)==0){ \
         *success = cp0.read(rd<<3|sel, res);\
     }
-    __cp0_info__(__cp0_name_read__,)
+    __cp0_info__(__cp0_name_read__, , );
     return res;
 }/*}}}*/

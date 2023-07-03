@@ -13,7 +13,6 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include "cp0.hpp"
 #include "nemu/isa.hpp"
 #include "fmt/core.h"
 
