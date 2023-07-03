@@ -18,15 +18,13 @@ VXX_WNO = -Wno-caseincomplete \
 		  -Wno-implicit \
 		  -Wno-timescalemod
 
-NPROC = $(shell nproc)
-
 VXX_BUILD := --cc --exe --build
 VXX_BUILD += --Mdir $(VXX_MDIR)
 
 VXXFLAGS += $(VXX_WNO) 
 VXXFLAGS += --relative-includes 
 VXXFLAGS += $(VINCLUDE)
-VXXFLAGS += -j 64
+VXXFLAGS += -j $(CPUS)
 VXXFLAGS += -CFLAGS "$(TB_CFLAGS)"
 VXXFLAGS += -LDFLAGS "$(LIBS)"
 
