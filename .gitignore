@@ -8,3 +8,4 @@ wave
 !.gitignore
 compile_commands.json
 out/
+!.envrc
