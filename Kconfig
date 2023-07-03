@@ -104,6 +104,13 @@ config CC_OPT
   default "-O3" if CC_O3
   default "none"
 
+config CCACHE_ENABLE
+    bool "Enable ccache"
+    default y
+    help 
+        use ccache to speed up compile
+
+
 config CC_LTO
   depends on !TARGET_AM
   bool "Enable link-time optimization"

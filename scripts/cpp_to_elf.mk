@@ -1,4 +1,6 @@
-CC = $(call remove_quote,$(CONFIG_CC))
+CC  := $(if $(CONFIG_CCACHE_ENABLE), ccache)
+CC += $(call remove_quote,$(CONFIG_CC))
+CXX := $(if $(CONFIG_CCACHE_ENABLE), ccache) g++
 COM_FLAG := -MMD -Wall -Werror -std=gnu++17 -I$(HITD_HOME)/include
 COM_FLAG += -DNSCSCC_HOME=\"$(NSCSCC_HOME)\" -DHITD_HOME=\"$(HITD_HOME)\" 
 CFLAGS_BUILD += $(if $(CONFIG_CC_DEBUG),,$(call remove_quote,$(CONFIG_CC_OPT)))

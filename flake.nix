@@ -14,6 +14,7 @@
             verilator
             readline
             ncurses
+            ccache
             bison
             flex
             fmt
@@ -28,6 +29,7 @@
             export HITD_HOME=$(pwd)
             export VSRC_HOME=$(pwd)/../build
             export PATH="${pkgs.clang-tools_15}/bin:$PATH"
+            ccache --set-config=sloppiness=locale,time_macros
           '';
         };
       });

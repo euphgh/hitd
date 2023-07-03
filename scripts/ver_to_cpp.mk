@@ -12,17 +12,27 @@ TB_CFLAGS   += $(TB_INCLUDES)
 
 # verilator -Mdir Name of output object directory
 VXX_MDIR = $(HITD_HOME)/build
-VXX_WNO = -Wno-caseincomplete \
-		  -Wno-width \
-		  -Wno-pinmissing \
-		  -Wno-implicit \
-		  -Wno-timescalemod
+# VXX_WNO = -Wno-caseincomplete \
+# 		  -Wno-width \
+# 		  -Wno-pinmissing \
+# 		  -Wno-implicit \
+# 		  -Wno-timescalemod
+VXX_WNO = -Wno-width
 
 VXX_BUILD := --cc --exe --build
 VXX_BUILD += --Mdir $(VXX_MDIR)
 
+CCACHE := $(if $(shell which ccache),ccache,)
+ifneq ($(CCACHE),)
+export OBJCACHE = ccache
+endif
+
 VXXFLAGS += $(VXX_WNO) 
 VXXFLAGS += --relative-includes 
+VXXFLAGS += +define+RANDOMIZE_REG_INIT      
+VXXFLAGS += +define+RANDOMIZE_MEM_INIT      
+VXXFLAGS += +define+RANDOMIZE_GARBAGE_ASSIGN
+VXXFLAGS += +define+RANDOMIZE_DELAY=0       
 VXXFLAGS += $(VINCLUDE)
 VXXFLAGS += -j $(CPUS)
 VXXFLAGS += -CFLAGS "$(TB_CFLAGS)"
