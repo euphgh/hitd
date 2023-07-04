@@ -1,6 +1,15 @@
-CC  := $(if $(CONFIG_CCACHE_ENABLE), ccache)
-CC += $(call remove_quote,$(CONFIG_CC))
-CXX := $(if $(CONFIG_CCACHE_ENABLE), ccache) g++
+CC  := $(call remove_quote,$(CONFIG_CC))
+
+# test ccache exist
+CCACHE := $(if $(shell which ccache),ccache,)
+ifneq ($(CCACHE),)
+# enable ccache for verilator
+export OBJCACHE = ccache
+endif
+
+# add ccache for c and cpp compiler
+CC  := $(if $(CONFIG_CCACHE_ENABLE), ccache $(CC), $(CC))
+CXX := $(if $(CONFIG_CCACHE_ENABLE), ccache $(CXX), $(CXX)) 
 COM_FLAG := -MMD -Wall -Werror -std=gnu++17 -I$(HITD_HOME)/include
 COM_FLAG += -DNSCSCC_HOME=\"$(NSCSCC_HOME)\" -DHITD_HOME=\"$(HITD_HOME)\" 
 CFLAGS_BUILD += $(if $(CONFIG_CC_DEBUG),,$(call remove_quote,$(CONFIG_CC_OPT)))

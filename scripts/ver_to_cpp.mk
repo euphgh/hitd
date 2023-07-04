@@ -22,11 +22,6 @@ VXX_WNO = -Wno-width
 VXX_BUILD := --cc --exe --build
 VXX_BUILD += --Mdir $(VXX_MDIR)
 
-CCACHE := $(if $(shell which ccache),ccache,)
-ifneq ($(CCACHE),)
-export OBJCACHE = ccache
-endif
-
 VXXFLAGS += $(VXX_WNO) 
 VXXFLAGS += --relative-includes 
 VXXFLAGS += +define+RANDOMIZE_REG_INIT      
@@ -34,7 +29,7 @@ VXXFLAGS += +define+RANDOMIZE_MEM_INIT
 VXXFLAGS += +define+RANDOMIZE_GARBAGE_ASSIGN
 VXXFLAGS += +define+RANDOMIZE_DELAY=0       
 VXXFLAGS += $(VINCLUDE)
-VXXFLAGS += -j $(CPUS)
+VXXFLAGS += -j $(JOBS)
 VXXFLAGS += -CFLAGS "$(TB_CFLAGS)"
 VXXFLAGS += -LDFLAGS "$(LIBS)"
 
