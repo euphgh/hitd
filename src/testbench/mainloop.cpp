@@ -101,6 +101,7 @@ bool mainloop(
         top->aclk = !top->aclk;
         top->eval();
         IFDEF(CONFIG_WAVE_ON,tfp.dump(ticks));
+        last_commit = ticks;
     }
 
     top->aresetn = 1;
