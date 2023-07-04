@@ -2,7 +2,8 @@ include/config
 include/generated
 build
 *.log
-wave
+wave/*
+!wave/*.sav
 .*/
 .*
 !.gitignore
