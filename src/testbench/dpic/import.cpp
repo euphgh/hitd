@@ -8,7 +8,7 @@ extern diff_state *dut_ptr;
 extern "C" void v_difftest_InstrCommit(char retire_num, int last_retire_pc,
                                        char interr_seq) {
   dut_ptr->commitNum = retire_num;
-  dut_ptr->lastPC = last_retire_pc;
+  dut_ptr->pc = last_retire_pc;
   dut_ptr->interruptSeq = interr_seq;
 }
 
