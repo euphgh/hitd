@@ -5,7 +5,7 @@ VINCLUDE = $(addprefix -I, $(VSRC_SUB_DIR))
 TB_SRCS     := $(shell find src/testbench -name "*.cpp")
 TB_INCLUDES  = $(addprefix -I, $(TB_INC_PATH) $(NEMU_INC_PATH))
 
-TB_CFLAGS 	:= -MMD -Wall -Werror -std=gnu++17 -I$(HITD_HOME)/include
+TB_CFLAGS 	:= -MMD -Wall -Werror -std=gnu++17 -I$(HITD_HOME)/include -Wno-maybe-uninitialized
 TB_CFLAGS 	+= -DNSCSCC_HOME=\\\"$(NSCSCC_HOME)\\\" -DHITD_HOME=\\\"$(HITD_HOME)\\\" 
 TB_CFLAGS   += $(CFLAGS_BUILD) -D__GUEST_ISA__=$(GUEST_ISA)
 TB_CFLAGS   += $(TB_INCLUDES)
