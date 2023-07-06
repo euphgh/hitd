@@ -1,3 +1,5 @@
+#include "common.hpp"
+#include "testbench/sim_state.hpp"
 
 #ifdef CONFIG_FREELIST_DIFF
 #include "testbench/difftest/global_info.hpp"
