@@ -133,14 +133,13 @@ extern "C" void v_difftest_PhyRegInROB(char io_robHead, char io_robTail,
                                        const char *io_rob, char io_flrHead,
                                        char io_flrTail, const char *io_flr,
                                        unsigned char io_isRecover) {
-  if (!io_isRecover)
-    for (int i = io_robTail; i != io_robHead; i = (i + 1) % 64) {
-      auto prfNum = (unsigned char)io_rob[i & 0x1f];
-      if (prfNum) {
-        pregMaps[newMap].robAdd(prfNum);
-      }
+  for (int i = io_robTail; i != io_robHead; i = (i + 1) % 64) {
+    auto prfNum = (unsigned char)io_rob[i & 0x1f];
+    if (prfNum) {
+      pregMaps[newMap].robAdd(prfNum);
     }
-  else
+  }
+  if (io_isRecover)
     for (int i = io_flrTail; i != io_flrHead; i = (i + 1) % 64) {
       auto prfNum = (unsigned char)io_flr[i & 0x1f];
       if (prfNum) {
