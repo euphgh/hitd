@@ -73,6 +73,10 @@ config HILO_DIFF
     bool "Enable hi lo register check"
     default no
 
+config FREELIST_DIFF
+    bool "Enable FreeList Physical register move check"
+    default no
+
 config COMMIT_WAIT
     bool "Automatic exit after waiting a while without instruction commit"
     default yes

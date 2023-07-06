@@ -68,9 +68,6 @@ static void check_cpu_state(diff_state* mycpu){/*{{{*/
     }
 }/*}}}*/
 
-void difftest_clean_phySign();
-void difftest_count_phySign();
-
 bool mainloop(
         Vmycpu_top* top,
         axi_paddr* axi,
@@ -109,6 +106,8 @@ bool mainloop(
 
     top->aresetn = 1;
 
+    IFDEF(CONFIG_FREELIST_DIFF, difftest_init_PhyPosition());
+
     while (!Verilated::gotFinish()) {
         /* if need count perf_timer TIMED_SCOPE(one_clk,"one_clk"); */
         /* posedge edge comming {{{*/
@@ -120,7 +119,7 @@ bool mainloop(
         nemu->ref_tick_and_int(0);
 
         /* clean phy use */
-        difftest_clean_phySign();
+        IFDEF(CONFIG_FREELIST_DIFF, difftest_clean_phySign());
 
         /* update mycpu */
         axi->calculate_output();
@@ -134,7 +133,7 @@ bool mainloop(
         if (sim_status!=SIM_RUN) break;
 
         /* count phy use */
-        difftest_count_phySign();
+        IFDEF(CONFIG_FREELIST_DIFF, difftest_count_phySign());
 
         /* get mycpu instructions commit status */
         uint8_t commit_num = mycpu.commitNum;
