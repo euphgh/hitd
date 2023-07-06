@@ -107,8 +107,6 @@ bool mainloop(
 
     top->aresetn = 1;
 
-    IFDEF(CONFIG_FREELIST_DIFF, difftest_init_PhyPosition());
-
     while (!Verilated::gotFinish()) {
         /* if need count perf_timer TIMED_SCOPE(one_clk,"one_clk"); */
         /* posedge edge comming {{{*/
