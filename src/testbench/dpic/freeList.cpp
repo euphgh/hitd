@@ -37,13 +37,15 @@ void logPhyRegsMove() {
     auto newPos = phyFree[newMap][i];
     if (oldPos != newPos) {
       if (oldPos == Non) {
-        Assert(newPos == inFreeList, "retire back prf not to freeList");
+        __ASSERT_SIM__(newPos != inROB,
+                       "PRF {} apear in ROB but last cycle it not in FreeList",
+                       i);
         mycpu_log->trace(fmt::format("[P] retire back prf {} to freeList", i));
       } else {
         if (newPos == Non) {
-          Assert(oldPos == inROB, "retire dispear prf not from rob");
-          mycpu_log->trace(
-              fmt::format("[P] retire dispear prf {} from rob", i));
+          __ASSERT_SIM__(oldPos != inFreeList,
+                         "PRF {} disapear but last cycle it not in ROB", i);
+          mycpu_log->trace(fmt::format("[P] retire clean prf {} from rob", i));
         } else {
           if (newPos == inROB)
             mycpu_log->trace(fmt::format("[P] dispatcher prf {} to rob", i));
