@@ -20,7 +20,7 @@ extern "C" void v_difftest_ArchIntRegState(const int *io_gpr) {
 
 extern "C" void v_difftest_ArchHILO(int hi, int lo) {
   dut_ptr->hi = hi;
-  dut_ptr->lo = hi;
+  dut_ptr->lo = lo;
 }
 
 #define COMMON ,
