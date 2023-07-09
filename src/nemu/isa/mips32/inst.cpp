@@ -1,3 +1,4 @@
+// clang-format off
 /***************************************************************************************
 * Copyright (c) 2014-2022 Zihao Yu, Nanjing University
 *
@@ -22,7 +23,6 @@
 #include "isa-def.hpp"
 #include "utils.hpp"
 #include <csignal>
-
 
 enum {
   TYPE_I, // signed extended imm
@@ -229,9 +229,10 @@ int mips32_CPU_state::decode_exec() {
   inst_state.wdata = R(inst_state.wnum);
   return 0;
 }
+// clang-format on
 
 int mips32_CPU_state::isa_exec_once(bool has_int) {
-    // TIMED_FUNC(isa_exec_once);
+  // TIMED_FUNC(isa_exec_once);
 except_restart:
   inst_state.wnum = 0;
   inst_state.flag = 0;
@@ -242,26 +243,30 @@ except_restart:
   // if (this_pc == 0xbfc7cbe8)
   //       raise(SIGTRAP);
   try {
-        if (has_int)
-          (isa_raise_intr(EC_Int, arch_state.pc));
-        inst_state.inst =
-            vaddr_ifetch(align_check(inst_state.snpc, 0x3, EC_AdEL), 4);
-        inst_state.snpc += 4;
-        inst_state.dnpc =
-            inst_state.is_delay_slot ? delay_slot_npc : inst_state.snpc;
-        decode_exec();
+    if (has_int)
+      (isa_raise_intr(EC_Int, arch_state.pc));
+    else {
+      inst_state.inst =
+          vaddr_ifetch(align_check(inst_state.snpc, 0x3, EC_AdEL), 4);
+      inst_state.snpc += 4;
+      inst_state.dnpc =
+          inst_state.is_delay_slot ? delay_slot_npc : inst_state.snpc;
+      decode_exec();
+    }
   } catch (...) {
-        arch_state.pc = inst_state.dnpc;
-        goto except_restart;
+    arch_state.pc = inst_state.dnpc;
+    goto except_restart;
   }
 
-    //TODO:check pc finish conditions
-    // if (this_pc==0x9fc13178)
-    //     analysis = !analysis;
-    IFDEF(CONFIG_TEST_FUNC, if (this_pc==0xbfc00100) nemu_state.state = NEMU_END);
-    IFDEF(CONFIG_TEST_PERF, if (this_pc==0xbfc00100) nemu_state.state = NEMU_END);
-    arch_state.pc = inst_state.dnpc;
-    extern uint32_t log_pc;
-    log_pc = this_pc;
-    return 0;
+  // TODO:check pc finish conditions
+  //  if (this_pc==0x9fc13178)
+  //      analysis = !analysis;
+  IFDEF(CONFIG_TEST_FUNC,
+        if (this_pc == 0xbfc00100) nemu_state.state = NEMU_END);
+  IFDEF(CONFIG_TEST_PERF,
+        if (this_pc == 0xbfc00100) nemu_state.state = NEMU_END);
+  arch_state.pc = inst_state.dnpc;
+  extern uint32_t log_pc;
+  log_pc = this_pc;
+  return 0;
 }
