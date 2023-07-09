@@ -68,7 +68,7 @@ void mips32_CPU_state::isa_raise_intr(word_t NO, vaddr_t badva, bool refill) {/*
             break;
         default:break;
     }
-    if (NO == EC_Sys || NO == EC_Tr || NO == EC_Bp)
+    if (NO == EC_Sys || NO == EC_Tr || NO == EC_Bp || NO == EC_Int)
             return;
     else
             throw new std::exception;
