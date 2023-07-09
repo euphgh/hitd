@@ -232,21 +232,28 @@ int mips32_CPU_state::decode_exec() {
 
 int mips32_CPU_state::isa_exec_once(bool has_int) {
     // TIMED_FUNC(isa_exec_once);
-    inst_state.wnum = 0;
-    inst_state.flag = 0;
-
-    inst_state.snpc = inst_state.pc = arch_state.pc;
-    word_t this_pc = inst_state.snpc;
-    inst_state.is_delay_slot = next_is_delay_slot;
-    next_is_delay_slot = false;
-    // if (this_pc==0x80100ad0) raise(SIGTRAP);
-    try {
-        if (has_int) (isa_raise_intr(EC_Int, arch_state.pc));
-        inst_state.inst = vaddr_ifetch(align_check(inst_state.snpc,0x3,EC_AdEL), 4);
+except_restart:
+  inst_state.wnum = 0;
+  inst_state.flag = 0;
+  inst_state.snpc = inst_state.pc = arch_state.pc;
+  word_t this_pc = inst_state.snpc;
+  inst_state.is_delay_slot = next_is_delay_slot;
+  next_is_delay_slot = false;
+  // if (this_pc == 0xbfc7cbe8)
+  //       raise(SIGTRAP);
+  try {
+        if (has_int)
+          (isa_raise_intr(EC_Int, arch_state.pc));
+        inst_state.inst =
+            vaddr_ifetch(align_check(inst_state.snpc, 0x3, EC_AdEL), 4);
         inst_state.snpc += 4;
-        inst_state.dnpc = inst_state.is_delay_slot ? delay_slot_npc : inst_state.snpc;
+        inst_state.dnpc =
+            inst_state.is_delay_slot ? delay_slot_npc : inst_state.snpc;
         decode_exec();
-    } catch (int e) {}
+  } catch (...) {
+        arch_state.pc = inst_state.dnpc;
+        goto except_restart;
+  }
 
     //TODO:check pc finish conditions
     // if (this_pc==0x9fc13178)

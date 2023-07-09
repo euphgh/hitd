@@ -13,8 +13,10 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include "nemu/isa.hpp"
 #include "fmt/core.h"
+#include "isa/cp0.hpp"
+#include "nemu/isa.hpp"
+#include <exception>
 
 #ifdef CONFIG_ETRACE
             const char *e_msg[16] = {
@@ -66,7 +68,10 @@ void mips32_CPU_state::isa_raise_intr(word_t NO, vaddr_t badva, bool refill) {/*
             break;
         default:break;
     }
-    throw 0;
+    if (NO == EC_Sys || NO == EC_Tr || NO == EC_Bp)
+            return;
+    else
+            throw new std::exception;
 }/*}}}*/
 
 bool mips32_CPU_state::isa_query_intr() {/*{{{*/
