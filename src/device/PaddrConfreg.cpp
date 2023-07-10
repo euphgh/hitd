@@ -34,6 +34,8 @@
 #define OPEN_TRACE_ADDR     0xfff8  //32'hbfaf_fff8
 #define NUM_MONITOR_ADDR    0xfffc  //32'hbfaf_fffc
 
+bool global_read_config_timer = false;
+
 PaddrConfreg::PaddrConfreg(bool simulation, el::Logger* input_logger):
     PaddrInterface(input_logger),
     output(input_logger){/*{{{*/
@@ -107,6 +109,7 @@ bool PaddrConfreg::do_read (word_t addr, wen_t info, word_t* data) {/*{{{*/
             break;
         case TIMER_ADDR:
             *(uint32_t *)data = timer;
+            global_read_config_timer = true;
             break;
         case SIMU_FLAG_ADDR:
             *(uint32_t *)data = simu_flag;

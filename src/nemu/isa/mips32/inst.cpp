@@ -81,9 +81,11 @@ void mips32_CPU_state::decode_operand(int *rd, word_t *src1, word_t *src2, word_
     arch_state.hi = BITS(res,63,32); \
     arch_state.lo = BITS(res,31,0);
 
+extern bool global_read_config_timer;
 int mips32_CPU_state::decode_exec() {
   int rd = 0;
   inst_state.skip = false;
+  global_read_config_timer = false;
   word_t src1 = 0, src2 = 0, imm = 0;
 
 #define INSTPAT_INST(s) ((inst_state).inst)
@@ -227,6 +229,7 @@ int mips32_CPU_state::decode_exec() {
 
   R(0) = 0; // reset $zero to 0
   inst_state.wdata = R(inst_state.wnum);
+  inst_state.skip |= global_read_config_timer;
   return 0;
 }
 // clang-format on
