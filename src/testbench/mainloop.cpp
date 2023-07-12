@@ -9,6 +9,7 @@
 #include "testbench/difftest/struct.hpp"
 #include "testbench/inst_timer.hpp"
 #include "testbench/sim_state.hpp"
+#include <csignal>
 
 #define wave_file_t MUXDEF(CONFIG_EXT_FST,VerilatedFstC,VerilatedVcdC)
 #define __WAVE_INC__ MUXDEF(CONFIG_EXT_FST,"verilated_fst_c.h","verilated_vcd_c.h")

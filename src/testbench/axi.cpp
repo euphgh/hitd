@@ -1,8 +1,9 @@
-#include "testbench/sim_state.hpp"
-#include "common.hpp"
 #include "testbench/axi.hpp"
+#include "common.hpp"
 #include "fmt/core.h"
+#include "testbench/difftest/struct.hpp"
 #include "testbench/sim_state.hpp"
+#include <cstdint>
 #include <vector>
 extern el::Logger* mycpu_log;
 
@@ -23,6 +24,50 @@ void axi_paddr::reset(){/*{{{*/
     w_status = w_idel;
     idel_wait_write();
 }/*}}}*/
+
+word_t shiftDataToAXI(word_t data, wen_t info, word_t paddr) {
+    if (info.size != 4) {
+      switch (paddr & 0x3) {
+      case 0x0:
+        return data;
+      case 0x1:
+        return data << 8;
+      case 0x2:
+        return data << 16;
+      default:
+        return data << 24;
+      };
+    } else
+      return data;
+}
+
+word_t shiftDataFromAXI(word_t data, wen_t info, word_t paddr) {
+    if (info.size != 4) {
+      switch (paddr & 0x3) {
+      case 0x0:
+        return data;
+      case 0x1:
+        return data >> 8;
+      case 0x2:
+        return data >> 16;
+      default:
+        return data >> 24;
+      };
+    } else
+      return data;
+}
+
+void generateReadStrb(wen_t &info, word_t paddr) {
+    uint8_t low2 = paddr & 0x3;
+    switch (info.size) {
+    case 1:
+      info.wstrb = 1 << low2;
+    case 2:
+      info.wstrb = low2 == 0 ? 0b0011 : 0b1100;
+    default:
+      info.wstrb = 0xf;
+    }
+}
 
 void axi_paddr::set_diff_mem(PaddrTop* diff_mem){ check_paddr_top = diff_mem; }
 
@@ -86,9 +131,9 @@ bool axi_paddr::accept_read_req(){/*{{{*/
     else r_wrap_offset = 0;
 
     r_cur_id = pins.arid;
-    r_cur_addr = start_addr & ~(0x3);
+    r_cur_addr = start_addr;
     r_cur_info.size = num_bytes;
-    r_cur_info.wstrb = 0xf;
+    generateReadStrb(r_cur_info, r_cur_addr);
     r_cur_NO = 0;
 
     r_left_time = rand_delay();
@@ -101,6 +146,7 @@ bool axi_paddr::do_once_read(){/*{{{*/
     bool res = true;
     res = paddr_top->do_read(r_cur_addr, r_cur_info, &s_rdata);
     IFDEF(CONFIG_MEM_DIFF, read_difftest();)
+    s_rdata = shiftDataToAXI(s_rdata, r_cur_info, r_cur_addr);
     r_cur_data[r_cur_NO++] = s_rdata;
     s_rvalid = 1;
     s_rlast = r_burst_count==r_cur_NO;
@@ -178,7 +224,7 @@ bool axi_paddr::accept_write_req(){/*{{{*/
 
     w_cur_NO = 0;
     w_cur_id = pins.awid;
-    w_cur_addr[w_cur_NO] = start_addr & ~(0x3);
+    w_cur_addr[w_cur_NO] = start_addr;
     w_cur_info[w_cur_NO].size = num_bytes;
     s_awready = 0;
     s_wready = 1;
@@ -223,7 +269,9 @@ bool axi_paddr::accept_write_data(){/*{{{*/
 bool axi_paddr::do_all_write(){/*{{{*/
     bool res = true;
     for (size_t i = 0; i < w_burst_count; i++) {
-        res &= paddr_top->do_write(w_cur_addr[i], w_cur_info[i], w_cur_data[i]);
+        auto wData =
+            shiftDataFromAXI(w_cur_data[i], w_cur_info[i], w_cur_addr[i]);
+        res &= paddr_top->do_write(w_cur_addr[i], w_cur_info[i], wData);
     }
     s_bvalid = 1;
     s_bresp = res ? RESP_OKEY : RESP_DECERR;
@@ -271,19 +319,21 @@ bool axi_paddr::write_eval(){/*{{{*/
 }/*}}}*/
 
 void my_word_fmt(uint32_t data, wen_t info, std::stringstream &out){/*{{{*/
-    int width = info.size << 1;
+    int width = 8;
     char res[8] = {0};
     for (size_t i = 0; i < width; i++) {
-        char tmp =  '\0';
-        if (info.wstrb & 0x1) {
-            char seg = data & 0xf;
-            if (seg < 10) tmp = 48 + seg;
-            else tmp = 87 + seg;
-        }
-        else tmp = '?';
-        res[width-1-i] = tmp;
-        info.wstrb = info.wstrb >> (i & 0x1);
-        data  = data  >> 4;
+            char tmp = '\0';
+            if (info.wstrb & 0x1) {
+                char seg = data & 0xf;
+                if (seg < 10)
+                    tmp = 48 + seg;
+                else
+                    tmp = 87 + seg;
+            } else
+                tmp = '?';
+            res[width - 1 - i] = tmp;
+            info.wstrb = info.wstrb >> (i & 0x1);
+            data = data >> 4;
     }
     out << res;
 }/*}}}*/
