@@ -48,7 +48,7 @@ public:
 
   mips32_CPU_state(PaddrTop *ptop_input);
   void exec_once();
-  void reset(word_t reset_pc = 0xbfc00000);
+  void reset(word_t reset_pc = CONFIG_RESET_PC);
 
   // nemu difftest ref api{{{
   void ref_tick_and_int(uint8_t ext_int);
