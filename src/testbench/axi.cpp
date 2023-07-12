@@ -86,7 +86,7 @@ bool axi_paddr::accept_read_req(){/*{{{*/
     else r_wrap_offset = 0;
 
     r_cur_id = pins.arid;
-    r_cur_addr = start_addr;
+    r_cur_addr = start_addr & ~(0x3);
     r_cur_info.size = num_bytes;
     r_cur_info.wstrb = 0xf;
     r_cur_NO = 0;
@@ -178,7 +178,7 @@ bool axi_paddr::accept_write_req(){/*{{{*/
 
     w_cur_NO = 0;
     w_cur_id = pins.awid;
-    w_cur_addr[w_cur_NO] = start_addr;
+    w_cur_addr[w_cur_NO] = start_addr & ~(0x3);
     w_cur_info[w_cur_NO].size = num_bytes;
     s_awready = 0;
     s_wready = 1;
