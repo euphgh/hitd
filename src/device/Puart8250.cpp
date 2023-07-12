@@ -1,4 +1,5 @@
 #include "paddr/paddr_interface.hpp"
+#include "testbench/sim_state.hpp"
 #include <csignal>
 #include <cstdio>
 
@@ -23,8 +24,10 @@ Puart8250::Puart8250(el::Logger *input_logger)
 bool Puart8250::do_read(word_t addr, wen_t info, word_t *data) { /*{{{*/
   std::unique_lock<std::mutex> lock(rx_lock);
   *data = 0;
-  if (info.size != 1)
+  if (info.size != 1) {
     log_pt->error("read uart8250 size not 1");
+    __ASSERT_SIM__(false, "stop sim");
+  }
   switch (addr) {
   case UART8250_TX_RX_DLL: {
     if (DLAB()) {
@@ -79,7 +82,7 @@ bool Puart8250::do_read(word_t addr, wen_t info, word_t *data) { /*{{{*/
     break;
   }
   default:
-    assert(false);
+    __ASSERT_SIM__(false, "read not exist addr of uart: " HEX_WORD, addr);
   }
   return true;
 } /*}}}*/
@@ -87,8 +90,10 @@ bool Puart8250::do_write(word_t addr, wen_t info, const word_t data) { /*{{{*/
   // std::unique_lock<std::mutex> lock_tx(tx_lock);
   std::unique_lock<std::mutex> lock_rx(rx_lock);
   bool res = true;
-  if (info.size != 1)
+  if (info.size != 1) {
     log_pt->error("write uart8250 size not 1");
+    __ASSERT_SIM__(false, "stop sim");
+  }
   switch (addr) {
   case UART8250_TX_RX_DLL:
     if (DLAB())
