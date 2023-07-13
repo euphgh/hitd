@@ -26,8 +26,8 @@ bool PaddrTop::do_read (word_t addr, wen_t info, word_t* data){
             return it.second->do_read(addr & dev_range.mask, info, data);
         }
     }
-    log_pt->warn(fmt::format("read  addr " HEX_WORD " {} bytes out of bound",
-                             addr, (uint8_t)info.size));
+    // log_pt->warn(fmt::format("read  addr " HEX_WORD " {} bytes out of bound",
+    //                          addr, (uint8_t)info.size));
     return false;
 }
 
@@ -45,6 +45,7 @@ bool PaddrTop::do_write(word_t addr, wen_t info, const word_t data){
             return it.second->do_write(addr & dev_range.mask, info, data);
         }
     }
-    log_pt->error(fmt::format("write addr " HEX_WORD " {} bytes out of bound", addr, (uint8_t)info.size));
+    // log_pt->error(fmt::format("write addr " HEX_WORD " {} bytes out of
+    // bound", addr, (uint8_t)info.size));
     return false;
 }

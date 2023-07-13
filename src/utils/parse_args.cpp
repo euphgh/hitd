@@ -25,7 +25,7 @@ static const struct option table[] = {
 const char* arg_log_file = "trace.log";
 bool arg_batch_mode = false;
 uint64_t arg_wave_on_tick =
-    MUXDEF(CONFIG_WAVE_TAIL_ENABLE, CONFIG_START_FROM, 0);
+    MUXDEF(CONFIG_WAVE_TAIL_ENABLE, CONFIG_WAVE_START_FROM, 0);
 void parse_args(int argc, char *argv[]) {
   int o;
   while ((o = getopt_long(argc, argv, "bl:w:", table, NULL)) != -1) {
