@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.115 (w)1999-2023 BSI
-[*] Thu Jul 13 09:11:02 2023
+[*] Thu Jul 13 10:13:59 2023
 [*]
 [dumpfile] "/home/hgh/mnt/wave/linux.fst"
-[dumpfile_mtime] "Thu Jul 13 09:07:48 2023"
-[dumpfile_size] 194879
+[dumpfile_mtime] "Thu Jul 13 10:11:55 2023"
+[dumpfile_size] 1156664
 [savefile] "/home/hgh/mnt/configs/lsu.sav"
-[timestart] 1964485
+[timestart] 1939380
 [size] 1920 989
 [pos] -1 -1
-*-2.600000 1964510 22602 1964510 -1 -1 1444958 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-14.300000 1970800 22602 -1 -1 -1 1444958 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.mycpu_top.
 [treeopen] TOP.mycpu_top.backend.
@@ -19,7 +19,7 @@
 [treeopen] TOP.mycpu_top.backend.lsuFU.memStage2.cache2.
 [treeopen] TOP.mycpu_top.backend.rob.robEntries.unnamedblk3.
 [treeopen] TOP.mycpu_top.frontend.instBuffer.ib.
-[sst_width] 270
+[sst_width] 393
 [signals_width] 521
 [sst_expanded] 1
 [sst_vpaned_height] 539
@@ -554,17 +554,16 @@ TOP.mycpu_top.backend.lsuFU.memStage2.io_in_bits_debugPC[31:0]
 @28
 TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_in_bits_cancel
 TOP.mycpu_top.backend.lsuFU.memStage2.io_in_bits_exDetect_happen
+TOP.mycpu_top.backend.lsuFU.memStage2.io_in_bits_toCache2_dCacheReq_isWrite
 @22
 TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_out_bits_ddata[31:0]
-TOP.mycpu_top.backend.lsuFU.memStage2.io_out_bits_wPrf_result[31:0]
 TOP.mycpu_top.backend.lsuFU.storeQ.io_query_res_data[31:0]
+TOP.mycpu_top.backend.lsuFU.memStage2.io_out_bits_wPrf_result[31:0]
 TOP.mycpu_top.backend.lsuFU.memStage2.io_in_bits_pTag[19:0]
 @28
 TOP.mycpu_top.backend.lsuFU.memStage2.io_out_valid
-@23
-TOP.mycpu_top.backend.lsuFU.storeQ.io_query_res_memMask[3:0]
 @22
-TOP.mycpu_top.backend.lsuFU.memStage2.io_querySQ_req_needMask[3:0]
+TOP.mycpu_top.backend.lsuFU.storeQ.io_query_res_memMask[3:0]
 @28
 TOP.mycpu_top.backend.lsuFU.memStage2.io_doneSQ
 TOP.mycpu_top.backend.lsuFU.memStage2.io_in_bits_isSQ
@@ -593,7 +592,7 @@ TOP.mycpu_top.backend.lsuFU.storeQ.io_deq_req_bits_rwReq_wWord[31:0]
 TOP.mycpu_top.backend.lsuFU.storeQ.enq_ptr[3:0]
 @1401200
 -StoreQ-Enq
-@800200
+@c00200
 -DCache2
 @28
 TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_in_valid
@@ -663,14 +662,14 @@ TOP.mycpu_top.backend.lsuFU.memStage2.cache2.w1meta_3__bore_req_bits_data_tag[19
 -channel3
 @1401200
 -w1metas
-@800200
+@c00200
 -hit
 @28
 TOP.mycpu_top.backend.lsuFU.memStage2.cache2.hitMask_0
 TOP.mycpu_top.backend.lsuFU.memStage2.cache2.hitMask_1
 TOP.mycpu_top.backend.lsuFU.memStage2.cache2.hitMask_2
 TOP.mycpu_top.backend.lsuFU.memStage2.cache2.hitMask_3
-@1000200
+@1401200
 -hit
 @c00200
 -w1Data
@@ -688,8 +687,8 @@ TOP.mycpu_top.backend.lsuFU.memStage2.cache2.w1data_0__bore_req_bits_setIdx[6:0]
 TOP.mycpu_top.backend.lsuFU.memStage2.cache2.w1data_0_req_valid
 @1401200
 -w1Data
-@1000200
 -DCache2
+@1000200
 -LSU
 @c00200
 -MDU
@@ -777,6 +776,7 @@ TOP.mycpu_top.backend.lsuFU.storeQ.io_fromMem1_ready
 TOP.mycpu_top.backend.lsuFU.memStage1.state[1:0]
 TOP.mycpu_top.backend.lsuFU.memStage1.nextIsLoad
 TOP.mycpu_top.backend.lsuFU.memStage1.io_flush
+TOP.mycpu_top.backend.lsuFU.memStage1.io_out_toStoreQ_bits_stqEnq_rwReq_isWrite
 @800200
 -toMem2
 @28
@@ -788,22 +788,41 @@ TOP.mycpu_top.backend.lsuFU.memStage1.io_out_toMem2_bits_debugPC[31:0]
 -toMem2
 @1401200
 -Mem1-fromRO
-@800200
+@c00200
 -Mem1-fromSQ
 @28
 TOP.mycpu_top.backend.lsuFU.memStage1.sqDecp_ready
 TOP.mycpu_top.backend.lsuFU.memStage1.valid_1
-@1000200
+TOP.mycpu_top.backend.lsuFU.memStage1.io_out_toMem2_bits_toCache2_dCacheReq_isWrite
+@1401200
 -Mem1-fromSQ
-@800200
+@c00201
 -storeQ-ptr
+@22
+TOP.mycpu_top.backend.lsuFU.storeQ.enq_ptr[3:0]
+@c00200
+-enqReq
+@28
+TOP.mycpu_top.backend.lsuFU.storeQ.io_fromMem1_ready
+@22
+TOP.mycpu_top.backend.lsuFU.storeQ.fromM1Decp_bits_r_stqEnq_debugPC[31:0]
+@28
+TOP.mycpu_top.backend.lsuFU.storeQ.io_fromMem1_bits_stqEnq_rwReq_isWrite
+@1401200
+-enqReq
 @22
 TOP.mycpu_top.backend.lsuFU.storeQ.ret_ptr[3:0]
 TOP.mycpu_top.backend.lsuFU.storeQ.req_ptr[3:0]
+@800200
+-deq
+@22
 TOP.mycpu_top.backend.lsuFU.storeQ.io_deq_req_bits_debugPC[31:0]
 @28
+TOP.mycpu_top.backend.lsuFU.storeQ.io_deq_req_bits_rwReq_isWrite
 TOP.mycpu_top.backend.lsuFU.storeQ.io_deq_req_valid
 TOP.mycpu_top.backend.lsuFU.storeQ.io_deq_req_ready
+@1000200
+-deq
 @c00022
 TOP.mycpu_top.backend.lsuFU.storeQ.deq_ptr[3:0]
 @28
@@ -815,9 +834,7 @@ TOP.mycpu_top.backend.lsuFU.storeQ.deq_ptr[3:0]
 -group_end
 @28
 TOP.mycpu_top.backend.lsuFU.storeQ.io_deq_back
-@1000200
+@1401201
 -storeQ-ptr
-@22
-TOP.mycpu_top.backend.lsuFU.memStage2.cacheMask[3:0]
 [pattern_trace] 1
 [pattern_trace] 0

@@ -69,7 +69,7 @@ extern "C" void v_difftest_CacheRun(char io_mainState, svBit io_hasValid,
   state[newMap].reqAddr = io_reqAddr;
   state[newMap].isUncache = io_isUncache;
   state[newMap].isWrite = io_isWrite;
-  state[newMap].writeData = io_isWrite;
+  state[newMap].writeData = io_writeData;
   state[newMap].cancel = io_cancel;
 
   if (state[newMap].mainState != state[oldMap].mainState) {
