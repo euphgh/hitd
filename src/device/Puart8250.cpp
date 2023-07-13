@@ -26,7 +26,7 @@ bool Puart8250::do_read(word_t addr, wen_t info, word_t *data) { /*{{{*/
   *data = 0;
   if (info.size != 1) {
     log_pt->error("read uart8250 size not 1");
-    __ASSERT_SIM__(false, "stop sim");
+    return false;
   }
   switch (addr) {
   case UART8250_TX_RX_DLL: {
@@ -83,6 +83,7 @@ bool Puart8250::do_read(word_t addr, wen_t info, word_t *data) { /*{{{*/
   }
   default:
     __ASSERT_SIM__(false, "read not exist addr of uart: " HEX_WORD, addr);
+    return false;
   }
   return true;
 } /*}}}*/
@@ -92,7 +93,7 @@ bool Puart8250::do_write(word_t addr, wen_t info, const word_t data) { /*{{{*/
   bool res = true;
   if (info.size != 1) {
     log_pt->error("write uart8250 size not 1");
-    __ASSERT_SIM__(false, "stop sim");
+    return false;
   }
   switch (addr) {
   case UART8250_TX_RX_DLL:
@@ -134,7 +135,7 @@ bool Puart8250::do_write(word_t addr, wen_t info, const word_t data) { /*{{{*/
   case UART8250_SCR:
   default:
     log_pt->error("write uart8250 addr %v error", addr);
-    res = false;
+    return false;
   }
   return res;
 } /*}}}*/
