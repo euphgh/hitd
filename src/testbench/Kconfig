@@ -30,7 +30,6 @@ bool "Record every instruction execute time"
 default n
 endmenu# }}}
 
-
 menu "Wave and Debugging"
 config WAVE_ON
 bool "trace wave file"
@@ -60,6 +59,16 @@ config WAVE_EXT
   default "vcd" if EXT_VCD
   default "fst" if EXT_FST
   default "none"
+
+config WAVE_TAIL_ENABLE
+depends on WAVE_ON 
+bool "control the ticks when enble wave"
+default y
+
+config WAVE_START_FROM
+depends on WAVE_ON && WAVE_TAIL_ENABLE
+int "When wave trace start"
+default 0
 
 config MEM_DIFF
     bool "Enable memory check when read by AXI"

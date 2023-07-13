@@ -131,8 +131,14 @@ endif
 LOG_FILE = 	$(call remove_quote, $(CONFIG_TRACE_FILE))
 LOG_DIR  = 	$(dir $(LOG_FILE))
 WAVE_DIR = 	$(call remove_quote, $(CONFIG_WAVE_DIR))
+ifneq ($(wildcard $(LOG_FILE)),)
+    WAVE_TO_TICKS := $(shell head -n 1 $(LOG_FILE) | grep -oP '(?<=\[)[0-9]+(?=\])')
+endif
+ifndef WAVE_TO_TICKS 
+	WAVE_TO_TICKS := 0
+endif
 
-ARGS = --log=$(LOG_FILE)
+ARGS = --log=$(LOG_FILE) -w $(WAVE_TO_TICKS)
 ifdef CONFIG_NEMU_BAT
 ARGS += -b
 endif

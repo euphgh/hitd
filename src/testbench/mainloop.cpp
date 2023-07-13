@@ -10,6 +10,7 @@
 #include "testbench/inst_timer.hpp"
 #include "testbench/sim_state.hpp"
 #include <csignal>
+#include <cstdint>
 
 #define wave_file_t MUXDEF(CONFIG_EXT_FST,VerilatedFstC,VerilatedVcdC)
 #define __WAVE_INC__ MUXDEF(CONFIG_EXT_FST,"verilated_fst_c.h","verilated_vcd_c.h")
@@ -69,7 +70,7 @@ static void check_cpu_state(diff_state* mycpu){/*{{{*/
         nemu->ref_log_error(mycpu);
     }
 }/*}}}*/
-
+extern uint64_t arg_wave_on_tick;
 bool mainloop(
         Vmycpu_top* top,
         axi_paddr* axi,
@@ -81,6 +82,7 @@ bool mainloop(
     mycpu.ArchCop = std::make_unique<CP0_t>();
     dut_ptr = &mycpu;
     sim_status = SIM_RUN;
+    uint64_t wave_on_tick = arg_wave_on_tick;
 
     IFDEF(CONFIG_WAVE_ON,Verilated::traceEverOn(true));
     IFDEF(CONFIG_WAVE_ON,wave_file_t tfp);
@@ -102,7 +104,8 @@ bool mainloop(
         nemu->reset();
         top->aclk = !top->aclk;
         top->eval();
-        IFDEF(CONFIG_WAVE_ON,tfp.dump(ticks));
+        IFDEF(CONFIG_WAVE_ON, IFDEF(CONFIG_WAVE_TAIL_ENABLE,
+                                    if (ticks > wave_on_tick)) tfp.dump(ticks));
         last_commit = ticks;
     }
 
@@ -127,7 +130,8 @@ bool mainloop(
         axi->update_output();
 
         /* record waveform */
-        IFDEF(CONFIG_WAVE_ON,tfp.dump(ticks));
+        IFDEF(CONFIG_WAVE_ON, IFDEF(CONFIG_WAVE_TAIL_ENABLE,
+                                    if (ticks > wave_on_tick)) tfp.dump(ticks));
 
         /* check mainloop condition */
         if (sim_status!=SIM_RUN) break;
@@ -166,7 +170,8 @@ negtive_edge:
         ++ticks;
         top->aclk = !top->aclk;
         top->eval();
-        IFDEF(CONFIG_WAVE_ON,tfp.dump(ticks));
+        IFDEF(CONFIG_WAVE_ON, IFDEF(CONFIG_WAVE_TAIL_ENABLE,
+                                    if (ticks > wave_on_tick)) tfp.dump(ticks));
         IFDEF(CONFIG_COMMIT_WAIT, __ASSERT_SIM__(ticks-last_commit<CONFIG_COMMIT_TIME_LIMIT, \
                     "{} ticks not commit inst", \
                     CONFIG_COMMIT_TIME_LIMIT));/*}}}*/
