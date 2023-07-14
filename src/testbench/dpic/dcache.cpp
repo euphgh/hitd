@@ -10,8 +10,19 @@
 #include <utility>
 
 #define dclog(str, ...) mycpu_log->trace(fmt::format("[C] " str, ##__VA_ARGS__))
+#define dcError(str, ...) mycpu_log->error(fmt::format(str, ##__VA_ARGS__))
 enum CacheMainState { run, miss, readDram, refill, uncache, instr };
 enum CacheWriteState { wIdel, wReq, wData, waitwBack };
+enum InstrState {
+  instrIdle,
+  decode,
+  idxStTag,
+  hitInv,
+  idxInv,
+  fake,
+  waitWauto,
+  waitRetire
+};
 enum CacheOp {
   IndexInvalidI = 0b00000,
   IndexWriteBackInvalidD = 0b00001,
@@ -53,6 +64,9 @@ struct CacheState {
   bool cancel;
   CacheOp instrOp;
   bool instrOk;
+  InstrState instrState;
+  uint8_t tagWay;
+  word_t idxTag;
 };
 
 static CacheState state[2] = {{run, wIdel, 0}, {run, wIdel, 0}};
@@ -76,14 +90,23 @@ bool stateIsSame() {
   return res;
 }
 
-extern "C" void
-v_difftest_CacheRun(char io_mainState, svBit io_hasValid, int io_reqAddr,
-                    svBit io_isUncache, svBit io_isWrite, int io_writeData,
-                    svBit io_cancel, int io_retData, char io_hitWays,
-                    svBit io_isHit, char io_victimWay, int io_vicTag,
-                    svBit io_vicDirty, svBit io_vicValid, const int *io_vicLine,
-                    char io_writeState, char io_instrOp, svBit io_instrOk,
-                    svBit io_instrRetire) {
+extern "C" void v_difftest_CacheRun(
+    char io_mainState, svBit io_hasValid, int io_reqAddr, svBit io_isUncache,
+    svBit io_isWrite, int io_writeData, svBit io_cancel, int io_retData,
+    char io_hitWays, svBit io_isHit, char io_victimWay, const int *io_tagFrom1,
+    const svBit *io_dirtyFrom1, const svBit *io_validFrom1,
+    const int *io_wbBuffer, int io_wbAddr, char io_writeState,
+    char io_instrState, svBit io_instrValid, char io_tagWay, char io_instrOp) {
+
+  auto getTag = [&io_tagFrom1](uint8_t way) {
+    return (word_t)io_tagFrom1[way];
+  };
+  auto getValid = [&io_validFrom1](uint8_t way) {
+    return (bool)io_validFrom1[way];
+  };
+  auto getDirty = [&io_dirtyFrom1](uint8_t way) {
+    return (bool)io_dirtyFrom1[way];
+  };
   std::swap(oldMap, newMap);
   state[newMap].mainState = (CacheMainState)io_mainState;
   state[newMap].writeState = (CacheWriteState)io_writeState;
@@ -93,46 +116,62 @@ v_difftest_CacheRun(char io_mainState, svBit io_hasValid, int io_reqAddr,
   state[newMap].writeData = io_writeData;
   state[newMap].cancel = io_cancel;
   state[newMap].instrOp = (CacheOp)io_instrOp;
-  state[newMap].instrOk = io_instrOk;
+  state[newMap].instrState = (InstrState)io_instrState;
+  state[newMap].tagWay = io_tagWay;
 
   if (state[newMap].mainState != state[oldMap].mainState) {
     dclog("mainState Change: {} -> {}", mainStateStr[state[oldMap].mainState],
           mainStateStr[state[newMap].mainState]);
     if (io_mainState == miss) {
+      dclog("victim {:d} way with tag: " HEX_WORD ", valid: {:b}, dirty: {:b}",
+            io_victimWay, getTag(io_victimWay), getValid(io_victimWay),
+            getDirty(io_victimWay));
+    }
+  }
+
+  if (state[newMap].instrState == idxInv) {
+    if (state[oldMap].instrState == idxInv)
+      dcError("instrState \"idxInv\"should only one cycle");
+    dclog("{:s} tag: " HEX_WORD ", valid: {:b}, dirty: {:b}",
+          cacheOpStr[(CacheOp)io_instrOp], getTag(io_tagWay),
+          getValid(io_tagWay), getDirty(io_tagWay));
+  }
+  if (state[newMap].instrState == hitInv) {
+    if (state[oldMap].instrState == hitInv)
+      dcError("instrState \"hitInv\" should only one cycle");
+    if (io_isHit)
+      dclog("{:s} tag: " HEX_WORD ", valid: {:b}, dirty: {:b}",
+            cacheOpStr[(CacheOp)io_instrOp], getTag(io_hitWays),
+            getValid(io_hitWays), getDirty(io_hitWays));
+    else
+      dclog("{:s} notHit with addr: " HEX_WORD, cacheOpStr[(CacheOp)io_instrOp],
+            io_reqAddr);
+  }
+  if (state[newMap].instrState == fake) {
+    if (state[oldMap].instrState != fake)
+      dclog("{:s}", cacheOpStr[(CacheOp)io_instrOp]);
+  }
+
+  if (state[newMap].writeState != state[oldMap].writeState) {
+    if (state[newMap].writeState == wReq) {
       auto wordNum = 8;
       std::stringstream res;
       for (int i = 0; i < wordNum; i++)
-        res << std::hex << std::setw(8) << std::setfill('0') << io_vicLine[i]
+        res << std::hex << std::setw(8) << std::setfill('0') << io_wbBuffer[i]
             << " ";
-      dclog("victim {:d} way with tag: " HEX_WORD
-            ", valid: {:b}, dirty: {:b}, data: {}",
-            (uint8_t)io_victimWay, (word_t)io_vicTag, io_vicValid, io_vicDirty,
-            res.str());
+      dclog("WriteState Change: {} -> {} with addr: " HEX_WORD ", data: {:s}",
+            writeStateStr[state[oldMap].writeState],
+            writeStateStr[state[newMap].writeState], io_wbAddr, res.str());
     }
-  }
-  if (io_mainState == instr) {
-    if (state[newMap].mainState != state[oldMap].mainState)
-      dclog("EXEC {:s}", cacheOpStr[(CacheOp)io_instrOp]);
-    else {
-      if (state[newMap].instrOp != state[oldMap].instrOp)
-        mycpu_log->error(fmt::format("CacheOp not same {:b} -> {:b}",
-                                     state[oldMap].instrOp,
-                                     state[newMap].instrOp));
-      if (state[newMap].instrOk != state[oldMap].instrOk)
-        dclog("FIN {:s}", cacheOpStr[(CacheOp)io_instrOp]);
-      if (io_instrRetire)
-        dclog("RETIRE {:s}", cacheOpStr[(CacheOp)io_instrOp]);
-    }
-  }
-  if (state[newMap].writeState != state[oldMap].writeState)
     dclog("WriteState Change: {} -> {}",
           writeStateStr[state[oldMap].writeState],
           writeStateStr[state[newMap].writeState]);
+  }
 
   if (state[oldMap].valid == false && io_hasValid == false)
     return;
 
-  if (io_hasValid == true) {
+  if (io_hasValid == true && io_instrValid == false) {
     if (!reqIsSame()) {
       auto cacheStr = io_isUncache ? "UnCache" : "Cache";
       auto cancelStr = io_cancel ? " CANCELED" : "";
@@ -161,3 +200,5 @@ v_difftest_CacheRun(char io_mainState, svBit io_hasValid, int io_reqAddr,
             writeStateStr[state[newMap].writeState]);
   }
 }
+#undef dclog
+#undef dcError
