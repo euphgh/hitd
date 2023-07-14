@@ -48,3 +48,14 @@ el::Logger* logger_init(std::string name){
     LOG(INFO) << "Init logger with name:" << name;
     return logger;
 }
+
+void disableLogger(el::Logger *logger) {
+    auto conf = logger->configurations();
+    conf->setGlobally(el::ConfigurationType::Enabled, "false");
+    logger->configure(*conf);
+}
+void enableLogger(el::Logger *logger) {
+    auto conf = logger->configurations();
+    conf->setGlobally(el::ConfigurationType::Enabled, "true");
+    logger->configure(*conf);
+}
