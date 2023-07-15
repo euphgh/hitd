@@ -75,7 +75,7 @@
     )\
     inter \
     f2(compare, 11, 0,\
-            f1(all      ,31 ,0  ,0x0  ,__W__, __c__)\
+            f1(all      ,31 ,0  ,0x0 ,__W__, __c__)\
     )\
     inter \
     f2(status, 12, 0,\
@@ -209,6 +209,7 @@ class CP0_t {
 #define __cp0_compare_wfunc__ 1
         inline void compare_wfunc(word_t data){ 
             cause.ip_h &= 0x1f; 
+        //     cause.ti = false; 
         }
 #define __cp0_wire_wfunc__ 1
         inline void wire_wfunc(word_t data){ random.random = CONFIG_TLB_NR-1;}

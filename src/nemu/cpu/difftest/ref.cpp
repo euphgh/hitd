@@ -26,9 +26,11 @@ void CPU_state::ref_tick_and_int(uint8_t ext_int){/*{{{*/
     // mfc0 reg, count
     // mtc0 reg, compare
     // should not cause tick interrupt
-    cp0.count.all += cp0.clock_tick; 
-    cp0.clock_tick = 1 - cp0.clock_tick; 
+    cp0.count.all += cp0.clock_tick;
+    cp0.clock_tick = 1 - cp0.clock_tick;
     bool new_ip5 = cp0.cause.ip_h >> 5 || (cp0.count.all==cp0.compare.all);
+    // bool new_ip5 = cp0.cause.ip_h >> 5 || cp0.cause.ti;
+    // cp0.cause.ti = cp0.count.all == cp0.compare.all;
     cp0.cause.ip_h =  (new_ip5 << 5)|(ext_int & 0b011111);
     cp0.cause.ip_h |= ((cp0.count.all==cp0.compare.all)<<5);
     cp0.random.random = cp0.random.random==cp0.wire.wire ? 
