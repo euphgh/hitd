@@ -45,11 +45,11 @@ $(NEMU_OBJS): $(OBJ_DIR)/%.o: %.cpp
 	@$(CXX) $(NEMU_CFLAGS) -c -o $@ $<
 	$(call call_fixdep, $(@:.o=.d), $@)
 ifdef CONFIG_NSC_NEMU
-ELFIN_AR += tools/libelfin/elf/libelf++.a
-ELFIN_AR += tools/libelfin/dwarf/libdwarf++.a
+# ELFIN_AR += tools/libelfin/elf/libelf++.a
+# ELFIN_AR += tools/libelfin/dwarf/libdwarf++.a
 # OBJ_ALL  += tools/libelfin/elf/test.a
-$(ELFIN_AR):
-	make -C tools/libelfin
+# $(ELFIN_AR):
+# 	make -C tools/libelfin
 endif
 OBJ_ALL += $(NEMU_OBJS)
 endif

@@ -256,9 +256,11 @@ except_restart:
           inst_state.is_delay_slot ? delay_slot_npc : inst_state.snpc;
       decode_exec();
     }
-  } catch (...) {
-    arch_state.pc = inst_state.dnpc;
-    goto except_restart;
+  } catch (bool restart) {
+    if (restart) {
+      arch_state.pc = inst_state.dnpc;
+      goto except_restart;
+    }
   }
 
   // TODO:check pc finish conditions

@@ -10,7 +10,7 @@
 #include <queue>
 #include <set>
 
-class mips_core {
+template <int nr_tlb_entry = 8> class mips_core {
 public:
     mips_core(PaddrTop *bus): mmu(bus),cp0(pc,in_delay_slot,mmu) {
         reset();
@@ -670,7 +670,7 @@ private:
             case OPCODE_J: {
                 // J
                 assert(!next_delay_slot);
-                delay_npc = (pc & 0xf0000000) | (instr.j_type.imm << 2);
+                delay_npc = ((pc + 4) & 0xf0000000) | (instr.j_type.imm << 2);
                 next_delay_slot = true;
                 next_control_trans = true;
                 j_cnt ++;
@@ -680,7 +680,7 @@ private:
                 // JAL
                 assert(!next_delay_slot);
                 set_GPR(31, pc + 8);
-                delay_npc = (pc & 0xf0000000) | (instr.j_type.imm << 2);
+                delay_npc = ((pc + 4) & 0xf0000000) | (instr.j_type.imm << 2);
                 next_delay_slot = true;
                 next_control_trans = true;
                 break;
@@ -814,8 +814,11 @@ private:
                 uint32_t buf;
                 uint32_t align_addr = vaddr ^ (vaddr & 3);
                 mips32_exccode stat = mmu.va_read(align_addr, 4, (unsigned char*)&buf, cp0.get_ksu(), cp0.get_asid(), tlb_invalid);
-                if (stat != EXC_OK) cp0.raise_trap(stat, align_addr, tlb_invalid);
-                else {
+                if (stat != EXC_OK) {
+                    if (stat == EXC_TLBL)
+                            stat = EXC_TLBS;
+                    cp0.raise_trap(stat, align_addr, tlb_invalid);
+                } else {
                     switch (vaddr % 4) {
                         case 0:
                             buf = (((uint32_t)GPR[instr.i_type.rt]) >> 24) | (buf & 0xffffff00u);
@@ -843,8 +846,11 @@ private:
                 uint32_t buf;
                 uint32_t align_addr = vaddr ^ (vaddr & 3);
                 mips32_exccode stat = mmu.va_read(align_addr, 4, (unsigned char*)&buf, cp0.get_ksu(), cp0.get_asid(), tlb_invalid);
-                if (stat != EXC_OK) cp0.raise_trap(stat, align_addr, tlb_invalid);
-                else {
+                if (stat != EXC_OK) {
+                    if (stat == EXC_TLBL)
+                            stat = EXC_TLBS;
+                    cp0.raise_trap(stat, align_addr, tlb_invalid);
+                } else {
                     switch (vaddr % 4) {
                         case 0:
                             buf = GPR[instr.i_type.rt];
@@ -983,9 +989,8 @@ private:
     bool cur_control_trans = false;
     uint32_t delay_npc;
 public:
-    mips_mmu<16> mmu;
-    mips_cp0<16> cp0;
+  mips_mmu<nr_tlb_entry> mmu;
+  mips_cp0<nr_tlb_entry> cp0;
 };
-
 
 #endif
