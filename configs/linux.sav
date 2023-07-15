@@ -1,24 +1,27 @@
 [*]
 [*] GTKWave Analyzer v3.3.115 (w)1999-2023 BSI
-[*] Wed Jul 12 13:49:28 2023
+[*] Sat Jul 15 07:31:10 2023
 [*]
 [dumpfile] "/home/hgh/mnt/wave/linux.fst"
-[dumpfile_mtime] "Wed Jul 12 13:41:48 2023"
-[dumpfile_size] 13410762
-[savefile] "/home/hgh/mnt/configs/llsc.sav"
-[timestart] 1959287
+[dumpfile_mtime] "Sat Jul 15 07:26:44 2023"
+[dumpfile_size] 2955461
+[savefile] "/home/hgh/mnt/configs/linux.sav"
+[timestart] 3892472
 [size] 1920 989
 [pos] -1 -1
-*-1.700000 1959292 1959292 -1 -1 -1 1444958 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-4.700000 3892554 22602 1992237 1992160 1991876 1444958 2132914 3892554 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.mycpu_top.
 [treeopen] TOP.mycpu_top.backend.
 [treeopen] TOP.mycpu_top.backend.lsuFU.
 [treeopen] TOP.mycpu_top.backend.lsuFU.memStage1.cache1.datas_0.array_ext.unnamedblk1.
 [treeopen] TOP.mycpu_top.backend.lsuFU.memStage2.cache2.
+[treeopen] TOP.mycpu_top.backend.mduFU.
+[treeopen] TOP.mycpu_top.backend.mduFU.clz.
+[treeopen] TOP.mycpu_top.backend.rob.
 [treeopen] TOP.mycpu_top.backend.rob.robEntries.unnamedblk3.
 [treeopen] TOP.mycpu_top.frontend.instBuffer.ib.
-[sst_width] 414
+[sst_width] 389
 [signals_width] 521
 [sst_expanded] 1
 [sst_vpaned_height] 539
@@ -111,6 +114,41 @@ TOP.mycpu_top.backend.rob.difftestRetire.io_lastPC[31:0]
 TOP.mycpu_top.backend.rob.difftestRetire.io_retireNum[7:0]
 @1401200
 -Difftest-Retire
+@c00200
+-PRF-WB
+@22
+TOP.mycpu_top.backend.prf.io_writePorts_0_bits_pDest[5:0]
+TOP.mycpu_top.backend.prf.io_writePorts_0_bits_result[31:0]
+@28
+TOP.mycpu_top.backend.prf.io_writePorts_0_valid
+@22
+TOP.mycpu_top.backend.prf.io_writePorts_1_bits_pDest[5:0]
+TOP.mycpu_top.backend.prf.io_writePorts_1_bits_result[31:0]
+@28
+TOP.mycpu_top.backend.prf.io_writePorts_1_valid
+@22
+TOP.mycpu_top.backend.prf.io_writePorts_2_bits_pDest[5:0]
+TOP.mycpu_top.backend.prf.io_writePorts_2_bits_result[31:0]
+TOP.mycpu_top.backend.prf.io_writePorts_2_bits_wmask[3:0]
+@28
+TOP.mycpu_top.backend.prf.io_writePorts_2_valid
+@1401200
+-PRF-WB
+@c00200
+-RO-lwlr
+@28
+TOP.mycpu_top.backend.lsuFU.roStage.lwlrReg
+TOP.mycpu_top.backend.lsuFU.roStage.io_in_valid
+@22
+TOP.mycpu_top.backend.lsuFU.roStage.io_out_bits_debugPC[31:0]
+TOP.mycpu_top.backend.lsuFU.roStage.io_out_bits_srcData_0[31:0]
+TOP.mycpu_top.backend.lsuFU.roStage.io_out_bits_prevData[31:0]
+@28
+TOP.mycpu_top.backend.lsuFU.roStage.io_out_valid
+@1401200
+-RO-lwlr
+@200
+-
 @c00200
 -dper_mispre
 @c00028
@@ -507,8 +545,17 @@ TOP.mycpu_top.backend.rob.singleRetireMask_plaInput[1:0]
 -group_end
 @22
 TOP.mycpu_top.backend.rob.robEntries.io_pop_0_bits_uOp_specialType[3:0]
+TOP.mycpu_top.backend.rob.robEntries.io_pop_0_bits_exception_basic_pc[31:0]
 @28
-TOP.mycpu_top.backend.rob.state[1:0]
+TOP.mycpu_top.backend.rob.io_out_multiRetire_0_bits_scommit
+TOP.mycpu_top.backend.rob.robEntries.io_pop_0_valid
+TOP.mycpu_top.backend.rob.robEntries.io_pop_0_ready
+@22
+TOP.mycpu_top.backend.rob.robEntries.io_pop_1_bits_exception_basic_pc[31:0]
+@28
+TOP.mycpu_top.backend.rob.io_out_multiRetire_1_bits_scommit
+TOP.mycpu_top.backend.rob.robEntries.io_pop_1_valid
+TOP.mycpu_top.backend.rob.robEntries.io_pop_1_ready
 TOP.mycpu_top.backend.rob.io_out_flushAll
 TOP.mycpu_top.backend.rob.io_out_mispreFlushBackend
 @1401200
@@ -542,9 +589,8 @@ TOP.mycpu_top.backend.rob.robEntries.io_push_2_valid
 TOP.mycpu_top.backend.rob.robEntries.io_push_2_ready
 @1401200
 -Rob-Push
-@800200
--LSU
 @c00200
+-LSU
 -Mem2
 @28
 TOP.mycpu_top.backend.lsuFU.memStage2.io_in_valid
@@ -554,19 +600,39 @@ TOP.mycpu_top.backend.lsuFU.memStage2.io_in_bits_debugPC[31:0]
 @28
 TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_in_bits_cancel
 TOP.mycpu_top.backend.lsuFU.memStage2.io_in_bits_exDetect_happen
-TOP.mycpu_top.backend.lsuFU.memStage2.io_flush
+TOP.mycpu_top.backend.lsuFU.memStage2.io_in_bits_toCache2_dCacheReq_isWrite
 @22
 TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_out_bits_ddata[31:0]
-TOP.mycpu_top.backend.lsuFU.memStage2.io_out_bits_wPrf_result[31:0]
+@c00022
+TOP.mycpu_top.backend.lsuFU.memStage2.cacheMask[3:0]
+@28
+(0)TOP.mycpu_top.backend.lsuFU.memStage2.cacheMask[3:0]
+(1)TOP.mycpu_top.backend.lsuFU.memStage2.cacheMask[3:0]
+(2)TOP.mycpu_top.backend.lsuFU.memStage2.cacheMask[3:0]
+(3)TOP.mycpu_top.backend.lsuFU.memStage2.cacheMask[3:0]
+@1401200
+-group_end
+@22
 TOP.mycpu_top.backend.lsuFU.storeQ.io_query_res_data[31:0]
-TOP.mycpu_top.backend.lsuFU.memStage2.io_in_bits_pTag[19:0]
+TOP.mycpu_top.backend.lsuFU.memStage2.validWord[31:0]
+TOP.mycpu_top.backend.lsuFU.memStage2.io_in_bits_prevDstSrc[31:0]
+TOP.mycpu_top.backend.lsuFU.memStage2.io_out_bits_wPrf_wmask[3:0]
+TOP.mycpu_top.backend.lsuFU.memStage2.io_out_bits_wPrf_result[31:0]
 @28
 TOP.mycpu_top.backend.lsuFU.memStage2.io_out_valid
-@22
+@c00022
 TOP.mycpu_top.backend.lsuFU.storeQ.io_query_res_memMask[3:0]
+@28
+(0)TOP.mycpu_top.backend.lsuFU.storeQ.io_query_res_memMask[3:0]
+(1)TOP.mycpu_top.backend.lsuFU.storeQ.io_query_res_memMask[3:0]
+(2)TOP.mycpu_top.backend.lsuFU.storeQ.io_query_res_memMask[3:0]
+(3)TOP.mycpu_top.backend.lsuFU.storeQ.io_query_res_memMask[3:0]
+@1401200
+-group_end
 @28
 TOP.mycpu_top.backend.lsuFU.memStage2.io_doneSQ
 TOP.mycpu_top.backend.lsuFU.memStage2.io_in_bits_isSQ
+TOP.mycpu_top.backend.lsuFU.memStage2.io_flush
 @1401200
 -Mem2
 @c00200
@@ -607,8 +673,111 @@ TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_in_bits_fromStage1_dCacheReq_wSt
 TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_in_bits_fromStage1_dCacheReq_wWord[31:0]
 TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_out_bits_ddata[31:0]
 @28
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.writeCounter_value[2:0]
 TOP.mycpu_top.backend.lsuFU.memStage2.cache2.mainState[2:0]
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.instrState[2:0]
 TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_out_valid
+@22
+TOP.mycpu_top.backend.lsuFU.memStage2.cacheMask[3:0]
+TOP.mycpu_top.backend.lsuFU.memStage2.io_querySQ_req_needMask[3:0]
+@c00022
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_in_bits_fromStage1_cacheInst_bits_op[4:0]
+@28
+(0)TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_in_bits_fromStage1_cacheInst_bits_op[4:0]
+(1)TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_in_bits_fromStage1_cacheInst_bits_op[4:0]
+(2)TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_in_bits_fromStage1_cacheInst_bits_op[4:0]
+(3)TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_in_bits_fromStage1_cacheInst_bits_op[4:0]
+(4)TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_in_bits_fromStage1_cacheInst_bits_op[4:0]
+@1401200
+-group_end
+@c00200
+-stage1meta
+@800200
+-channel0
+@22
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_in_bits_fromStage1_meta_0_tag[19:0]
+@28
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_in_bits_fromStage1_meta_0_dirty
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_in_bits_fromStage1_meta_0_valid
+@1000200
+-channel0
+@800200
+-channel1
+@22
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_in_bits_fromStage1_meta_1_tag[19:0]
+@28
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_in_bits_fromStage1_meta_1_dirty
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_in_bits_fromStage1_meta_1_valid
+@1000200
+-channel1
+@800200
+-channel2
+@22
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_in_bits_fromStage1_meta_2_tag[19:0]
+@28
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_in_bits_fromStage1_meta_2_dirty
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_in_bits_fromStage1_meta_2_valid
+@1000200
+-channel2
+@800200
+-channel3
+@22
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_in_bits_fromStage1_meta_3_tag[19:0]
+@28
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_in_bits_fromStage1_meta_3_dirty
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_in_bits_fromStage1_meta_3_valid
+@1000200
+-channel3
+@1401200
+-stage1meta
+@c00200
+-w1metas
+@28
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.writeState[1:0]
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.victimWay[1:0]
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.mainState[2:0]
+@800200
+-channel0
+@28
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.w1meta_0__bore_req_valid
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.w1meta_0__bore_req_bits_data_dirty
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.w1meta_0__bore_req_bits_data_valid
+@22
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.w1meta_0__bore_req_bits_data_tag[19:0]
+@1000200
+-channel0
+@800200
+-channel1
+@28
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.w1meta_1__bore_req_valid
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.w1meta_1__bore_req_bits_data_dirty
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.w1meta_1__bore_req_bits_data_valid
+@22
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.w1meta_1__bore_req_bits_data_tag[19:0]
+@1000200
+-channel1
+@800200
+-channel2
+@28
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.w1meta_2__bore_req_valid
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.w1meta_2__bore_req_bits_data_dirty
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.w1meta_2__bore_req_bits_data_valid
+@22
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.w1meta_2__bore_req_bits_data_tag[19:0]
+@1000200
+-channel2
+@800200
+-channel3
+@28
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.w1meta_3__bore_req_valid
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.w1meta_3__bore_req_bits_data_dirty
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.w1meta_3__bore_req_bits_data_valid
+@22
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.w1meta_3__bore_req_bits_data_tag[19:0]
+@1000200
+-channel3
+@1401200
+-w1metas
 @c00200
 -hit
 @28
@@ -635,9 +804,8 @@ TOP.mycpu_top.backend.lsuFU.memStage2.cache2.w1data_0_req_valid
 @1401200
 -w1Data
 -DCache2
-@1000200
 -LSU
-@c00200
+@800200
 -MDU
 @28
 TOP.mycpu_top.backend.mduFU.io_in_valid
@@ -662,7 +830,7 @@ TOP.mycpu_top.backend.mduFU.c0Inst_mtc0_wdata[31:0]
 TOP.mycpu_top.backend.mduFU.c0Inst_mtc0_wen
 TOP.mycpu_top.backend.mduFU.data32Q.deq_ptr_value[1:0]
 TOP.mycpu_top.backend.mduFU.data32Q.enq_ptr_value[1:0]
-@22
+@23
 TOP.mycpu_top.backend.mduFU.data32Q.ram_ext.Memory[1][31:0]
 @c00200
 -Data32Q
@@ -704,8 +872,26 @@ TOP.mycpu_top.backend.mduFU.mtc0AddrQ.io_flush
 TOP.mycpu_top.backend.mduFU.mtc0AddrQ.maybe_full
 @1401200
 -Mtc0Q
--MDU
 @800200
+-clz
+@28
+TOP.mycpu_top.backend.mduFU.clz.io_in_valid
+@22
+TOP.mycpu_top.backend.mduFU.clz.io_in_bits_src[31:0]
+@28
+TOP.mycpu_top.backend.mduFU.clz.state[1:0]
+@22
+TOP.mycpu_top.backend.mduFU.clz.widthCounter_value[4:0]
+TOP.mycpu_top.backend.mduFU.clz.sum[31:0]
+TOP.mycpu_top.backend.mduFU.clz.tmp[31:0]
+@28
+TOP.mycpu_top.backend.mduFU.clz.io_out_valid
+@22
+TOP.mycpu_top.backend.mduFU.clz.io_out_bits[31:0]
+@1000200
+-clz
+-MDU
+@c00200
 -Mem1-fromRO
 @22
 TOP.mycpu_top.backend.lsuFU.memStage1.io_fromRO_bits_debugPC[31:0]
@@ -715,13 +901,15 @@ TOP.mycpu_top.backend.lsuFU.memStage1.roDecp_ready
 @22
 TOP.mycpu_top.backend.lsuFU.memStage1.roDecp_bits_r_debugPC[31:0]
 @28
+TOP.mycpu_top.backend.lsuFU.memStage1.valid
 TOP.mycpu_top.backend.lsuFU.memStage1.roDecp_bits_r_rwReq_isWrite
 TOP.mycpu_top.backend.lsuFU.memStage1.isUncache
 TOP.mycpu_top.backend.lsuFU.memStage1.io_out_toStoreQ_valid
 TOP.mycpu_top.backend.lsuFU.storeQ.io_fromMem1_ready
 TOP.mycpu_top.backend.lsuFU.memStage1.state[1:0]
 TOP.mycpu_top.backend.lsuFU.memStage1.nextIsLoad
-TOP.mycpu_top.backend.lsuFU.memStage1.valid
+TOP.mycpu_top.backend.lsuFU.memStage1.io_flush
+TOP.mycpu_top.backend.lsuFU.memStage1.io_out_toStoreQ_bits_stqEnq_rwReq_isWrite
 @800200
 -toMem2
 @28
@@ -731,29 +919,22 @@ TOP.mycpu_top.backend.lsuFU.memStage1.io_out_toMem2_ready
 TOP.mycpu_top.backend.lsuFU.memStage1.io_out_toMem2_bits_debugPC[31:0]
 @1000200
 -toMem2
+@1401200
 -Mem1-fromRO
-@22
-TOP.mycpu_top.backend.lsuFU.memStage1.roDecp_bits_r_debugPC[31:0]
-@29
-TOP.mycpu_top.backend.lsuFU.memStage1.io_out_toStoreQ_bits_scFail
-@28
-TOP.mycpu_top.backend.lsuFU.memStage1.llbitInMem1__bore
-@800200
+@c00200
 -Mem1-fromSQ
 @28
 TOP.mycpu_top.backend.lsuFU.memStage1.sqDecp_ready
 TOP.mycpu_top.backend.lsuFU.memStage1.valid_1
-@1000200
+TOP.mycpu_top.backend.lsuFU.memStage1.io_out_toMem2_bits_toCache2_dCacheReq_isWrite
+@1401200
 -Mem1-fromSQ
 @c00200
 -storeQ-ptr
 @22
-TOP.mycpu_top.backend.lsuFU.storeQ.ret_ptr[3:0]
+TOP.mycpu_top.backend.lsuFU.storeQ.enq_ptr[3:0]
 TOP.mycpu_top.backend.lsuFU.storeQ.req_ptr[3:0]
-TOP.mycpu_top.backend.lsuFU.storeQ.io_deq_req_bits_debugPC[31:0]
-@28
-TOP.mycpu_top.backend.lsuFU.storeQ.io_deq_req_valid
-TOP.mycpu_top.backend.lsuFU.storeQ.io_deq_req_ready
+TOP.mycpu_top.backend.lsuFU.storeQ.ret_ptr[3:0]
 @c00022
 TOP.mycpu_top.backend.lsuFU.storeQ.deq_ptr[3:0]
 @28
@@ -764,8 +945,44 @@ TOP.mycpu_top.backend.lsuFU.storeQ.deq_ptr[3:0]
 @1401200
 -group_end
 @28
+TOP.mycpu_top.backend.lsuFU.storeQ.io_flush
+@800200
+-enqReq
+@28
+TOP.mycpu_top.backend.lsuFU.storeQ.io_fromMem1_valid
+TOP.mycpu_top.backend.lsuFU.storeQ.io_fromMem1_ready
+@22
+TOP.mycpu_top.backend.lsuFU.storeQ.fromM1Decp_bits_r_stqEnq_debugPC[31:0]
+@1000200
+-enqReq
+@800200
+-ret
+@28
+TOP.mycpu_top.backend.lsuFU.storeQ.io_retire_0
+@22
+TOP.mycpu_top.backend.lsuFU.storeQ.io_retirePC_0[31:0]
+@28
+TOP.mycpu_top.backend.lsuFU.storeQ.io_retire_1
+@22
+TOP.mycpu_top.backend.lsuFU.storeQ.io_retirePC_1[31:0]
+@1000200
+-ret
+@c00200
+-req
+@22
+TOP.mycpu_top.backend.lsuFU.storeQ.req_ptr[3:0]
+TOP.mycpu_top.backend.lsuFU.storeQ.io_deq_req_bits_debugPC[31:0]
+@28
+TOP.mycpu_top.backend.lsuFU.storeQ.io_deq_req_valid
+TOP.mycpu_top.backend.lsuFU.storeQ.io_deq_req_ready
+@1401200
+-req
+@c00200
+-back
+@28
 TOP.mycpu_top.backend.lsuFU.storeQ.io_deq_back
 @1401200
+-back
 -storeQ-ptr
 [pattern_trace] 1
 [pattern_trace] 0
