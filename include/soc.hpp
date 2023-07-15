@@ -6,6 +6,12 @@
 #ifndef __SOC_HPP__
 #define __SOC_HPP__
 
+#ifdef CONFIG_DIFFTEST
+#define SoC_t dual_soc
+#else
+#define SoC_t single_soc
+#endif
+
 class dual_soc {/*{{{*/
     public:
         enum soc_who  { DUT = 0, REF = 1};

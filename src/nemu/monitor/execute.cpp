@@ -7,13 +7,14 @@
 #include <csignal>
 bool g_si_print = false;
 void compare_exec(uint64_t n) {
-  extern std::unique_ptr<dual_soc> soc;
+  extern std::unique_ptr<SoC_t> soc;
   for (; n > 0; n--) {
     // TIMED_SCOPE(exec_once, "compare exec once");
     extern uint64_t ticks;
     ++ticks;
     soc->tick();
-    nemu->ref_tick_and_int(soc->dut_ext_int());
+    nemu->ref_tick_and_int(
+        soc->MUXDEF(CONFIG_DIFFTEST, dut_ext_int(), ext_int()));
     nemu->exec_once();
     if (g_si_print)
       fmt::print(

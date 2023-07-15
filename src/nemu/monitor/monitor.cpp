@@ -42,7 +42,7 @@ static void welcome() {
 extern int parse_args(int argc, char *argv[]);
 extern el::Logger* logger_init(std::string name);
 extern bool arg_batch_mode;
-std::unique_ptr<dual_soc> soc;
+std::unique_ptr<SoC_t> soc;
 
 void init_monitor(int argc, char *argv[]) {
   /* Perform some global initialization. */
@@ -58,11 +58,17 @@ void init_monitor(int argc, char *argv[]) {
   cemu_log = logger_init("CHemu");
 
   /* Initialize memory. */
+#ifdef CONFIG_DIFFTEST
   soc.reset(new dual_soc());
   PaddrTop* nemu_paddr = soc->get_dut_soc();
   PaddrTop* cemu_paddr = soc->get_ref_soc();
   nemu_paddr->set_logger(nemu_log);
   cemu_paddr->set_logger(cemu_log);
+#else
+  soc.reset(new single_soc());
+  PaddrTop *nemu_paddr = soc->get_single_soc();
+  nemu_paddr->set_logger(nemu_log);
+#endif
   soc->set_switch(1);
 
   /* Perform ISA dependent initialization. */

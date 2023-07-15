@@ -49,8 +49,8 @@ void check_deadloop(word_t pc){
 void trace_and_difftest(Decode *_this) {
     // TIMED_FUNC(trace_and_difftest);
     IFDEF(CONFIG_ITRACE, nemu->log_pt->trace("[I] %v", nemu->isa_disasm_inst()));
-    IFDEF(CONFIG_DIFFTEST, extern std::unique_ptr<dual_soc> soc;
-            difftest_step(soc->ref_ext_int()));
+    IFDEF(CONFIG_DIFFTEST, extern std::unique_ptr<SoC_t> soc;
+          difftest_step(soc->ref_ext_int()));
     IFDEF(CONFIG_WATCH_POINT, if(is_wp_change())nemu_state.state=NEMU_STOP);
     IFDEF(CONFIG_DEADLOOP, check_deadloop(_this->pc));
 #ifdef CONFIG_DWARD
@@ -67,5 +67,5 @@ void trace_and_difftest(Decode *_this) {
 void mips32_CPU_state::exec_once() {
     // TIMED_FUNC(mips32);
     isa_exec_once(isa_query_intr());
-    trace_and_difftest(&inst_state);
+    // trace_and_difftest(&inst_state);
 }
