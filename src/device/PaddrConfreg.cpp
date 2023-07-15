@@ -54,7 +54,8 @@ void PaddrConfreg::tick() { timer++; }
 
 bool PaddrConfreg::do_read(word_t addr, wen_t info, word_t *data) { /*{{{*/
   confreg_read++;
-  __ASSERT_SIM__(info.size == 4, "read confreg size must be 4 bytes");
+  IFDEF(CONFIG_NSC_DIFF,
+        __ASSERT_SIM__(info.size == 4, "read confreg size must be 4 bytes"));
   switch (addr) {
   case CR0_ADDR:
     *(uint32_t *)data = cr[0];

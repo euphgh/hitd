@@ -1,3 +1,4 @@
+#include "macro.hpp"
 #include "paddr/paddr_interface.hpp"
 #include "testbench/sim_state.hpp"
 #include <csignal>
@@ -82,7 +83,9 @@ bool Puart8250::do_read(word_t addr, wen_t info, word_t *data) { /*{{{*/
     break;
   }
   default:
-    __ASSERT_SIM__(false, "read not exist addr of uart: " HEX_WORD, addr);
+    IFDEF(
+        CONFIG_NSC_DIFF,
+        __ASSERT_SIM__(false, "read not exist addr of uart: " HEX_WORD, addr));
     return false;
   }
   return true;
