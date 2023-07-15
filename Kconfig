@@ -129,31 +129,48 @@ endmenu# }}}
 menu "Log Options"# {{{
 
 config TRACE
-    bool "Enable tracer"
-    default y
-    help 
-        save testbench output in file
+  bool "Enable tracer"
+  default y
+  help 
+      save testbench output in file
 
 config TRACE_FILE
-    depends on TRACE
-    string "log file path and name"
-    default "$(HITD_HOME)/tb-trace.log"
-    help 
-        the absolute path or relative path of log file,
-        can use environment variable with makefile grammer
+  depends on TRACE
+  string "log file path and name"
+  default "$(HITD_HOME)/tb-trace.log"
+  help 
+      the absolute path or relative path of log file,
+      can use environment variable with makefile grammer
+
+choice
+  prompt "Truncate option"
+  depends on TRACE
+  default TRUNCATE_AUTO
+config TRUNCATE_AUTO
+  bool "Automatically truncate files based on file size"
+config TRUNCATE_MANUAL
+  bool "Manually set the start tick and end tick"
+config TRUNCATE_NONE
+  bool "Full record, no truncation"
+endchoice
 
 config TRACE_FILE_SIZE
-    depends on TRACE
-    int "truncate file when trace file reaches the specified size"
-    default 512
-    help 
-        the uint of trace file is KB
-        close truncation by setting the value zero
+  depends on TRACE && TRUNCATE_AUTO
+  int "truncate file when trace file reaches the specified size"
+  default 512
+  help 
+      the uint of trace file is KB
+      close truncation by setting the value zero
 
-config TTRACE
-  depends on TRACE
-  bool "Trace MyCPU all AXI Transition"
-  default y
+config TRACE_START_TICK
+  depends on TRACE && TRUNCATE_MANUAL
+  int "trace start tick"
+  default 0
+
+config TRACE_END_TICK
+  depends on TRACE && TRUNCATE_MANUAL
+  int "trace end tick"
+  default -1
 
 endmenu# }}}
 

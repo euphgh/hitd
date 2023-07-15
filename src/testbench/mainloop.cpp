@@ -1,6 +1,7 @@
 #include "Vmycpu_top.h"
 #include "easylogging++.h"
 #include "generated/autoconf.h"
+#include "macro.hpp"
 #include "nemu/isa.hpp"
 #include "paddr/paddr_interface.hpp"
 #include "soc.hpp"
@@ -24,6 +25,8 @@ extern el::Logger* mycpu_log;
 extern FILE* golden_trace;
 diff_state *dut_ptr;
 #define RST_TIME 128
+void disableLogger(el::Logger *logger);
+void enableLogger(el::Logger *logger);
 
 inline static void sim_ending(int nemu_end_state){/*{{{*/
     switch (nemu_end_state) {
@@ -70,6 +73,20 @@ static void check_cpu_state(diff_state* mycpu){/*{{{*/
         nemu->ref_log_error(mycpu);
     }
 }/*}}}*/
+
+static inline void tickAdd() {
+    ticks++;
+#ifdef CONFIG_TRUNCATE_MANUAL
+    if (unlikely(ticks == CONFIG_TRACE_START_TICK)) {
+        enableLogger(mycpu_log);
+        enableLogger(nemu->log_pt);
+    }
+    if (unlikely(ticks == CONFIG_TRACE_END_TICK)) {
+        disableLogger(mycpu_log);
+        disableLogger(nemu->log_pt);
+    }
+#endif
+}
 extern uint64_t arg_wave_on_tick;
 bool mainloop(
         Vmycpu_top* top,
@@ -82,7 +99,11 @@ bool mainloop(
     mycpu.ArchCop = std::make_unique<CP0_t>();
     dut_ptr = &mycpu;
     sim_status = SIM_RUN;
-    uint64_t wave_on_tick = arg_wave_on_tick;
+    IFDEF(CONFIG_WAVE_TAIL_ENABLE, uint64_t wave_on_tick = arg_wave_on_tick);
+
+    /* close log when manual truncate */
+    IFDEF(CONFIG_TRUNCATE_MANUAL, disableLogger(mycpu_log));
+    IFDEF(CONFIG_TRUNCATE_MANUAL, disableLogger(nemu->log_pt));
 
     IFDEF(CONFIG_WAVE_ON,Verilated::traceEverOn(true));
     IFDEF(CONFIG_WAVE_ON,wave_file_t tfp);
@@ -99,7 +120,7 @@ bool mainloop(
     IFDEF(CONFIG_PERF_ANALYSES, perf_timer(AddrIntv(0x1fc00000,bit_mask(22))));
 
     while (ticks < (RST_TIME & ~0x1)) {
-        ++ticks;
+        tickAdd();
         axi->reset();
         nemu->reset();
         top->aclk = !top->aclk;
@@ -114,7 +135,7 @@ bool mainloop(
     while (!Verilated::gotFinish()) {
         /* if need count perf_timer TIMED_SCOPE(one_clk,"one_clk"); */
         /* posedge edge comming {{{*/
-        ++ticks;
+        tickAdd();
         top->aclk = !top->aclk;
 
         /* update SoC and nemu clock */
@@ -166,8 +187,8 @@ bool mainloop(
 
         /*}}}*/
         /* negtive edge comming {{{*/
-negtive_edge: 
-        ++ticks;
+    negtive_edge:
+        tickAdd();
         top->aclk = !top->aclk;
         top->eval();
         IFDEF(CONFIG_WAVE_ON, IFDEF(CONFIG_WAVE_TAIL_ENABLE,
