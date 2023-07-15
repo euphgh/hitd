@@ -75,6 +75,7 @@ static unsigned char newMap = 1;
 
 static bool reqIsSame() {
   auto res = true;
+  res &= state[oldMap].valid == state[newMap].valid;
   res &= state[oldMap].reqAddr == state[newMap].reqAddr;
   res &= state[oldMap].isUncache == state[newMap].isUncache;
   res &= state[oldMap].isWrite == state[newMap].isWrite;

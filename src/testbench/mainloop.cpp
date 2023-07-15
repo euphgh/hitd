@@ -1,7 +1,6 @@
 #include "Vmycpu_top.h"
 #include "easylogging++.h"
 #include "generated/autoconf.h"
-#include "macro.hpp"
 #include "nemu/isa.hpp"
 #include "paddr/paddr_interface.hpp"
 #include "soc.hpp"
@@ -11,7 +10,6 @@
 #include "testbench/inst_timer.hpp"
 #include "testbench/sim_state.hpp"
 #include <csignal>
-#include <cstdint>
 
 #define wave_file_t MUXDEF(CONFIG_EXT_FST,VerilatedFstC,VerilatedVcdC)
 #define __WAVE_INC__ MUXDEF(CONFIG_EXT_FST,"verilated_fst_c.h","verilated_vcd_c.h")
@@ -87,6 +85,14 @@ static inline void tickAdd() {
     }
 #endif
 }
+
+static void inline checkCP0(const CP0_t *dut) {
+    if (nemu->cp0.check(dut) == false) {
+        nemu->cp0.log_error(*dut);
+        __ASSERT_SIM__(false, "CP0 not match");
+    }
+}
+
 extern uint64_t arg_wave_on_tick;
 bool mainloop(
         Vmycpu_top* top,
@@ -168,7 +174,7 @@ bool mainloop(
           uint8_t mycpu_int = mycpu.interruptSeq;
           for (size_t i = 0; i < commit_num; i++) {
             // TIMED_SCOPE(nemu_once, "nemu_once");
-            if (!nemu->ref_exec_once(i == mycpu_int)) {
+            if (unlikely(!nemu->ref_exec_once(i == mycpu_int))) {
               sim_ending(nemu_state.state);
               goto negtive_edge;
             }
@@ -181,7 +187,7 @@ bool mainloop(
                       ((consume_t)(ticks - last_commit)) / commit_num, ticks));
           }
             check_cpu_state(&mycpu);
-            IFDEF(CONFIG_CP0_DIFF, nemu->cp0.check(mycpu.ArchCop.get()));
+            IFDEF(CONFIG_CP0_DIFF, checkCP0(mycpu.ArchCop.get()));
             IFDEF(CONFIG_COMMIT_WAIT, last_commit = ticks);
         }/*}}}*/
 

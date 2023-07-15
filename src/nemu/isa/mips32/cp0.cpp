@@ -1,4 +1,5 @@
 #include "isa/cp0.hpp"
+// clang-format off
 bool CP0_t::read (uint8_t rd_sel, word_t& data) const {/*{{{*/
     bool res = true;
     switch (rd_sel) {
@@ -57,14 +58,14 @@ bool CP0_t::check(const CP0_t *ref) { /*{{{*/
     res &= check ? (name==obj.name) : 1;
 __cp0_info__(__cp0_reg_equals__, __cp0_field_equals__, )
 
-    void CP0_t::log_error(const CP0_t &ref) { /*{{{*/
+    void CP0_t::log_error(const CP0_t &dut) { /*{{{*/
     extern void print_reg_diff(word_t ref, word_t my_ans, const char* name);
-    word_t the_value, ref_value;
+    word_t dut_value, ref_value;
 #define __cp0_reg_log__(regname,rd,sel,...) \
-    if (!regname.equals(ref.regname)){ \
-        read((rd<<3|sel), the_value); \
-        ref.read((rd<<3|sel), ref_value); \
-        print_reg_diff(ref_value, the_value, #regname); \
+    if (!regname.equals(dut.regname)){ \
+        read((rd<<3|sel), ref_value); \
+        dut.read((rd<<3|sel), dut_value); \
+        print_reg_diff(ref_value, dut_value, #regname); \
     }
     __cp0_info__(__cp0_reg_log__, , );
 } /*}}}*/
