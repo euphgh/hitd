@@ -204,7 +204,7 @@ int mips32_CPU_state::decode_exec() {
   INSTPAT("010000 10000   00000   00000 00000 000001", tlbr   , N, tlbr());
   INSTPAT("010000 10000   00000   00000 00000 000010", tlbwi  , N, EXPT(tlbwi())); //TODO: machine exception
   INSTPAT("010000 10000   00000   00000 00000 000110", tlbwr  , N, EXPT(tlbwr())); //TODO: machine exception
-  INSTPAT("110000 ?????   ?????   ????? ????? ??????", ll     , I, EXPT(Rw(rd, Mr(align_check(src1+imm, 0x3, EC_AdEL), 4)));arch_state.llbit=1);
+  INSTPAT("110000 ?????   ?????   ????? ????? ??????", ll     , I, EXPT(Rw(rd, Mr(align_check(src1+imm, 0x3, EC_AdEL), 4));arch_state.llbit=1;));
   INSTPAT("111000 ?????   ?????   ????? ????? ??????", sc     , I, EXPT(inst_sc(rd, src1+imm)));
   INSTPAT("000000 ?????   ?????   ????? ????? 110110", tne    , R, EXPT(if (src1!=src2) isa_raise_intr(EC_Tr)));
   INSTPAT("000000 ?????   ?????   ????? ????? 110100", teq    , R, EXPT(if (src1==src2) isa_raise_intr(EC_Tr)));
@@ -243,8 +243,6 @@ except_restart:
   word_t this_pc = inst_state.snpc;
   inst_state.is_delay_slot = next_is_delay_slot;
   next_is_delay_slot = false;
-  // if (this_pc == 0xbfc7cbe8)
-  //       raise(SIGTRAP);
   try {
     if (has_int)
       (isa_raise_intr(EC_Int, arch_state.pc));

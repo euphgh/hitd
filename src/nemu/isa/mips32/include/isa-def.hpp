@@ -138,6 +138,7 @@ private:
   inline void inst_eret() { /*{{{*/
     inst_state.dnpc = cp0.epc.all;
     cp0.status.exl = 0;
+    arch_state.llbit = 0;
     IFDEF(CONFIG_ETRACE,
           log_pt->trace(fmt::format("[E] exception return to " HEX_WORD,
                                     inst_state.dnpc)));
@@ -209,9 +210,8 @@ private:
   void tlbwr();
   void inst_sc(int rd, word_t addr) { /*{{{*/
     align_check(addr, 0x3, EC_AdES);
-    word_t paddr = writeTranslate(addr);
     bool llbit = arch_state.llbit;
-    vaddr_sc(paddr, llbit, R(rd));
+    vaddr_sc(addr, llbit, R(rd));
     Rw(rd, llbit);
   }                                    /*}}}*/
   void inst_clz(word_t src1, int rd) { /*{{{*/

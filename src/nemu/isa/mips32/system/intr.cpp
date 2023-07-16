@@ -54,8 +54,9 @@ void mips32_CPU_state::isa_raise_intr(word_t NO, vaddr_t badva, bool refill) {/*
     cp0.cause.exccode = NO;
     cp0.status.exl = 1;
     inst_state.dnpc = trap_base + trap_offs;
-    IFDEF(CONFIG_ETRACE,log_pt->trace(fmt::format("[E] exception {} trigger to " HEX_WORD,e_msg[NO], inst_state.dnpc)));
-    arch_state.llbit = 0;
+    IFDEF(CONFIG_ETRACE,
+          log_pt->trace(fmt::format("[E] exception {} trigger to " HEX_WORD,
+                                    e_msg[NO], inst_state.dnpc)));
     switch (NO) {
         case EC_TLBL:
         case EC_TLBS:
