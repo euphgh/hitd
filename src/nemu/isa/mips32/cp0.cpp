@@ -72,10 +72,10 @@ __cp0_info__(__cp0_reg_equals__, __cp0_field_equals__, )
 } /*}}}*/
 
 void CP0_t::println() const {
-    word_t value;
+        word_t value;
 #define __cp0_reg_println__(regname,rd,sel,...) \
         read((rd<<3|sel), value); \
-        fmt::print(# regname ": " HEX_WORD "\n", value);
+        fmt::print("{:12s}" HEX_WORD "\n", #regname, value);
 
 __cp0_info__(__cp0_reg_println__,, )
 }
