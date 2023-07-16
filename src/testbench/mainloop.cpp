@@ -10,6 +10,7 @@
 #include "testbench/inst_timer.hpp"
 #include "testbench/sim_state.hpp"
 #include <csignal>
+#include <fmt/core.h>
 
 #define wave_file_t MUXDEF(CONFIG_EXT_FST,VerilatedFstC,VerilatedVcdC)
 #define __WAVE_INC__ MUXDEF(CONFIG_EXT_FST,"verilated_fst_c.h","verilated_vcd_c.h")
@@ -60,6 +61,7 @@ static bool sim_end_statistics(){/*{{{*/
             mycpu_log->info("mycpu quit with not defined state %v", sim_status);
             break;
     }
+    nemu->isa_reg_display();
     return res;
 }/*}}}*/
 
@@ -86,12 +88,14 @@ static inline void tickAdd() {
 #endif
 }
 
+#ifdef CONFIG_CP0_DIFF
 static void inline checkCP0(const CP0_t *dut) {
     if (nemu->cp0.check(dut) == false) {
         nemu->cp0.log_error(*dut);
         __ASSERT_SIM__(false, "CP0 not match");
     }
 }
+#endif
 
 extern uint64_t arg_wave_on_tick;
 bool mainloop(

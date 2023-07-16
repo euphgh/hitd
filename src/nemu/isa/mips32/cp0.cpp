@@ -1,4 +1,5 @@
 #include "isa/cp0.hpp"
+#include <fmt/core.h>
 // clang-format off
 bool CP0_t::read (uint8_t rd_sel, word_t& data) const {/*{{{*/
     bool res = true;
@@ -69,6 +70,15 @@ __cp0_info__(__cp0_reg_equals__, __cp0_field_equals__, )
     }
     __cp0_info__(__cp0_reg_log__, , );
 } /*}}}*/
+
+void CP0_t::println() const {
+    word_t value;
+#define __cp0_reg_println__(regname,rd,sel,...) \
+        read((rd<<3|sel), value); \
+        fmt::print(# regname ": " HEX_WORD "\n", value);
+
+__cp0_info__(__cp0_reg_println__,, )
+}
 
 void CP0_t::reset(){/*{{{*/
     clock_tick = false;

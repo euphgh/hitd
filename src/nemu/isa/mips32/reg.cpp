@@ -24,13 +24,18 @@ const char *regs[] = {
 
 void CPU_state::isa_reg_display() {/*{{{*/
     uint8_t regs_len = ARRLEN(regs);
+    printf(FMT_REG, "pc", arch_state.pc, arch_state.pc);
     for (int i = 0; i < regs_len; i++) {
         word_t value = arch_state.gpr[i];
         char name[8];
         sprintf(name, "$%-2d(%s)",i,regs[i]);
         printf(FMT_REG,name,value,value);
     }
-    printf(FMT_REG,"pc",arch_state.pc,arch_state.pc);
+    printf(FMT_REG, "hi", arch_state.hi, arch_state.hi);
+    printf(FMT_REG, "lo", arch_state.lo, arch_state.lo);
+    printf(FMT_REG, "llbit", arch_state.llbit, arch_state.llbit);
+    arch_state.ArchCop->println();
+    printAllTLB();
 }/*}}}*/
 
 word_t CPU_state::isa_reg_str2val(const char *s, bool *success) {/*{{{*/

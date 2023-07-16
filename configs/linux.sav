@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.115 (w)1999-2023 BSI
-[*] Sun Jul 16 03:24:16 2023
+[*] Sun Jul 16 06:53:47 2023
 [*]
 [dumpfile] "/home/hgh/mnt/wave/linux.fst"
-[dumpfile_mtime] "Sun Jul 16 03:19:14 2023"
-[dumpfile_size] 819106
+[dumpfile_mtime] "Sun Jul 16 05:23:13 2023"
+[dumpfile_size] 742569
 [savefile] "/home/hgh/mnt/configs/linux.sav"
-[timestart] 36127643
+[timestart] 43898053
 [size] 1920 989
 [pos] -1 -1
-*-8.300000 36128793 22602 1992237 1992160 1991876 1444958 2132914 3892554 4115180 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-2.900000 43898067 22602 1992237 1992160 1991876 1444958 2132914 3892554 4115180 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.mycpu_top.
 [treeopen] TOP.mycpu_top.backend.
@@ -189,7 +189,7 @@ TOP.mycpu_top.arlock[1:0]
 TOP.mycpu_top.arcache[3:0]
 @1401200
 -mycpu-ar
-@c00201
+@c00200
 -mycpu-r
 @28
 TOP.mycpu_top.rvalid
@@ -202,7 +202,7 @@ TOP.mycpu_top.rlast
 TOP.mycpu_top.rid[3:0]
 @28
 TOP.mycpu_top.rresp[1:0]
-@1401201
+@1401200
 -mycpu-r
 @c00200
 -DISPATCHER
@@ -471,6 +471,18 @@ TOP.mycpu_top.backend.rob.io_out_flRecover_1_bits[5:0]
 TOP.mycpu_top.backend.rob.io_out_flRecover_1_valid
 @1401200
 -Recover-Pop
+@22
+TOP.mycpu_top.backend.rob.io_in_wbRob_0_bits_debugPC[31:0]
+@28
+TOP.mycpu_top.backend.rob.io_in_wbRob_0_valid
+@22
+TOP.mycpu_top.backend.rob.io_in_wbRob_1_bits_debugPC[31:0]
+@28
+TOP.mycpu_top.backend.rob.io_in_wbRob_1_valid
+@22
+TOP.mycpu_top.backend.rob.io_in_wbRob_2_bits_debugPC[31:0]
+@28
+TOP.mycpu_top.backend.rob.io_in_wbRob_1_valid
 @c00200
 -Rob-Data
 @24
@@ -902,7 +914,7 @@ TOP.mycpu_top.backend.mduFU.clz.io_out_bits[31:0]
 -clz
 @1401200
 -MDU
-@c00200
+@800200
 -Mem1-fromRO
 @22
 TOP.mycpu_top.backend.lsuFU.memStage1.io_fromRO_bits_debugPC[31:0]
@@ -914,26 +926,19 @@ TOP.mycpu_top.backend.lsuFU.memStage1.roDecp_ready
 TOP.mycpu_top.backend.lsuFU.memStage1.roDecp_bits_r_debugPC[31:0]
 @28
 TOP.mycpu_top.backend.lsuFU.memStage1.valid
-TOP.mycpu_top.backend.lsuFU.memStage1.roDecp_bits_r_rwReq_isWrite
-TOP.mycpu_top.backend.lsuFU.memStage1.isUncache
+TOP.mycpu_top.backend.lsuFU.memStage1.state[1:0]
 TOP.mycpu_top.backend.lsuFU.memStage1.io_out_toStoreQ_valid
 TOP.mycpu_top.backend.lsuFU.storeQ.io_fromMem1_ready
-@22
-TOP.mycpu_top.backend.lsuFU.memStage1.roDecp_bits_r_srcData_0[31:0]
-TOP.mycpu_top.backend.lsuFU.memStage1.roDecp_bits_r_immOffset[15:0]
-@28
-TOP.mycpu_top.backend.lsuFU.memStage1.state[1:0]
 TOP.mycpu_top.backend.lsuFU.memStage1.nextIsLoad
 TOP.mycpu_top.backend.lsuFU.memStage1.io_flush
-TOP.mycpu_top.backend.lsuFU.memStage1.io_out_toStoreQ_bits_stqEnq_rwReq_isWrite
-@c00200
+@800200
 -toMem2
 @28
 TOP.mycpu_top.backend.lsuFU.memStage1.io_out_toMem2_valid
 TOP.mycpu_top.backend.lsuFU.memStage1.io_out_toMem2_ready
 @22
 TOP.mycpu_top.backend.lsuFU.memStage1.io_out_toMem2_bits_debugPC[31:0]
-@1401200
+@1000200
 -toMem2
 -Mem1-fromRO
 @c00200
@@ -1052,5 +1057,32 @@ TOP.mycpu_top.backend.cp0.hasInt
 TOP.mycpu_top.backend.cp0.hasInt__bore
 @1401200
 -Interrupt
+@800200
+-cp0
+@28
+TOP.mycpu_top.backend.cp0.difftestCP0.io_clock
+@22
+TOP.mycpu_top.backend.cp0.difftestCP0.io_epc[31:0]
+TOP.mycpu_top.backend.cp0.difftestCP0.io_badvaddr[31:0]
+TOP.mycpu_top.backend.cp0.difftestCP0.io_cause[31:0]
+TOP.mycpu_top.backend.cp0.difftestCP0.io_status[31:0]
+TOP.mycpu_top.backend.cp0.difftestCP0.io_context[31:0]
+TOP.mycpu_top.backend.cp0.difftestCP0.io_ebase[31:0]
+TOP.mycpu_top.backend.cp0.difftestCP0.io_count[31:0]
+TOP.mycpu_top.backend.cp0.difftestCP0.io_compare[31:0]
+TOP.mycpu_top.backend.cp0.difftestCP0.io_entryhi[31:0]
+TOP.mycpu_top.backend.cp0.difftestCP0.io_entrylo0[31:0]
+TOP.mycpu_top.backend.cp0.difftestCP0.io_entrylo1[31:0]
+TOP.mycpu_top.backend.cp0.difftestCP0.io_index[31:0]
+@23
+TOP.mycpu_top.backend.cp0.difftestCP0.io_pagemask[31:0]
+@22
+TOP.mycpu_top.backend.cp0.difftestCP0.io_prid[31:0]
+TOP.mycpu_top.backend.cp0.difftestCP0.io_random[31:0]
+TOP.mycpu_top.backend.cp0.difftestCP0.io_wire[31:0]
+TOP.mycpu_top.backend.cp0.difftestCP0.io_config1[31:0]
+TOP.mycpu_top.backend.cp0.difftestCP0.io_config0[31:0]
+@1000200
+-cp0
 [pattern_trace] 1
 [pattern_trace] 0

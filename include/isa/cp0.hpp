@@ -193,6 +193,7 @@ class CP0_t {
         CP0_t (bool dpic = false) {}
         void reset();
         bool read (uint8_t rd_sel, word_t& data)const ;
+        void println() const ;
         bool write(uint8_t rd_sel, word_t  data); // write writable field 
         bool check(const CP0_t* ref);
         void log_error(const CP0_t& ref);
