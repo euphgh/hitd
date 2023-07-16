@@ -208,14 +208,11 @@ private:
   void tlbwi();
   void tlbwr();
   void inst_sc(int rd, word_t addr) { /*{{{*/
-    Mw(align_check(addr, 0x3, EC_AdES), 0xf4, R(rd));
-    Rw(rd, 1);
-
-    // bool& llbit = arch_state.llbit;
-    // if (llbit)
-    //     Mw(align_check(addr, 0x3, EC_AdES), 0xf4, R(rd));
-    // Rw(rd, llbit);
-    // llbit = 0;
+    align_check(addr, 0x3, EC_AdES);
+    word_t paddr = writeTranslate(addr);
+    bool llbit = arch_state.llbit;
+    vaddr_sc(paddr, llbit, R(rd));
+    Rw(rd, llbit);
   }                                    /*}}}*/
   void inst_clz(word_t src1, int rd) { /*{{{*/
     uint8_t res = 32;
@@ -254,7 +251,14 @@ public:
   tlb_entry *tlb_match(vaddr_t vaddr);
   word_t vaddr_ifetch(vaddr_t addr, int len);
   word_t vaddr_read(vaddr_t addr, int len);
+  word_t writeTranslate(vaddr_t vaddr);
   void vaddr_write(vaddr_t addr, int len, word_t data);
+  void vaddr_sc(vaddr_t addr, bool llbits, word_t data);
+  void printAllTLB() {
+    for (int i = 0; i < CONFIG_TLB_NR; i++) {
+      tlb[i].print();
+    }
+  }
 
 private:
   ftracer mips_ftracer;

@@ -55,25 +55,35 @@ word_t CPU_state::vaddr_read(vaddr_t addr, int len) {
     return paddr_read(paddr, len);
 }
 
-void CPU_state::vaddr_write(vaddr_t addr, int len, word_t data) {
+word_t CPU_state::writeTranslate(vaddr_t addr) {
     word_t paddr = addr & 0x1fffffff;
     bool refill = false;
     switch (mmu_check(addr)) {
-        case MMU_DIRECT:
+    case MMU_DIRECT:
             paddr = addr & 0x1fffffff;
             break;
-        case MMU_TRANSLATE:{
-            const tlb_info& info =mmu_translate(addr,paddr,refill);
-            if (info.hit==false) 
+    case MMU_TRANSLATE: {
+            const tlb_info &info = mmu_translate(addr, paddr, refill);
+            if (info.hit == false)
                 isa_raise_intr(EC_TLBS, addr, refill);
-            if (info.dirty==false)
+            if (info.dirty == false)
                 isa_raise_intr(EC_Mod, addr, refill);
             break;
-                           }
-        case MMU_FAIL:
+    }
+    case MMU_FAIL:
             isa_raise_intr(EC_AdES, addr);
             break;
     }
-    //TODO: Bus Error Exception
+    // TODO: Bus Error Exception
+    return paddr;
+}
+
+void CPU_state::vaddr_write(vaddr_t addr, int len, word_t data) {
+    word_t paddr = writeTranslate(addr);
     paddr_write(paddr, len, data);
+}
+void CPU_state::vaddr_sc(vaddr_t addr, bool llbits, word_t data) {
+    word_t paddr = writeTranslate(addr);
+    if (llbits)
+            paddr_write(paddr, 0xf4, data);
 }
