@@ -1,18 +1,19 @@
 [*]
 [*] GTKWave Analyzer v3.3.115 (w)1999-2023 BSI
-[*] Sat Jul 15 09:27:34 2023
+[*] Sun Jul 16 03:24:16 2023
 [*]
 [dumpfile] "/home/hgh/mnt/wave/linux.fst"
-[dumpfile_mtime] "Sat Jul 15 09:17:25 2023"
-[dumpfile_size] 268490745
+[dumpfile_mtime] "Sun Jul 16 03:19:14 2023"
+[dumpfile_size] 819106
 [savefile] "/home/hgh/mnt/configs/linux.sav"
-[timestart] 1958663
+[timestart] 36127643
 [size] 1920 989
 [pos] -1 -1
-*-8.600000 1958256 22602 1992237 1992160 1991876 1444958 2132914 3892554 4115180 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-8.300000 36128793 22602 1992237 1992160 1991876 1444958 2132914 3892554 4115180 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.mycpu_top.
 [treeopen] TOP.mycpu_top.backend.
+[treeopen] TOP.mycpu_top.backend.cp0.
 [treeopen] TOP.mycpu_top.backend.lsuFU.
 [treeopen] TOP.mycpu_top.backend.lsuFU.memStage1.cache1.datas_0.array_ext.unnamedblk1.
 [treeopen] TOP.mycpu_top.backend.lsuFU.memStage2.cache2.
@@ -149,8 +150,6 @@ TOP.mycpu_top.backend.lsuFU.roStage.io_out_bits_prevData[31:0]
 TOP.mycpu_top.backend.lsuFU.roStage.io_out_valid
 @1401200
 -RO-lwlr
-@200
--
 @c00200
 -dper_mispre
 @c00028
@@ -190,7 +189,7 @@ TOP.mycpu_top.arlock[1:0]
 TOP.mycpu_top.arcache[3:0]
 @1401200
 -mycpu-ar
-@c00200
+@c00201
 -mycpu-r
 @28
 TOP.mycpu_top.rvalid
@@ -203,7 +202,7 @@ TOP.mycpu_top.rlast
 TOP.mycpu_top.rid[3:0]
 @28
 TOP.mycpu_top.rresp[1:0]
-@1401200
+@1401201
 -mycpu-r
 @c00200
 -DISPATCHER
@@ -430,10 +429,7 @@ TOP.mycpu_top.backend.sAluFU_io_in_bits_r_basic_debugPC[31:0]
 @1401200
 -alu component
 -SubAlu
-@28
-TOP.mycpu_top.frontend.instFetch.ifStage1.icacheInst__bore_valid
-TOP.mycpu_top.frontend.instFetch.ifStage1.io_out_bits_iCache_cacheInst_valid
-@800200
+@c00200
 -Ifstage2
 @28
 TOP.mycpu_top.frontend.instFetch.ifStage2.io_in_ready
@@ -462,6 +458,7 @@ TOP.mycpu_top.frontend.instFetch.ifStage2.icache2.io_cacheInst_finish
 TOP.mycpu_top.frontend.instFetch.ifStage2.icache2.io_cacheInst_redirect
 @1000200
 -ICache2
+@1401200
 -Ifstage2
 @c00200
 -Recover-Pop
@@ -606,7 +603,7 @@ TOP.mycpu_top.backend.rob.robEntries.io_push_2_valid
 TOP.mycpu_top.backend.rob.robEntries.io_push_2_ready
 @1401200
 -Rob-Push
-@800200
+@c00200
 -LSU
 -Mem2
 @28
@@ -644,7 +641,7 @@ TOP.mycpu_top.backend.lsuFU.memStage2.io_out_valid
 TOP.mycpu_top.backend.lsuFU.memStage2.io_doneSQ
 TOP.mycpu_top.backend.lsuFU.memStage2.io_in_bits_isSQ
 TOP.mycpu_top.backend.lsuFU.memStage2.io_flush
-@1000200
+@1401200
 -Mem2
 @c00200
 -StoreQ-Deq
@@ -816,6 +813,7 @@ TOP.mycpu_top.backend.lsuFU.memStage2.cache2.w1data_0_req_valid
 -w1Data
 @1000200
 -DCache2
+@1401200
 -LSU
 @c00200
 -MDU
@@ -904,13 +902,7 @@ TOP.mycpu_top.backend.mduFU.clz.io_out_bits[31:0]
 -clz
 @1401200
 -MDU
-@28
-TOP.mycpu_top.backend.lsuFU.memStage1.toICache1_valid
-TOP.mycpu_top.backend.lsuFU.roStage.io_out_bits_mem_cache_cacheInst_valid
-@22
-TOP.mycpu_top.backend.lsuFU.roStage.io_in_bits_uOp_memType[4:0]
-TOP.mycpu_top.backend.lsuFU.roStage.io_out_bits_uOp_memType[4:0]
-@800200
+@c00200
 -Mem1-fromRO
 @22
 TOP.mycpu_top.backend.lsuFU.memStage1.io_fromRO_bits_debugPC[31:0]
@@ -943,7 +935,6 @@ TOP.mycpu_top.backend.lsuFU.memStage1.io_out_toMem2_ready
 TOP.mycpu_top.backend.lsuFU.memStage1.io_out_toMem2_bits_debugPC[31:0]
 @1401200
 -toMem2
-@1000200
 -Mem1-fromRO
 @c00200
 -Mem1-fromSQ
@@ -1024,7 +1015,7 @@ TOP.mycpu_top.backend.tlb.search_0_res_hit
 TOP.mycpu_top.backend.tlb.search_0_res_refill
 @1401200
 -tlb-cahnnel0
-@c00201
+@c00200
 -tlb-channel1
 @28
 TOP.mycpu_top.backend.tlb.search_1_req_valid
@@ -1040,7 +1031,26 @@ TOP.mycpu_top.backend.tlb.search_1_res_hit
 TOP.mycpu_top.backend.tlb.search_1_res_pTag[19:0]
 @28
 TOP.mycpu_top.backend.tlb.search_1_res_refill
-@1401201
+@1401200
 -tlb-channel1
+@c00200
+-Interrupt
+@28
+TOP.mycpu_top.aclk
+@22
+TOP.mycpu_top.ext_int[5:0]
+@28
+TOP.mycpu_top.backend.cp0.causeReg_iph2
+TOP.mycpu_top.backend.cp0.causeReg_iph3
+TOP.mycpu_top.backend.cp0.causeReg_iph4
+TOP.mycpu_top.backend.cp0.causeReg_iph5
+TOP.mycpu_top.backend.cp0.causeReg_iph6
+TOP.mycpu_top.backend.cp0.causeReg_iph7
+TOP.mycpu_top.backend.cp0.causeReg_ips0
+TOP.mycpu_top.backend.cp0.causeReg_ips1
+TOP.mycpu_top.backend.cp0.hasInt
+TOP.mycpu_top.backend.cp0.hasInt__bore
+@1401200
+-Interrupt
 [pattern_trace] 1
 [pattern_trace] 0

@@ -47,8 +47,9 @@ void mips32_CPU_state::isa_raise_intr(word_t NO, vaddr_t badva, bool refill) {/*
         bool bd = inst_state.is_delay_slot;
         cp0.epc.all = bd ? (inst_state.pc-4) : inst_state.pc;
         cp0.cause.bd = bd;
-        trap_offs = refill ? 0x0: 
-            ((NO == EC_Int && cp0.cause.iv && cp0.status.bev) ? 0x200 : 0x180);
+        trap_offs = ((NO == EC_TLBS || NO == EC_TLBL) && refill)
+                        ? 0x0
+                        : ((NO == EC_Int && cp0.cause.iv) ? 0x200 : 0x180);
     }
     cp0.cause.exccode = NO;
     cp0.status.exl = 1;
