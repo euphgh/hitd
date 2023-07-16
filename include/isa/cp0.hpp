@@ -64,7 +64,7 @@
     )\
     inter \
     f2(count, 9, 0,\
-            f1(all      ,31 ,0  ,0x0  ,__W__, __c__)\
+            f1(all      ,31 ,0  ,0x0  ,__W__, __n__)\
     )\
     inter \
     f2(entryhi, 10, 0,\
