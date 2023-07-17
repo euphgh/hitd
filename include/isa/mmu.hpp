@@ -44,5 +44,20 @@ class tlb_entry {
                     pfn0<<12,(bool)v0,(bool)d0,(unsigned)c0,
                     pfn1<<12,(bool)v1,(bool)d1,(unsigned)c1);
         }
+        bool equal(const tlb_entry &that) {
+            bool res = true;
+            res &= this->g == that.g;
+            res &= this->vpn2 == that.vpn2;
+            res &= this->asid == that.asid;
+            res &= this->v0 == that.v0;
+            res &= this->d0 == that.d0;
+            res &= this->c0 == that.c0;
+            res &= this->pfn0 == that.pfn0;
+            res &= this->v1 == that.v1;
+            res &= this->d1 == that.d1;
+            res &= this->c1 == that.c1;
+            res &= this->pfn1 == that.pfn1;
+            return res;
+        }
 };
 

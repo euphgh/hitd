@@ -116,9 +116,23 @@ void CPU_state::tlbwi(){
     entry.pfn1 = cp0.entrylo1.pfn ;
     entry.g = cp0.entrylo0.g && cp0.entrylo1.g;
 }
+#ifdef CONFIG_NSC_DIFF
+#include "testbench/difftest/global_info.hpp"
+#endif
 void CPU_state::tlbwr(){
     int tlb_seq = cp0.random.random;
-    __ASSERT_NEMU__(tlb_seq < CONFIG_TLB_NR, "tlbwi illegal parameter");
+#ifdef CONFIG_NSC_DIFF
+    if (randQueue.empty())
+        __ASSERT_NEMU__(false, "can not get random from mycpu");
+    else {
+        auto rand_pc = randQueue.front();
+        if (rand_pc.second != inst_state.pc)
+            __ASSERT_NEMU__(false, "mycpu tlbwr pc " HEX_WORD "not match",
+                            rand_pc.second);
+        else
+            tlb_seq = rand_pc.first;
+    }
+#endif
     tlb_entry& entry = tlb[tlb_seq];
     entry.vpn2 = cp0.entryhi.vpn2 ;
     entry.asid = cp0.entryhi.asid ;

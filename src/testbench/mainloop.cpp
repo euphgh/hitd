@@ -6,6 +6,7 @@
 #include "soc.hpp"
 #include "testbench/axi.hpp"
 #include "testbench/difftest/api.hpp"
+#include "testbench/difftest/global_info.hpp"
 #include "testbench/difftest/struct.hpp"
 #include "testbench/inst_timer.hpp"
 #include "testbench/sim_state.hpp"
@@ -89,9 +90,9 @@ static inline void tickAdd() {
 }
 
 #ifdef CONFIG_CP0_DIFF
-static void inline checkCP0(const CP0_t *dut) {
-    if (nemu->cp0.check(dut) == false) {
-        nemu->cp0.log_error(*dut);
+static void inline checkCP0(const CP0_t &dut) {
+    if (nemu->cp0.check(&dut) == false) {
+        nemu->cp0.log_error(dut);
         __ASSERT_SIM__(false, "CP0 not match");
     }
 }
@@ -105,9 +106,6 @@ bool mainloop(
         dual_soc& soc
         ){/*{{{*/
 
-    diff_state mycpu;
-    mycpu.ArchCop = std::make_unique<CP0_t>();
-    dut_ptr = &mycpu;
     sim_status = SIM_RUN;
     IFDEF(CONFIG_WAVE_TAIL_ENABLE, uint64_t wave_on_tick = arg_wave_on_tick);
 
@@ -145,15 +143,13 @@ bool mainloop(
     while (!Verilated::gotFinish()) {
         /* if need count perf_timer TIMED_SCOPE(one_clk,"one_clk"); */
         /* posedge edge comming {{{*/
+    positive_edge:
         tickAdd();
         top->aclk = !top->aclk;
 
         /* update SoC and nemu clock */
         soc.tick();
         nemu->ref_tick_and_int(0);
-
-        /* clean phy use */
-        IFDEF(CONFIG_FREELIST_DIFF, difftest_clean_phySign());
 
         /* update mycpu */
         axi->calculate_output();
@@ -164,48 +160,57 @@ bool mainloop(
         IFDEF(CONFIG_WAVE_ON, IFDEF(CONFIG_WAVE_TAIL_ENABLE,
                                     if (ticks > wave_on_tick)) tfp.dump(ticks));
 
-        /* check mainloop condition */
-        if (sim_status!=SIM_RUN) break;
+        /* get mycpu instructions commit status */
+        uint8_t commit_num = dutCommitNum;
+        uint8_t mycpu_int = dutIntrSeq;
+        word_t tmpDutLPC = dutLastCommitPC;
+
+        /*}}}*/
+        /* negtive edge comming {{{*/
+
+        /* clean phy use */
+        IFDEF(CONFIG_FREELIST_DIFF, difftest_clean_phySign());
+
+        tickAdd();
+        top->aclk = !top->aclk;
+        top->eval(); // get retire result
+        IFDEF(CONFIG_WAVE_ON, IFDEF(CONFIG_WAVE_TAIL_ENABLE,
+                                    if (ticks > wave_on_tick)) tfp.dump(ticks));
 
         /* count phy use */
         IFDEF(CONFIG_FREELIST_DIFF, difftest_count_phySign());
 
-        /* get mycpu instructions commit status */
-        uint8_t commit_num = mycpu.commitNum;
+        /* check mainloop condition */
+        IFDEF(CONFIG_COMMIT_WAIT,
+              __ASSERT_SIM__(ticks - last_commit < CONFIG_COMMIT_TIME_LIMIT,
+                             "{} ticks not commit inst",
+                             CONFIG_COMMIT_TIME_LIMIT));
+        if (sim_status != SIM_RUN)
+          break;
+
+        /* assign last commit PC to archState */
+        dutArchState.pc = tmpDutLPC;
 
         /* run nemu and check difference {{{*/
         if (commit_num > 0) {
-          uint8_t mycpu_int = mycpu.interruptSeq;
           for (size_t i = 0; i < commit_num; i++) {
-            // TIMED_SCOPE(nemu_once, "nemu_once");
             if (unlikely(!nemu->ref_exec_once(i == mycpu_int))) {
               sim_ending(nemu_state.state);
-              goto negtive_edge;
+              goto positive_edge;
             }
             Decode &inst = nemu->inst_state;
             if (inst.skip)
-              nemu->arch_state.gpr[inst.wnum] = mycpu.gpr[inst.wnum];
+              nemu->arch_state.gpr[inst.wnum] = dutArchState.gpr[inst.wnum];
             IFDEF(CONFIG_PERF_ANALYSES,
                   if (nemu->analysis) perf_timer.add_inst(
                       nemu->inst_state,
                       ((consume_t)(ticks - last_commit)) / commit_num, ticks));
           }
-            check_cpu_state(&mycpu);
-            IFDEF(CONFIG_CP0_DIFF, checkCP0(mycpu.ArchCop.get()));
-            IFDEF(CONFIG_COMMIT_WAIT, last_commit = ticks);
-        }/*}}}*/
-
-        /*}}}*/
-        /* negtive edge comming {{{*/
-    negtive_edge:
-        tickAdd();
-        top->aclk = !top->aclk;
-        top->eval();
-        IFDEF(CONFIG_WAVE_ON, IFDEF(CONFIG_WAVE_TAIL_ENABLE,
-                                    if (ticks > wave_on_tick)) tfp.dump(ticks));
-        IFDEF(CONFIG_COMMIT_WAIT, __ASSERT_SIM__(ticks-last_commit<CONFIG_COMMIT_TIME_LIMIT, \
-                    "{} ticks not commit inst", \
-                    CONFIG_COMMIT_TIME_LIMIT));/*}}}*/
+          check_cpu_state(&dutArchState);
+          IFDEF(CONFIG_CP0_DIFF, checkCP0(dutCP0));
+          IFDEF(CONFIG_TLB_DIFF, difftestTlbCheck());
+          IFDEF(CONFIG_COMMIT_WAIT, last_commit = ticks);
+        } /*}}}*/
     }
 
     IFDEF(CONFIG_WAVE_ON,tfp.close());

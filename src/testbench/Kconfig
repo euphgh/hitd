@@ -86,6 +86,10 @@ config FREELIST_DIFF
   bool "Enable FreeList Physical register move check"
   default no
 
+config TLB_DIFF
+  bool "Enable all TLB entries check"
+  default no
+
 config COMMIT_WAIT
   bool "Automatic exit after waiting a while without instruction commit"
   default yes

@@ -1,27 +1,27 @@
 mainmenu "HIT Verilog DiffTest Configure"
 
 choice# {{{
-    prompt "Runing Mode"
-    default NSC_DIFF
+  prompt "Runing Mode"
+  default NSC_DIFF
 config NSC_DIFF
-    bool "Use nemu as nscscc difftest emulator"
+  bool "Use nemu as nscscc difftest emulator"
 config NSC_NEMU
-    bool "Only run nemu with nscscc SoC"
+  bool "Only run nemu with nscscc SoC"
 config NSC_CEMU
-    bool "Only run cemu with nscscc SoC"
+  bool "Only run cemu with nscscc SoC"
 endchoice# }}}
 
 config NEED_NEMU
-    bool 
-    default y if NSC_NEMU || NSC_DIFF
+  bool 
+  default y if NSC_NEMU || NSC_DIFF
 
 config NEED_CEMU
-    bool
-    default y if NSC_CEMU || (NSC_NEMU && DIFFTEST)
+  bool
+  default y if NSC_CEMU || (NSC_NEMU && DIFFTEST)
 
 config NEED_TB
-    bool
-    default y if NSC_DIFF
+  bool
+  default y if NSC_DIFF
 
 choice
   prompt "Test Program"

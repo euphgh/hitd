@@ -12,13 +12,10 @@ typedef struct{
 } debug_info_t;
 
 typedef struct {
-    uint8_t commitNum;
-    uint8_t interruptSeq; // start from 0, eq to commitNum is no
     word_t gpr[32];
     word_t lo,hi;
     word_t pc;
     bool llbit;
-    std::unique_ptr<CP0_t> ArchCop;
 } diff_state;
 
 typedef struct {
