@@ -25,7 +25,7 @@
 
 #ifdef CONFIG_DIFFTEST
 
-mips_core<16> *cemu;
+mips_core<CONFIG_TLB_NR> *cemu;
 
 void difftest_skip_ref(){}
 
@@ -33,7 +33,7 @@ void difftest_skip_dut(int nr_ref, int nr_dut){}
 
 void init_difftest(PaddrTop* paddr_top){/*{{{*/
     LOG(INFO) << "Enable difftest with cemu";
-    cemu = new mips_core<16>(paddr_top);
+    cemu = new mips_core<CONFIG_TLB_NR>(paddr_top);
     cemu->reset();
     cemu->jump(CONFIG_RESET_PC);
 }/*}}}*/
