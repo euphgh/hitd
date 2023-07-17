@@ -153,7 +153,7 @@ private:
                                 pos & 0x7));
     }
     Rw(rd, tmp);
-    if (pos == (9 << 3)) {
+    if (pos == (9 << 3) || pos == (1 << 3)) {
       inst_state.skip = true;
     }
   }                                           /*}}}*/
