@@ -96,7 +96,8 @@ bool mainloop(
     top->aclk = 0;
     top->aresetn = 0;
     IFDEF(CONFIG_COMMIT_WAIT, uint64_t last_commit = ticks);
-    IFDEF(CONFIG_PERF_ANALYSES, perf_timer(AddrIntv(0x1fc00000,bit_mask(22))));
+    IFDEF(CONFIG_PERF_ANALISES,
+          inst_timer perf_timer(AddrIntv(0x1fc00000, bit_mask(22))));
 
     while (ticks < (RST_TIME & ~0x1)) {
         ++ticks;
@@ -106,7 +107,7 @@ bool mainloop(
         top->eval();
         IFDEF(CONFIG_WAVE_ON, IFDEF(CONFIG_WAVE_TAIL_ENABLE,
                                     if (ticks > wave_on_tick)) tfp.dump(ticks));
-        last_commit = ticks;
+        IFDEF(CONFIG_COMMIT_WAIT, last_commit = ticks);
     }
 
     top->aresetn = 1;
@@ -154,7 +155,7 @@ bool mainloop(
             Decode &inst = nemu->inst_state;
             if (inst.skip)
               nemu->arch_state.gpr[inst.wnum] = mycpu.gpr[inst.wnum];
-            IFDEF(CONFIG_PERF_ANALYSES,
+            IFDEF(CONFIG_PERF_ANALISES,
                   if (nemu->analysis) perf_timer.add_inst(
                       nemu->inst_state,
                       ((consume_t)(ticks - last_commit)) / commit_num, ticks));
@@ -178,6 +179,7 @@ negtive_edge:
     }
 
     IFDEF(CONFIG_WAVE_ON,tfp.close());
-    IFDEF(CONFIG_PERF_ANALYSES, perf_timer.save_date(wave_name+".bin"));
+    IFDEF(CONFIG_PERF_ANALISES,
+          perf_timer.save_date("logs/perf/" + wave_name + ".bin"));
     return sim_end_statistics();
 }/*}}}*/

@@ -262,8 +262,10 @@ except_restart:
   }
 
   // TODO:check pc finish conditions
-  //  if (this_pc==0x9fc13178)
-  //      analysis = !analysis;
+#ifdef CONFIG_PERF_ANALISES
+  if (this_pc == 0x9fc13178)
+    analysis = !analysis;
+#endif
   IFDEF(CONFIG_TEST_FUNC,
         if (this_pc == 0xbfc00100) nemu_state.state = NEMU_END);
   IFDEF(CONFIG_TEST_PERF,

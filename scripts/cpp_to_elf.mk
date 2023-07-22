@@ -150,6 +150,9 @@ endif
 ifdef CONFIG_WAVE_ON
 	@mkdir -p $(WAVE_DIR)
 endif
+ifdef CONFIG_PERF_ANALISES
+	@mkdir -p logs/perf
+endif
 
 elf: $(BINARY)
 
