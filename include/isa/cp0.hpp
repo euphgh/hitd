@@ -187,7 +187,6 @@ typedef enum{/*{{{*/
     unsigned int name: msb-lsb+1; \
 
 __cp0_info__(__cp0_reg_type__,__cp0_field_def__,)
-#include <csignal>
 class CP0_t {
     public:
         CP0_t (bool dpic = false) {}

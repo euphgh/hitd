@@ -112,6 +112,16 @@ $(ARG_OBJS): $(OBJ_DIR)/%.o: %.cpp
 	$(call call_fixdep, $(@:.o=.d), $@)
 OBJ_ALL += $(ARG_OBJS) # }}}
 
+PROPS_SRCS    = $(shell find src/utils/properties -type f -name "*.cpp") #{{{
+PROPS_CFLAGS  += $(COM_FLAG) $(CFLAGS_BUILD)
+PROPS_OBJS = $(PROPS_SRCS:%.cpp=$(OBJ_DIR)/%.o)
+$(PROPS_OBJS): $(OBJ_DIR)/%.o: %.cpp
+	@echo + CXX $<
+	@mkdir -p $(dir $@)
+	@$(CXX) $(PROPS_CFLAGS) -c -o $@ $<
+	$(call call_fixdep, $(@:.o=.d), $@)
+OBJ_ALL += $(PROPS_OBJS) # }}}
+
 # Depencies
 -include $(OBJ_ALL:.o=.d)
 LD := $(CXX)
@@ -150,6 +160,7 @@ endif
 ifdef CONFIG_WAVE_ON
 	@mkdir -p $(WAVE_DIR)
 endif
+	@mkdir -p snapshot
 
 elf: $(BINARY)
 

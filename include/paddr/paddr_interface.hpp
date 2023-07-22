@@ -73,7 +73,7 @@ class Pmem : public PaddrInterface  {/*{{{*/
         bool do_read (word_t addr, wen_t info, word_t* data);
         bool do_write(word_t addr, wen_t info, const word_t data);
         void load_binary(uint64_t addr, const char *init_file);
-        void save_binary(const char *filename) ;
+        void save_binary(std::string filename);
         uint8_t *get_mem_ptr();
 };/*}}}*/
 

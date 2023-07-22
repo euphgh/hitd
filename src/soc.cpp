@@ -1,108 +1,127 @@
 #include "soc.hpp"
 #include "debug.hpp"
 #include "macro.hpp"
+#include "paddr/paddr_interface.hpp"
+#include "path.hh"
 #include "utils.hpp"
 #include <csignal>
 #include <cstdio>
-#include "path.hh"
-#include "nemu/mytrace.hpp"
 #include <fmt/core.h>
-#include "testbench/sim_state.hpp"
+#include <string>
 
-static std::tuple<PaddrTop*, PaddrConfreg*> basic_soc(){/*{{{*/
-    AddrIntv s0_24_range = AddrIntv(0x0,bit_mask(24));
-    AddrIntv inst_range = AddrIntv(0x1fc00000,bit_mask(22));
-    AddrIntv confreg_range = AddrIntv(0x1faf0000,bit_mask(16));
+static std::tuple<PaddrTop *, PaddrConfreg *, Pmem *, Pmem *>
+basic_soc(bool useSnapShot = false, std::string snapShotName = "") { /*{{{*/
+  AddrIntv s0_24_range = AddrIntv(0x0, bit_mask(24));
+  AddrIntv inst_range = AddrIntv(0x1fc00000, bit_mask(22));
+  AddrIntv confreg_range = AddrIntv(0x1faf0000, bit_mask(16));
 
-    /* new inst and data mem from 0x0 */
-    Pmem* s0_mem = new Pmem(s0_24_range);
-    s0_mem->load_binary(0,__TEST_BIN__);
+  /* new inst and data mem from 0x0 */
+  auto binName = useSnapShot ? snapShotName : __TEST_BIN__;
+  Pmem *s0_mem = new Pmem(s0_24_range);
+  s0_mem->load_binary(0, binName.c_str());
 
-    /* map inst mem to 0x1fc00000 */
-    Pmem* inst_mem = new Pmem(inst_range, s0_mem->get_mem_ptr());
+  /* map inst mem to 0x1fc00000 */
+  Pmem *inst_mem = new Pmem(inst_range, s0_mem->get_mem_ptr());
 
-    /* new nscscc confreg */
-    PaddrConfreg* confreg = new PaddrConfreg(true);
+  /* new nscscc confreg */
+  PaddrConfreg *confreg = new PaddrConfreg(false);
 
-    PaddrTop* top = new PaddrTop();
-    top->add_dev(inst_range, inst_mem);
-    top->add_dev(s0_24_range, s0_mem);
-    top->add_dev(confreg_range, confreg);
-    return std::make_tuple(top, confreg);
-}/*}}}*/
-static std::tuple<PaddrTop*, Puart8250*> boot_soc() {/*{{{*/
-    AddrIntv flash_range(0x1fc00000, bit_mask(21));
-    AddrIntv ddr_range  (0x00000000, bit_mask(27));
-    AddrIntv uart_range (0x1fe40000, bit_mask(14));
+  PaddrTop *top = new PaddrTop();
+  top->add_dev(inst_range, inst_mem);
+  top->add_dev(s0_24_range, s0_mem);
+  top->add_dev(confreg_range, confreg);
+  return std::make_tuple(top, confreg, s0_mem, inst_mem);
+} /*}}}*/
+static std::tuple<PaddrTop *, Puart8250 *, Pmem *, Pmem *>
+boot_soc(bool useSnapShot = false, std::string snapShotName = "") { /*{{{*/
+  AddrIntv flash_range(0x1fc00000, bit_mask(21));
+  AddrIntv ddr_range(0x00000000, bit_mask(27));
+  AddrIntv uart_range(0x1fe40000, bit_mask(14));
 
-    Puart8250* uart = new Puart8250();
-    Pmem* spi_flash = new Pmem(flash_range);
-    spi_flash->load_binary(0, __TEST_BIN__);
-    Pmem* dram = new Pmem(ddr_range);
+  Puart8250 *uart = new Puart8250();
+  Pmem *spi_flash = new Pmem(flash_range);
+  auto binName = useSnapShot ? snapShotName : __TEST_BIN__;
+  spi_flash->load_binary(0, binName.c_str());
+  Pmem *dram = new Pmem(ddr_range);
 
-    PaddrTop* top = new PaddrTop();
-    top->add_dev(flash_range, spi_flash);
-    top->add_dev(ddr_range, dram);
-    top->add_dev(uart_range, uart);
-    return std::tie(top,uart);
-}/*}}}*/
-static std::tuple<PaddrTop*, Puart8250*> kernel_soc() {/*{{{*/
-    AddrIntv ddr_range  (0x00000000, bit_mask(27));
-    AddrIntv uart_range (0x1fe40000, bit_mask(14));
+  PaddrTop *top = new PaddrTop();
+  top->add_dev(flash_range, spi_flash);
+  top->add_dev(ddr_range, dram);
+  top->add_dev(uart_range, uart);
+  return std::tie(top, uart, dram, spi_flash);
+} /*}}}*/
+static std::tuple<PaddrTop *, Puart8250 *, Pmem *, Pmem *>
+kernel_soc(bool useSnapShot = false, std::string snapShotName = "") { /*{{{*/
+  AddrIntv ddr_range(0x00000000, bit_mask(27));
+  AddrIntv uart_range(0x1fe40000, bit_mask(14));
 
-    Puart8250* uart = new Puart8250();
-    Pmem* dram = new Pmem(ddr_range);
-    dram->load_binary(0x00100000, __TEST_BIN__);
+  Puart8250 *uart = new Puart8250();
+  Pmem *dram = new Pmem(ddr_range);
+  Pmem *resetMem = nullptr;
+  auto binName = useSnapShot ? snapShotName : __TEST_BIN__;
+  dram->load_binary(0x00100000, binName.c_str());
 
-    PaddrTop* top = new PaddrTop();
-    top->add_dev(ddr_range, dram);
-    top->add_dev(uart_range, uart);
-    return std::tie(top,uart);
-}/*}}}*/
+  PaddrTop *top = new PaddrTop();
+  top->add_dev(ddr_range, dram);
+  top->add_dev(uart_range, uart);
+  return std::tie(top, uart, dram, resetMem);
+} /*}}}*/
 
-dual_soc::dual_soc() {/*{{{*/
-    IFDEF(CONFIG_BASIC_SOC, create_basic_soc());
-    IFDEF(CONFIG_BOOT_SOC, create_boot_soc());
-    IFDEF(CONFIG_KERNEL_SOC, create_kernel_soc());
-}/*}}}*/
-void dual_soc::create_basic_soc(){/*{{{*/
-    has_confreg = true;
-    for (size_t i = 0; i < 2; i++) {
-        std::tie(ptop[i], pcfreg[i]) = basic_soc();
-    }
-}/*}}}*/
-void dual_soc::create_boot_soc(){/*{{{*/
-    has_confreg = false;
-    pcfreg[0] = pcfreg[1] = nullptr;
-    for (size_t i = 0; i < 2; i++) {
-        std::tie(ptop[i],puart[i]) = boot_soc();
-    }
-}/*}}}*/
-void dual_soc::create_kernel_soc(){/*{{{*/
-    has_confreg = false;
-    pcfreg[0] = pcfreg[1] = nullptr;
-    for (size_t i = 0; i < 2; i++) {
-        std::tie(ptop[i],puart[i]) = kernel_soc();
-    }
-}/*}}}*/
+dual_soc::dual_soc(bool useSnapShot, std::string snapShotName) { /*{{{*/
+  IFDEF(CONFIG_BASIC_SOC, create_basic_soc());
+  IFDEF(CONFIG_BOOT_SOC, create_boot_soc());
+  IFDEF(CONFIG_KERNEL_SOC, create_kernel_soc());
+} /*}}}*/
+void dual_soc::create_basic_soc(bool useSnapShot,
+                                std::string snapShotName) { /*{{{*/
+  has_confreg = true;
+  for (size_t i = 0; i < 2; i++) {
+    std::tie(ptop[i], pcfreg[i], mainMem[i], resetMem[i]) =
+        basic_soc(useSnapShot, snapShotName);
+  }
+} /*}}}*/
+void dual_soc::create_boot_soc(bool useSnapShot,
+                               std::string snapShotName) { /*{{{*/
+  has_confreg = false;
+  pcfreg[0] = pcfreg[1] = nullptr;
+  for (size_t i = 0; i < 2; i++) {
+    std::tie(ptop[i], puart[i], mainMem[i], resetMem[i]) =
+        boot_soc(useSnapShot, snapShotName);
+  }
+} /*}}}*/
+void dual_soc::create_kernel_soc(bool useSnapShot,
+                                 std::string snapShotName) { /*{{{*/
+  has_confreg = false;
+  pcfreg[0] = pcfreg[1] = nullptr;
+  for (size_t i = 0; i < 2; i++) {
+    std::tie(ptop[i], puart[i], mainMem[i], resetMem[i]) =
+        kernel_soc(useSnapShot, snapShotName);
+  }
+} /*}}}*/
 
+void dual_soc::saveSnapShot(std::string parentDir) {
+  mainMem[DUT]->save_binary(parentDir + "/main.bin");
+#ifndef CONFIG_TEST_LINUX
+  resetMem[DUT]->save_binary(parentDir + "/reset.bin");
+#endif
+}
 
-single_soc::single_soc(){
-    IFDEF(CONFIG_BASIC_SOC, create_basic_soc());
-    IFDEF(CONFIG_BOOT_SOC, create_boot_soc());
-    IFDEF(CONFIG_KERNEL_SOC, create_kernel_soc());
+single_soc::single_soc() {
+  IFDEF(CONFIG_BASIC_SOC, create_basic_soc());
+  IFDEF(CONFIG_BOOT_SOC, create_boot_soc());
+  IFDEF(CONFIG_KERNEL_SOC, create_kernel_soc());
 }
 
 void single_soc::create_basic_soc(){/*{{{*/
-    std::tie(ptop, pcfreg) = basic_soc();
+  std::tie(ptop, pcfreg, mainMem, resetMem) = basic_soc();
 }/*}}}*/
 void single_soc::create_boot_soc(){/*{{{*/
     pcfreg = nullptr;
-    std::tie(ptop, puart) = boot_soc();
+    std::tie(ptop, puart, mainMem, resetMem) = boot_soc();
 }/*}}}*/
 void single_soc::create_kernel_soc(){/*{{{*/
     pcfreg = nullptr;
-    std::tie(ptop, puart) = kernel_soc();
+    std::tie(ptop, puart, mainMem, resetMem) = kernel_soc();
 }/*}}}*/
 
 #define UART_CHAR "'{:c}'({:#x})"

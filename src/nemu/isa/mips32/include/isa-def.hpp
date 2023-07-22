@@ -27,8 +27,6 @@
 #include "nemu/mytrace.hpp"
 #include "paddr/paddr_interface.hpp"
 #include <fmt/core.h>
-#include <memory>
-#include <string>
 
 class mips32_CPU_state {
 public:
@@ -40,6 +38,7 @@ public:
   word_t delay_slot_npc;
   bool next_is_delay_slot;
   el::Logger *log_pt;
+  el::Logger *gt_log_pt;
   bool raise_ex;
   std::shared_ptr<PaddrTop> paddr_top;
   Decode inst_state;
@@ -60,6 +59,10 @@ public:
   void ref_log_error(diff_state *mycpu);
   void ref_get_debug_info(debug_info_t *ref);
   // }}}
+
+  /* SnapShot */
+  void saveSnapShot(std::string fileName);
+  void loadSnapShot(std::string fileName);
 
   // nemu difftest utils api{{{
   bool isa_difftest_checkregs(diff_state *ref_r);

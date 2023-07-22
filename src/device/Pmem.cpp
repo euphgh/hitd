@@ -83,8 +83,8 @@ void Pmem::load_binary(uint64_t offset, const char *init_file) {/*{{{*/
     }
     file.read((char*)mem+offset,file_size);
 }/*}}}*/
-void Pmem::save_binary(const char *filename) {/*{{{*/
+void Pmem::save_binary(std::string filename) { /*{{{*/
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     file.write((char*)mem, mem_size);
-}/*}}}*/
+} /*}}}*/
 uint8_t* Pmem::get_mem_ptr() { return mem; }

@@ -78,6 +78,7 @@ void CP0_t::println() const {
         fmt::print("{:12s}" HEX_WORD "\n", #regname, value);
 
 __cp0_info__(__cp0_reg_println__,, )
+#undef __cp0_reg_println__
 }
 
 void CP0_t::reset(){/*{{{*/
@@ -89,4 +90,6 @@ void CP0_t::reset(){/*{{{*/
     };
 #define __cp0_field_init__(name,msb,lsb,reset,writable,check) .name = reset,
     __cp0_info__(__cp0_reg_init__, __cp0_field_init__, );
+#undef __cp0_reg_init__
+#undef __cp0_field_init__
 }/*}}}*/

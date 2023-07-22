@@ -41,30 +41,36 @@ inline static void sim_ending(int nemu_end_state){/*{{{*/
             break;
     }
 }/*}}}*/
-
-static bool sim_end_statistics(){/*{{{*/
+static bool sim_end_statistics(dual_soc &soc) { /*{{{*/
     bool res = false;
     switch (sim_status) {
         case SIM_ABORT:
             mycpu_log->info("mycpu has error and quit");
+            nemu->isa_reg_display();
             break;
         case SIM_END:
             mycpu_log->info("mycpu pass test");
             res = true;
             break;
-        case SIM_INT:
+        case SIM_INT: {
+            string mkSnapShotDir(const string &parentFolder);
+            auto pdir = mkSnapShotDir(HITD_HOME "/snapshot");
+            nemu->saveSnapShot(pdir + "/nemu.properties");
+            soc.saveSnapShot(pdir);
             mycpu_log->info("mycpu stop test for key board interrupt");
+            nemu->isa_reg_display();
             break;
+        }
         case SIM_NEMU_QUIT:
+            nemu->isa_reg_display();
             mycpu_log->info("mycpu stop test for nemu abnormal exit");
             break;
         default:
             mycpu_log->info("mycpu quit with not defined state %v", sim_status);
             break;
-    }
-    nemu->isa_reg_display();
+        }
     return res;
-}/*}}}*/
+} /*}}}*/
 
 static void check_cpu_state(diff_state* mycpu){/*{{{*/
     bool res = nemu->ref_checkregs(mycpu);
@@ -74,20 +80,6 @@ static void check_cpu_state(diff_state* mycpu){/*{{{*/
         nemu->ref_log_error(mycpu);
     }
 }/*}}}*/
-
-static inline void tickAdd() {
-    ticks++;
-#ifdef CONFIG_TRUNCATE_MANUAL
-    if (unlikely(ticks == CONFIG_TRACE_START_TICK)) {
-        enableLogger(mycpu_log);
-        enableLogger(nemu->log_pt);
-    }
-    if (unlikely(ticks == CONFIG_TRACE_END_TICK)) {
-        disableLogger(mycpu_log);
-        disableLogger(nemu->log_pt);
-    }
-#endif
-}
 
 #ifdef CONFIG_CP0_DIFF
 static void inline checkCP0(const CP0_t &dut) {
@@ -105,6 +97,26 @@ bool mainloop(
         std::string wave_name,
         dual_soc& soc
         ){/*{{{*/
+    auto tickAdd = [&soc]() {
+      ticks++;
+      if (CONFIG_SNAPSHOT_TICK == ticks) {
+        string mkSnapShotDir(const string &parentFolder);
+        auto pdir = mkSnapShotDir(HITD_HOME "snapshot");
+        nemu->saveSnapShot(pdir + "/nemu.properties");
+        soc.saveSnapShot(pdir);
+      }
+#ifdef CONFIG_TRUNCATE_MANUAL
+      if (unlikely(ticks == CONFIG_TRACE_START_TICK)) {
+        enableLogger(mycpu_log);
+        enableLogger(nemu->log_pt);
+        soc.saveSnapShot();
+      }
+      if (unlikely(ticks == CONFIG_TRACE_END_TICK)) {
+        disableLogger(mycpu_log);
+        disableLogger(nemu->log_pt);
+      }
+#endif
+    };
 
     sim_status = SIM_RUN;
     IFDEF(CONFIG_WAVE_TAIL_ENABLE, uint64_t wave_on_tick = arg_wave_on_tick);
@@ -113,9 +125,9 @@ bool mainloop(
     IFDEF(CONFIG_TRUNCATE_MANUAL, disableLogger(mycpu_log));
     IFDEF(CONFIG_TRUNCATE_MANUAL, disableLogger(nemu->log_pt));
 
-    IFDEF(CONFIG_WAVE_ON,Verilated::traceEverOn(true));
-    IFDEF(CONFIG_WAVE_ON,wave_file_t tfp);
-    IFDEF(CONFIG_WAVE_ON,top->trace(&tfp,0));
+    IFDEF(CONFIG_WAVE_ON, Verilated::traceEverOn(true));
+    IFDEF(CONFIG_WAVE_ON, wave_file_t tfp);
+    IFDEF(CONFIG_WAVE_ON, top->trace(&tfp, 0));
     IFDEF(
         CONFIG_WAVE_ON,
         tfp.open(
@@ -125,7 +137,7 @@ bool mainloop(
     top->aclk = 0;
     top->aresetn = 0;
     IFDEF(CONFIG_COMMIT_WAIT, uint64_t last_commit = ticks);
-    IFDEF(CONFIG_PERF_ANALYSES, perf_timer(AddrIntv(0x1fc00000,bit_mask(22))));
+    IFDEF(CONFIG_PERF_ANALYSES, perf_timer(AddrIntv(0x1fc00000, bit_mask(22))));
 
     while (ticks < (RST_TIME & ~0x1)) {
         tickAdd();
@@ -213,7 +225,7 @@ bool mainloop(
         } /*}}}*/
     }
 
-    IFDEF(CONFIG_WAVE_ON,tfp.close());
-    IFDEF(CONFIG_PERF_ANALYSES, perf_timer.save_date(wave_name+".bin"));
-    return sim_end_statistics();
-}/*}}}*/
+    IFDEF(CONFIG_WAVE_ON, tfp.close());
+    IFDEF(CONFIG_PERF_ANALYSES, perf_timer.save_date(wave_name + ".bin"));
+    return sim_end_statistics(soc);
+} /*}}}*/

@@ -126,6 +126,12 @@ config CC_ASAN
   default n
 endmenu# }}}
 
+config SNAPSHOT_TICK
+  int "the ticks saving snapshot"
+  default 0
+  help
+    set 0 will close snapshot
+
 menu "Log Options"# {{{
 
 config TRACE

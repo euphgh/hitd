@@ -10,3 +10,4 @@ compile_commands.json
 out/
 !.envrc
 core
+snapshot/*

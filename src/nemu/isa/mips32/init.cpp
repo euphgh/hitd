@@ -52,6 +52,24 @@ CPU_state::mips32_CPU_state(PaddrTop* ptop_input):
     mips_ftracer(__TEST_ELF__, ptop_input->log_pt, CONFIG_RESET_PC)
 {
     Assert(IS_2_POW(CONFIG_TLB_NR), "TLB entry number is not power of 2");
+
+#ifdef CONFIG_TRACE
+    auto name = "golden_trace";
+    el::Configurations log_conf;
+    log_conf.setToDefault();
+    log_conf.setGlobally(el::ConfigurationType::Enabled, "true");
+    log_conf.setGlobally(el::ConfigurationType::Format, "%msg");
+    log_conf.setGlobally(el::ConfigurationType::ToFile,
+                         MUXDEF(CONFIG_TRACE, "true", "false"));
+    log_conf.setGlobally(el::ConfigurationType::MaxLogFileSize, "0");
+    log_conf.setGlobally(el::ConfigurationType::Filename,
+                         HITD_HOME "/golden_trace.txt");
+    log_conf.set(el::Level::Trace, el::ConfigurationType::ToStandardOutput,
+                 "false");
+    gt_log_pt = el::Loggers::getLogger(name);
+    gt_log_pt->configure(log_conf);
+    LOG(INFO) << "Init logger with name:" << name;
+#endif
 };
 
 void init_isa(PaddrTop* ptop_input) {

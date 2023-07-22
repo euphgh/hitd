@@ -17,6 +17,7 @@
 #ifndef EASYLOGGINGPP_H
 #define EASYLOGGINGPP_H
 
+// clang format off
 // my def start
 #define ELPP_FRESH_LOG_FILE
 #define ELPP_NO_DEFAULT_LOG_FILE

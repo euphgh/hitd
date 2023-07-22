@@ -306,25 +306,27 @@ static struct {/*{{{*/
   const char *description;
   int (*handler) (char *);
 } /*}}}*/
-cmd_table [] = {/*{{{*/
-    { "w",    "add watchpoint by \"w [expressions]\"",                      cmd_w   },
-    { "d",    "delete watchpoint/break with number by \"d [number]\"",      cmd_d   },
-    { "info", "print registers by \"info r\" and watchpoint by \"info w\"", cmd_info},  
-    { "x",    "check memory by \"x [size] [addr]\"",                        cmd_x   },  
-    { "c",    "Continue the execution of the program",                      cmd_c   },
-    { "p",    "print expressions value",                                    cmd_p   },
-    { "pi",   "print last instruction",                                     cmd_pi  },
-    { "bt",   "print function call stack",                                  cmd_bt  },
-    { "q",    "Exit NEMU",                                                  cmd_q   },
-    { "si",   "run program with instruction by \"si [step]\"",              cmd_si  },  
-    { "s",    "run into function or next line by \"s [step]\"",             cmd_s   },  
-    { "n",    "run to next line of src by \"n [step]\"",                    cmd_n   },  
-    { "b",    "set break point by \"b [addr]|[function name]\"",            cmd_b   },  
-    { "fin",  "return current function by \"fin\"",                         cmd_fin },  
-    { "l",    "list source code arrounded by \"l [up] [down]\"",            cmd_l   },  
-    { "help", "Display information about all supported commands",           cmd_help},
+cmd_table[] = {
+    /*{{{*/
+    {"w", "add watchpoint by \"w [expressions]\"", cmd_w},
+    {"d", "delete watchpoint/break with number by \"d [number]\"", cmd_d},
+    {"info", "print registers by \"info r\" and watchpoint by \"info w\"",
+     cmd_info},
+    {"x", "check memory by \"x [size] [addr]\"", cmd_x},
+    {"c", "Continue the execution of the program", cmd_c},
+    {"p", "print expressions value", cmd_p},
+    {"pi", "print last instruction", cmd_pi},
+    {"bt", "print function call stack", cmd_bt},
+    {"q", "Exit NEMU", cmd_q},
+    {"si", "run program with instruction by \"si [step]\"", cmd_si},
+    {"s", "run into function or next line by \"s [step]\"", cmd_s},
+    {"n", "run to next line of src by \"n [step]\"", cmd_n},
+    {"b", "set break point by \"b [addr]|[function name]\"", cmd_b},
+    {"fin", "return current function by \"fin\"", cmd_fin},
+    {"l", "list source code arrounded by \"l [up] [down]\"", cmd_l},
+    {"help", "Display information about all supported commands", cmd_help},
 
-};/*}}}*/
+}; /*}}}*/
 
 #define NR_CMD ARRLEN(cmd_table)
 

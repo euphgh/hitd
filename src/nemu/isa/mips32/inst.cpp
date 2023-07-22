@@ -16,7 +16,9 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <fmt/core.h>
 #include <nemu/cpu/cpu.hpp>
+#include "common.hpp"
 #include "easylogging++.h"
 #include "local-include/reg.hpp"
 #include <nemu/cpu/ifetch.hpp>
@@ -271,5 +273,10 @@ except_restart:
   arch_state.pc = inst_state.dnpc;
   extern uint32_t log_pc;
   log_pc = this_pc;
+#ifdef CONFIG_TRACE
+  if (inst_state.wnum != 0)
+    gt_log_pt->trace(fmt::format("{:08x} {:02x} {:08x}", log_pc,
+                                 inst_state.wnum, inst_state.wdata));
+#endif
   return 0;
 }
