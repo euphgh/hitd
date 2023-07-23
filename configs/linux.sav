@@ -1,17 +1,19 @@
 [*]
 [*] GTKWave Analyzer v3.3.115 (w)1999-2023 BSI
-[*] Tue Jul 18 02:02:53 2023
+[*] Sun Jul 23 06:44:55 2023
 [*]
-[dumpfile] "/home/hgh/mnt/wave/func-0.fst"
-[dumpfile_mtime] "Tue Jul 18 01:55:28 2023"
-[dumpfile_size] 108818
+[dumpfile] "/home/hgh/mnt/wave/linux.fst"
+[dumpfile_mtime] "Sun Jul 23 06:44:22 2023"
+[dumpfile_size] 59082244
 [savefile] "/home/hgh/mnt/configs/linux.sav"
-[timestart] 1
+[timestart] 3740832
 [size] 1920 989
 [pos] -1 -1
-*-3.200000 128 22602 1992237 1992160 1991876 1444958 2132914 3892554 4115180 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-2.600000 3740843 3740843 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.mycpu_top.
+[treeopen] TOP.mycpu_top.backend.
+[treeopen] TOP.mycpu_top.backend.lsuFU.
 [treeopen] TOP.mycpu_top.backend.lsuFU.memStage1.cache1.datas_0.array_ext.unnamedblk1.
 [treeopen] TOP.mycpu_top.backend.lsuFU.memStage2.cache2.
 [treeopen] TOP.mycpu_top.backend.lsuRS.
@@ -20,26 +22,15 @@
 [treeopen] TOP.mycpu_top.frontend.
 [treeopen] TOP.mycpu_top.frontend.instBuffer.
 [treeopen] TOP.mycpu_top.frontend.instBuffer.ib.
+[treeopen] TOP.mycpu_top.frontend.instFetch.
 [treeopen] TOP.mycpu_top.frontend.instFetch.ifStage1.
 [treeopen] TOP.mycpu_top.frontend.instFetch.ifStage2.
 [sst_width] 428
 [signals_width] 521
 [sst_expanded] 1
 [sst_vpaned_height] 539
-@c00200
--preIF-in
-@22
-TOP.mycpu_top.frontend.instFetch.preIfStage.io_in_fromIf1_pcVal[31:0]
-TOP.mycpu_top.frontend.instFetch.preIfStage.io_in_fromIf1_predictDst[31:0]
 @28
-TOP.mycpu_top.frontend.instFetch.preIfStage.io_in_fromIf1_dsFetched
-TOP.mycpu_top.frontend.instFetch.preIfStage.io_in_fromIf1_hasBranch
-TOP.mycpu_top.frontend.instFetch.preIfStage.io_in_fromIf1_stage1Rdy
-TOP.mycpu_top.frontend.instFetch.preIfStage.io_in_redirect_flush
-@22
-TOP.mycpu_top.frontend.instFetch.preIfStage.io_in_redirect_target[31:0]
-@1401200
--preIF-in
+TOP.mycpu_top.frontend.instBuffer.clock
 @c00200
 -if-tlb
 @22
@@ -164,71 +155,6 @@ TOP.mycpu_top.rresp[1:0]
 @1401200
 -mycpu-r
 @c00200
--DISPATCHER
-@28
-TOP.mycpu_top.frontend.instBuffer.clock
-TOP.mycpu_top.backend.dispatcher.io_in_fromInstBuffer_0_valid
-@c00200
--SEL GROUP
-@28
-TOP.mycpu_top.backend.dispatcher.mainAluSel[2:0]
-TOP.mycpu_top.backend.dispatcher.subAluSel[2:0]
-TOP.mycpu_top.backend.dispatcher.lsuSel[2:0]
-TOP.mycpu_top.backend.dispatcher.mduSel[2:0]
-@1401200
--SEL GROUP
-@c00200
--3 SLOT PC
-@22
-TOP.mycpu_top.backend.dispatcher.io_in_fromInstBuffer_0_bits_basicInstInfo_pcVal[31:0]
-TOP.mycpu_top.backend.dispatcher.io_in_fromInstBuffer_1_bits_basicInstInfo_pcVal[31:0]
-TOP.mycpu_top.backend.dispatcher.io_in_fromInstBuffer_2_bits_basicInstInfo_pcVal[31:0]
-@1401200
--3 SLOT PC
-@c00200
--3 SLOT FU
-@28
-TOP.mycpu_top.backend.dispatcher.io_in_fromInstBuffer_0_bits_whichFu[1:0]
-TOP.mycpu_top.backend.dispatcher.io_in_fromInstBuffer_1_bits_whichFu[1:0]
-TOP.mycpu_top.backend.dispatcher.io_in_fromInstBuffer_2_bits_whichFu[1:0]
-@1401200
--3 SLOT FU
-@c00200
--SLOT READY GO
-@28
-TOP.mycpu_top.backend.dispatcher.io_out_toRob_0_ready
-TOP.mycpu_top.backend.dispatcher.freeList.io_pop_0_valid
-@22
-TOP.mycpu_top.backend.dispatcher.io_in_fromInstBuffer_0_bits_aRegsIdx_dest[4:0]
-@28
-TOP.mycpu_top.backend.dispatcher.slots_0_readyGo
-TOP.mycpu_top.backend.dispatcher.slots_1_readyGo
-TOP.mycpu_top.backend.dispatcher.slots_2_readyGo
-TOP.mycpu_top.backend.dispatcher.io_out_toRob_0_ready
-TOP.mycpu_top.backend.dispatcher.io_out_toRob_1_ready
-TOP.mycpu_top.backend.dispatcher.io_out_toRob_2_ready
-TOP.mycpu_top.backend.dispatcher.io_out_toLsuRs_ready
-TOP.mycpu_top.backend.dispatcher.io_out_toMainAluRs_ready
-TOP.mycpu_top.backend.dispatcher.io_out_toMduRs_ready
-TOP.mycpu_top.backend.dispatcher.io_out_toSubAluRs_ready
-TOP.mycpu_top.backend.dispatcher.state[1:0]
-TOP.mycpu_top.backend.dispatcher.io_dsAllow
-TOP.mycpu_top.backend.dispatcher.io_fromAluMispre_happen
-@22
-TOP.mycpu_top.backend.dispatcher.io_fromAluMispre_realTarget[31:0]
-@28
-TOP.mycpu_top.backend.dispatcher.io_recoverSrat_valid
-@1401200
--SLOT READY GO
-@c00200
--freelist
-@24
-TOP.mycpu_top.backend.dispatcher.freeList.headPtr[5:0]
-TOP.mycpu_top.backend.dispatcher.freeList.tailPtr[5:0]
-@1401200
--freelist
--DISPATCHER
-@c00200
 -flr
 @22
 TOP.mycpu_top.backend.rob.robEntries.headPtr[5:0]
@@ -258,7 +184,7 @@ TOP.mycpu_top.backend.prf.checkArchRegs.io_gpr_3[31:0]
 @28
 TOP.mycpu_top.aclk
 TOP.mycpu_top.aresetn
-@c00200
+@800200
 -push
 @22
 TOP.mycpu_top.frontend.instBuffer.ib.io_push_0_bits_basicInstInfo_pcVal[31:0]
@@ -280,9 +206,9 @@ TOP.mycpu_top.frontend.instBuffer.ib.io_push_3_bits_basicInstInfo_pcVal[31:0]
 TOP.mycpu_top.frontend.instBuffer.ib.io_push_3_bits_basicInstInfo_instr[31:0]
 @28
 TOP.mycpu_top.frontend.instBuffer.ib.io_push_3_valid
-@1401200
+@1000200
 -push
-@c00200
+@800200
 -pop
 @22
 TOP.mycpu_top.frontend.instBuffer.ib.io_pop_0_bits_basicInstInfo_instr[31:0]
@@ -338,7 +264,7 @@ TOP.mycpu_top.frontend.instBuffer.ib.io_pop_2_bits_basicInstInfo_pcVal[31:0]
 @28
 TOP.mycpu_top.frontend.instBuffer.ib.io_pop_2_ready
 TOP.mycpu_top.frontend.instBuffer.ib.io_pop_2_valid
-@1401200
+@1000200
 -pop
 @28
 TOP.mycpu_top.frontend.instBuffer.ib.io_flush
@@ -407,6 +333,89 @@ TOP.mycpu_top.backend.sAluFU_io_in_bits_r_basic_debugPC[31:0]
 -alu component
 -SubAlu
 @c00200
+-DISPATCHER
+-SEL GROUP
+@28
+TOP.mycpu_top.backend.dispatcher.mainAluSel[2:0]
+TOP.mycpu_top.backend.dispatcher.subAluSel[2:0]
+TOP.mycpu_top.backend.dispatcher.lsuSel[2:0]
+TOP.mycpu_top.backend.dispatcher.mduSel[2:0]
+@1401200
+-SEL GROUP
+@c00200
+-3 SLOT PC
+@22
+TOP.mycpu_top.backend.dispatcher.io_in_fromInstBuffer_0_bits_basicInstInfo_pcVal[31:0]
+TOP.mycpu_top.backend.dispatcher.io_in_fromInstBuffer_1_bits_basicInstInfo_pcVal[31:0]
+TOP.mycpu_top.backend.dispatcher.io_in_fromInstBuffer_2_bits_basicInstInfo_pcVal[31:0]
+@1401200
+-3 SLOT PC
+@c00200
+-3 SLOT FU
+@28
+TOP.mycpu_top.backend.dispatcher.io_in_fromInstBuffer_0_bits_whichFu[1:0]
+TOP.mycpu_top.backend.dispatcher.io_in_fromInstBuffer_1_bits_whichFu[1:0]
+TOP.mycpu_top.backend.dispatcher.io_in_fromInstBuffer_2_bits_whichFu[1:0]
+@1401200
+-3 SLOT FU
+@c00200
+-SLOT READY GO
+@28
+TOP.mycpu_top.backend.dispatcher.io_out_toRob_0_ready
+TOP.mycpu_top.backend.dispatcher.freeList.io_pop_0_valid
+@22
+TOP.mycpu_top.backend.dispatcher.io_in_fromInstBuffer_0_bits_aRegsIdx_dest[4:0]
+@28
+TOP.mycpu_top.backend.dispatcher.slots_0_readyGo
+TOP.mycpu_top.backend.dispatcher.slots_1_readyGo
+TOP.mycpu_top.backend.dispatcher.slots_2_readyGo
+TOP.mycpu_top.backend.dispatcher.io_out_toRob_0_ready
+TOP.mycpu_top.backend.dispatcher.io_out_toRob_1_ready
+TOP.mycpu_top.backend.dispatcher.io_out_toRob_2_ready
+TOP.mycpu_top.backend.dispatcher.io_out_toLsuRs_ready
+TOP.mycpu_top.backend.dispatcher.io_out_toMainAluRs_ready
+TOP.mycpu_top.backend.dispatcher.io_out_toMduRs_ready
+TOP.mycpu_top.backend.dispatcher.io_out_toSubAluRs_ready
+TOP.mycpu_top.backend.dispatcher.state[1:0]
+TOP.mycpu_top.backend.dispatcher.io_dsAllow
+TOP.mycpu_top.backend.dispatcher.io_fromAluMispre_happen
+@22
+TOP.mycpu_top.backend.dispatcher.io_fromAluMispre_realTarget[31:0]
+@28
+TOP.mycpu_top.backend.dispatcher.io_recoverSrat_valid
+@1401200
+-SLOT READY GO
+@c00200
+-freelist
+@24
+TOP.mycpu_top.backend.dispatcher.freeList.headPtr[5:0]
+TOP.mycpu_top.backend.dispatcher.freeList.tailPtr[5:0]
+@1401200
+-freelist
+-DISPATCHER
+@c00200
+-preIF-in
+@22
+TOP.mycpu_top.frontend.instFetch.preIfStage.io_in_fromIf1_pcVal[31:0]
+TOP.mycpu_top.frontend.instFetch.preIfStage.io_in_fromIf1_predictDst[31:0]
+@28
+TOP.mycpu_top.frontend.instFetch.preIfStage.io_in_fromIf1_dsFetched
+TOP.mycpu_top.frontend.instFetch.preIfStage.io_in_fromIf1_hasBranch
+TOP.mycpu_top.frontend.instFetch.preIfStage.io_in_fromIf1_stage1Rdy
+TOP.mycpu_top.frontend.instFetch.preIfStage.io_in_redirect_flush
+@22
+TOP.mycpu_top.frontend.instFetch.preIfStage.io_in_redirect_target[31:0]
+@1401200
+-preIF-in
+@c00200
+-IfStage1
+@28
+TOP.mycpu_top.frontend.instFetch.ifStage1.io_out_bits_iCache_cacheInst_valid
+TOP.mycpu_top.frontend.instFetch.ifStage1.io_out_valid
+TOP.mycpu_top.frontend.instFetch.ifStage1.io_out_ready
+@1401200
+-IfStage1
+@c00200
 -Ifstage2
 @28
 TOP.mycpu_top.frontend.instFetch.ifStage2.io_in_ready
@@ -422,6 +431,9 @@ TOP.mycpu_top.frontend.instFetch.ifStage2.io_out_bits_basicInstInfo_2_pcVal[31:0
 TOP.mycpu_top.frontend.instFetch.ifStage2.io_out_bits_basicInstInfo_3_pcVal[31:0]
 @28
 TOP.mycpu_top.frontend.instFetch.ifStage2.icache2.io_in_bits_cancel
+TOP.mycpu_top.frontend.instFetch.ifStage2.io_in_bits_iCache_cacheInst_valid
+TOP.mycpu_top.frontend.instFetch.ifStage2.io_noBrMispreRedirect_flush
+TOP.mycpu_top.frontend.instFetch.ifStage2.robFlushAll__bore
 @800200
 -ICache2
 @28
@@ -582,6 +594,7 @@ TOP.mycpu_top.backend.rob.robEntries.io_push_2_ready
 -Rob-Push
 @c00200
 -LSU
+@800200
 -Mem2
 @28
 TOP.mycpu_top.backend.lsuFU.memStage2.io_in_valid
@@ -618,7 +631,7 @@ TOP.mycpu_top.backend.lsuFU.memStage2.io_out_valid
 TOP.mycpu_top.backend.lsuFU.memStage2.io_doneSQ
 TOP.mycpu_top.backend.lsuFU.memStage2.io_in_bits_isSQ
 TOP.mycpu_top.backend.lsuFU.memStage2.io_flush
-@1401200
+@1000200
 -Mem2
 @c00200
 -StoreQ-Deq
@@ -879,7 +892,7 @@ TOP.mycpu_top.backend.mduFU.clz.io_out_bits[31:0]
 -clz
 @1401200
 -MDU
-@c00200
+@c00201
 -Mem1-fromRO
 @22
 TOP.mycpu_top.backend.lsuFU.memStage1.io_fromRO_bits_debugPC[31:0]
@@ -893,6 +906,7 @@ TOP.mycpu_top.backend.lsuFU.memStage1.roDecp_bits_r_debugPC[31:0]
 TOP.mycpu_top.backend.lsuFU.memStage1.valid
 TOP.mycpu_top.backend.lsuFU.memStage1.state[1:0]
 TOP.mycpu_top.backend.lsuFU.memStage1.io_out_toStoreQ_valid
+TOP.mycpu_top.backend.lsuFU.memStage1.roDecp_bits_r_cacheInst_valid
 TOP.mycpu_top.backend.lsuFU.storeQ.io_fromMem1_ready
 TOP.mycpu_top.backend.lsuFU.memStage1.nextIsLoad
 TOP.mycpu_top.backend.lsuFU.memStage1.io_flush
@@ -905,7 +919,7 @@ TOP.mycpu_top.backend.lsuFU.memStage1.io_out_toMem2_ready
 TOP.mycpu_top.backend.lsuFU.memStage1.io_out_toMem2_bits_debugPC[31:0]
 @1000200
 -toMem2
-@1401200
+@1401201
 -Mem1-fromRO
 @c00200
 -Mem1-fromSQ
