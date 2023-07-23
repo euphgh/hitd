@@ -273,7 +273,7 @@ except_restart:
   arch_state.pc = inst_state.dnpc;
   extern uint32_t log_pc;
   log_pc = this_pc;
-#ifdef CONFIG_TRACE
+#ifdef CONFIG_GOLDEN_TRACE
   if (inst_state.wnum != 0)
     gt_log_pt->trace(fmt::format("{:08x} {:02x} {:08x}", log_pc,
                                  inst_state.wnum, inst_state.wdata));

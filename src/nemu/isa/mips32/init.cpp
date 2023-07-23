@@ -53,7 +53,7 @@ CPU_state::mips32_CPU_state(PaddrTop* ptop_input):
 {
     Assert(IS_2_POW(CONFIG_TLB_NR), "TLB entry number is not power of 2");
 
-#ifdef CONFIG_TRACE
+#ifdef CONFIG_GOLDEN_TRACE
     auto name = "golden_trace";
     el::Configurations log_conf;
     log_conf.setToDefault();

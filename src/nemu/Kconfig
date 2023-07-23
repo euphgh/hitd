@@ -83,6 +83,11 @@ config ETRACE
   bool "Trace Nemu all Exception trigger and return"
   default y
 
+config GOLDEN_TRACE
+  depends on TRACE
+  bool "generate golden trace"
+  default n
+
 endmenu
 # }}}
 
