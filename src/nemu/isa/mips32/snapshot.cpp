@@ -55,7 +55,8 @@ void mips32_CPU_state::saveSnapShot(string fileName) {
   PropertiesParser::Write(fileName, props);
 }
 void mips32_CPU_state::loadSnapShot(string fileName) {
-  Properties props = PropertiesParser::Read(fileName);
+  Properties props =
+      PropertiesParser::Read("snapshot/" + fileName + "/nemu.properties");
   arch_state.pc = props.GetHexWord("PC", CONFIG_RESET_PC);
   arch_state.hi = props.GetHexWord("HI", 0);
   arch_state.lo = props.GetHexWord("LO", 0);

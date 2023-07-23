@@ -16,7 +16,7 @@ basic_soc(bool useSnapShot = false, std::string snapShotName = "") { /*{{{*/
   AddrIntv confreg_range = AddrIntv(0x1faf0000, bit_mask(16));
 
   /* new inst and data mem from 0x0 */
-  auto binName = useSnapShot ? snapShotName : __TEST_BIN__;
+  auto binName = useSnapShot ? snapShotName + "/mainMem.bin" : __TEST_BIN__;
   Pmem *s0_mem = new Pmem(s0_24_range);
   s0_mem->load_binary(0, binName.c_str());
 
@@ -40,9 +40,11 @@ boot_soc(bool useSnapShot = false, std::string snapShotName = "") { /*{{{*/
 
   Puart8250 *uart = new Puart8250();
   Pmem *spi_flash = new Pmem(flash_range);
-  auto binName = useSnapShot ? snapShotName : __TEST_BIN__;
+  auto binName = useSnapShot ? snapShotName + "/resetMem.bin" : __TEST_BIN__;
   spi_flash->load_binary(0, binName.c_str());
   Pmem *dram = new Pmem(ddr_range);
+  if (useSnapShot)
+    dram->load_binary(0, snapShotName + "/mainMem.bin");
 
   PaddrTop *top = new PaddrTop();
   top->add_dev(flash_range, spi_flash);
@@ -58,7 +60,7 @@ kernel_soc(bool useSnapShot = false, std::string snapShotName = "") { /*{{{*/
   Puart8250 *uart = new Puart8250();
   Pmem *dram = new Pmem(ddr_range);
   Pmem *resetMem = nullptr;
-  auto binName = useSnapShot ? snapShotName : __TEST_BIN__;
+  auto binName = useSnapShot ? snapShotName + "/mainMem.bin" : __TEST_BIN__;
   dram->load_binary(0x00100000, binName.c_str());
 
   PaddrTop *top = new PaddrTop();
