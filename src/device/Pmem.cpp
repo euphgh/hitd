@@ -72,9 +72,9 @@ bool Pmem::do_write(word_t addr, wen_t info, const word_t data){/*{{{*/
     }
     return res;
 }/*}}}*/
-void Pmem::load_binary(uint64_t offset, const char *init_file) {/*{{{*/
+void Pmem::load_binary(uint64_t offset, std::string init_file) { /*{{{*/
     std::ifstream file (init_file, std::ios::in | std::ios::binary | std::ios::ate);
-    Assert(file, "file %s open error", init_file);
+    Assert(file, "file %s open error", init_file.c_str());
     size_t file_size = file.tellg();
     file.seekg(std::ios_base::beg);
     if (offset >= mem_size || file_size+offset > mem_size) {
@@ -82,7 +82,7 @@ void Pmem::load_binary(uint64_t offset, const char *init_file) {/*{{{*/
         file_size = mem_size;
     }
     file.read((char*)mem+offset,file_size);
-}/*}}}*/
+} /*}}}*/
 void Pmem::save_binary(std::string filename) { /*{{{*/
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     file.write((char*)mem, mem_size);

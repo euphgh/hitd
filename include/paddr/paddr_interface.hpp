@@ -66,13 +66,13 @@ class Pmem : public PaddrInterface  {/*{{{*/
                 el::Logger* input_logger = el::Loggers::getLogger("default"));
         Pmem(const AddrIntv &_range, unsigned char *init_binary, 
                 el::Logger* input_logger = el::Loggers::getLogger("default"));
-        Pmem(size_t size_bytes, const char *init_file, 
-                el::Logger* input_logger = el::Loggers::getLogger("default"));
+        Pmem(size_t size_bytes, std::string,
+             el::Logger *input_logger = el::Loggers::getLogger("default"));
         Pmem(const Pmem &src);
         ~Pmem() ;
         bool do_read (word_t addr, wen_t info, word_t* data);
         bool do_write(word_t addr, wen_t info, const word_t data);
-        void load_binary(uint64_t addr, const char *init_file);
+        void load_binary(uint64_t addr, std::string);
         void save_binary(std::string filename);
         uint8_t *get_mem_ptr();
 };/*}}}*/
