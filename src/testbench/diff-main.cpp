@@ -4,6 +4,7 @@
 #include "generated/autoconf.h"
 #include "nemu/isa.hpp"
 #include "soc.hpp"
+#include "testbench/args.hpp"
 #include "testbench/axi.hpp"
 #include "testbench/inst_timer.hpp"
 #include "testbench/sim_state.hpp"
@@ -53,8 +54,6 @@ void run_system(
     mainloop(top, axi, test_name, soc);
 }/*}}}*/
 
-
-extern void parse_args(int argc, char *argv[]);
 int main (int argc, char *argv[]) {
     parse_args(argc, argv);
 
@@ -64,7 +63,7 @@ int main (int argc, char *argv[]) {
 
     std::signal(SIGINT, [](int) {sim_status = SIM_INT;});
 
-    dual_soc soc {};
+    dual_soc soc(arg_useSnapShot, arg_ssDirStr);
     Vmycpu_top *top = new Vmycpu_top();
     axi_paddr* axi = new axi_paddr(top);
     axi->paddr_top = soc.get_dut_soc();

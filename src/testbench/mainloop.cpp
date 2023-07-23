@@ -4,6 +4,7 @@
 #include "nemu/isa.hpp"
 #include "paddr/paddr_interface.hpp"
 #include "soc.hpp"
+#include "testbench/args.hpp"
 #include "testbench/axi.hpp"
 #include "testbench/difftest/api.hpp"
 #include "testbench/difftest/global_info.hpp"
