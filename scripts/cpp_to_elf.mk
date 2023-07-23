@@ -150,7 +150,7 @@ ARGS := $(if $(strip $(WAVE_TO_TICKS)), $(ARGS) --wave=$(WAVE_TO_TICKS), $(ARGS)
 ifdef CONFIG_NEMU_BAT
 ARGS += -b
 endif
-ARGS := $(if $(SS) $(ARGS) --snapshot=$(SS), $(ARGS))
+ARGS := $(if $(SS), $(ARGS) --snapshot=$(SS), $(ARGS))
 
 dirs:
 ifdef CONFIG_TRACE
