@@ -146,7 +146,7 @@ extern "C" void v_difftest_CacheRun(
             getValid(io_hitWays), getDirty(io_hitWays));
     else
       dclog("{:s} notHit with addr: " HEX_WORD, cacheOpStr[(CacheOp)io_instrOp],
-            io_reqAddr);
+            state[newMap].reqAddr);
   }
   if (state[newMap].instrState == fake) {
     if (state[oldMap].instrState != fake)
