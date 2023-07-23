@@ -67,5 +67,5 @@ void trace_and_difftest(Decode *_this) {
 void mips32_CPU_state::exec_once() {
     // TIMED_FUNC(mips32);
     isa_exec_once(isa_query_intr());
-    IFDEF(CONFIG_DIFFTEST, trace_and_difftest(&inst_state));
+    trace_and_difftest(&inst_state);
 }

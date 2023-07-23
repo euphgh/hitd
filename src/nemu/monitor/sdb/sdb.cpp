@@ -231,20 +231,16 @@ static int cmd_q(char *args) {/*{{{*/
   return res;
 }/*}}}*/
 
-static int cmd_p(char *args) {/*{{{*/
-#ifdef CONFIG_DWARF
-    bool success = false;
-    word_t value = expr(args, &success);
-    if (success) {
-        printf("Decimal    :" FMT_WORD_U "\n",value);
-        printf("Hexadecimal:" FMT_WORD "\n",value);
-    }
-    else print_description("p");
-#else 
-    printf("C level debugger not enable, please first enable it by \"make memuconfig\"\n");
-#endif 
-    return 0;
-}/*}}}*/
+static int cmd_p(char *args) { /*{{{*/
+  bool success = false;
+  word_t value = expr(args, &success);
+  if (success) {
+      printf("Decimal    :" FMT_WORD_U "\n", value);
+      printf("Hexadecimal:" FMT_WORD "\n", value);
+  } else
+      print_description("p");
+  return 0;
+} /*}}}*/
 
 static int cmd_help(char *args);
 
