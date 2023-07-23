@@ -4,21 +4,16 @@
 #include "nemu/cpu/decode.hpp"
 #include "paddr/nemu_paddr.hpp"
 #include "testbench/sim_state.hpp"
+#include <cstdlib>
 #include <nemu/cpu/cpu.hpp>
 #include <nemu/isa.hpp>
 
 void CPU_state::ref_tick_and_int(uint8_t ext_int) { /*{{{*/
-  // must first change count then check compare
-  // mfc0 reg, count
-  // mtc0 reg, compare
-  // should not cause tick interrupt
+  // TODO: if update cause then add count, can run with verilog
   bool new_ip5 = cp0.cause.ip_h >> 5 || (cp0.count.all == cp0.compare.all);
   cp0.cause.ip_h = (new_ip5 << 5) | (ext_int & 0b011111);
   cp0.count.all += cp0.clock_tick;
   cp0.clock_tick = 1 - cp0.clock_tick;
-  // bool new_ip5 = cp0.cause.ip_h >> 5 || cp0.cause.ti;
-  // cp0.cause.ti = cp0.count.all == cp0.compare.all;
-  // cp0.random.random = 0;
   cp0.random.random = cp0.random.random == cp0.wire.wire
                           ? CONFIG_TLB_NR - 1
                           : cp0.random.random - 1;
