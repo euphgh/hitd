@@ -70,7 +70,7 @@ static bool sim_end_statistics(dual_soc &soc) { /*{{{*/
             mycpu_log->info("mycpu quit with not defined state %v", sim_status);
             break;
         }
-    return res;
+        return res;
 } /*}}}*/
 
 static void check_cpu_state(diff_state* mycpu){/*{{{*/
@@ -98,13 +98,18 @@ bool mainloop(
         std::string wave_name,
         dual_soc& soc
         ){/*{{{*/
-    auto tickAdd = [&soc]() {
+    uint64_t snapshotTick = CONFIG_SNAPSHOT_TICK;
+    auto tickAdd = [&soc, &snapshotTick]() {
       ticks++;
-      if (CONFIG_SNAPSHOT_TICK == ticks) {
-        string mkSnapShotDir(const string &parentFolder);
-        auto pdir = mkSnapShotDir(HITD_HOME "snapshot");
-        nemu->saveSnapShot(pdir + "/nemu.properties");
-        soc.saveSnapShot(pdir);
+      if (unlikely(snapshotTick == ticks)) {
+        if (nemu->next_is_delay_slot) {
+          snapshotTick += 2;
+        } else {
+          string mkSnapShotDir(const string &parentFolder);
+          auto pdir = mkSnapShotDir(HITD_HOME "snapshot");
+          nemu->saveSnapShot(pdir + "/nemu.properties");
+          soc.saveSnapShot(pdir);
+        }
       }
 #ifdef CONFIG_TRUNCATE_MANUAL
       if (unlikely(ticks == CONFIG_TRACE_START_TICK)) {
@@ -152,6 +157,10 @@ bool mainloop(
     }
 
     top->aresetn = 1;
+
+    if (arg_ssDirStr != "") {
+        nemu->loadSnapShot(arg_ssDirStr);
+    }
 
     while (!Verilated::gotFinish()) {
         /* if need count perf_timer TIMED_SCOPE(one_clk,"one_clk"); */

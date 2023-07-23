@@ -166,10 +166,12 @@ elf: $(BINARY)
 
 TB_EXEC := $(BINARY) $(ARGS)
 sim: elf dirs
-	$(TB_EXEC)
+	$(TB_EXEC) --snapshot=$(SS)
+
+ss: elf dirs
 
 gdb: elf
-	gdb -s $(BINARY) --args $(TB_EXEC)
+	gdb -s $(BINARY) --args $(TB_EXEC) --snapshot=$(SS)
 
 log:
 	cat $(LOG_FILE)
