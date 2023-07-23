@@ -106,7 +106,7 @@ bool mainloop(
           snapshotTick += 2;
         } else {
           string mkSnapShotDir(const string &parentFolder);
-          auto pdir = mkSnapShotDir(HITD_HOME "snapshot");
+          auto pdir = mkSnapShotDir(HITD_HOME "/snapshot");
           nemu->saveSnapShot(pdir + "/nemu.properties");
           soc.saveSnapShot(pdir);
         }
@@ -115,7 +115,6 @@ bool mainloop(
       if (unlikely(ticks == CONFIG_TRACE_START_TICK)) {
         enableLogger(mycpu_log);
         enableLogger(nemu->log_pt);
-        soc.saveSnapShot();
       }
       if (unlikely(ticks == CONFIG_TRACE_END_TICK)) {
         disableLogger(mycpu_log);
