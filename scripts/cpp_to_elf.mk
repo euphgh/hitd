@@ -144,14 +144,13 @@ WAVE_DIR = 	$(call remove_quote, $(CONFIG_WAVE_DIR))
 ifneq ($(wildcard $(LOG_FILE)),)
     WAVE_TO_TICKS := $(shell head -n 1 $(LOG_FILE) | grep -oP '(?<=\[)[0-9]+(?=\])')
 endif
-ifndef WAVE_TO_TICKS 
-	WAVE_TO_TICKS := 0
-endif
 
-ARGS = --log=$(LOG_FILE) -w $(WAVE_TO_TICKS)
+ARGS := --log=$(LOG_FILE) 
+ARGS := $(if $(strip $(WAVE_TO_TICKS)), $(ARGS) --wave=$(WAVE_TO_TICKS), $(ARGS))
 ifdef CONFIG_NEMU_BAT
 ARGS += -b
 endif
+ARGS := $(if $(SS) $(ARGS) --snapshot=$(SS), $(ARGS))
 
 dirs:
 ifdef CONFIG_TRACE
@@ -166,12 +165,12 @@ elf: $(BINARY)
 
 TB_EXEC := $(BINARY) $(ARGS)
 sim: elf dirs
-	$(TB_EXEC) --snapshot=$(SS)
+	$(TB_EXEC)
 
 ss: elf dirs
 
 gdb: elf
-	gdb -s $(BINARY) --args $(TB_EXEC) --snapshot=$(SS)
+	gdb -s $(BINARY) --args $(TB_EXEC)
 
 log:
 	cat $(LOG_FILE)
