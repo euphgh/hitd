@@ -126,6 +126,7 @@ void CPU_state::tlbwr(){
         __ASSERT_NEMU__(false, "can not get random from mycpu");
     else {
         auto rand_pc = randQueue.front();
+        randQueue.pop();
         if (rand_pc.second != inst_state.pc)
             __ASSERT_NEMU__(false, "mycpu tlbwr pc " HEX_WORD "not match",
                             rand_pc.second);
