@@ -1,9 +1,13 @@
+#include "debug.hpp"
+#include "easylogging++.h"
+#include "paddr/paddr_interface.hpp"
+#include "testbench/sim_state.hpp"
+#include <bits/utility.h>
+#include <cstddef>
+#include <cstdint>
+#include <fmt/core.h>
 #include <fstream>
 #include <iostream>
-#include "debug.hpp"
-#include "testbench/sim_state.hpp"
-#include "paddr/paddr_interface.hpp"
-#include "easylogging++.h"
 
 Pmem::Pmem(word_t size_bytes, el::Logger* input_logger): PaddrInterface(input_logger) {/*{{{*/
     Assert(IS_2_POW(size_bytes),"Pmem size is not 2 power: %x",size_bytes);
@@ -82,9 +86,27 @@ void Pmem::load_binary(uint64_t offset, std::string init_file) { /*{{{*/
         file_size = mem_size;
     }
     file.read((char*)mem+offset,file_size);
+    // printMem("load");
 } /*}}}*/
 void Pmem::save_binary(std::string filename) { /*{{{*/
+    // printMem("save");
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     file.write((char*)mem, mem_size);
 } /*}}}*/
+void Pmem::printMem(std::string basicName) {
+    extern std::string genTimeStr();
+    auto fileName =
+        fmt::format("{:s}/{:s}{:s}.txt", HITD_HOME, basicName, genTimeStr());
+    std::ofstream file(fileName, std::ios::out | std::ios::binary);
+    int j = 0;
+    for (size_t i = 0; i < mem_size; i++) {
+        if (j == 0)
+                file << fmt::format("{:07x} ", i);
+        file << fmt::format("{:02x} ", mem[i]);
+        if (++j == 32) {
+                file << std::endl;
+                j = 0;
+        }
+    }
+}
 uint8_t* Pmem::get_mem_ptr() { return mem; }

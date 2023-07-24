@@ -13,10 +13,11 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
+#include "nemu/cpu/difftest.hpp"
 #include "nemu/isa.hpp"
 #include "soc.hpp"
+#include "testbench/args.hpp"
 #include "utils.hpp"
-#include "nemu/cpu/difftest.hpp"
 #include <memory>
 extern uint64_t ticks ;
 extern uint32_t log_pc ;
@@ -39,7 +40,6 @@ static void welcome() {
     }
 }
 
-extern int parse_args(int argc, char *argv[]);
 extern el::Logger* logger_init(std::string name);
 extern bool arg_batch_mode;
 std::unique_ptr<SoC_t> soc;
@@ -65,7 +65,7 @@ void init_monitor(int argc, char *argv[]) {
   nemu_paddr->set_logger(nemu_log);
   cemu_paddr->set_logger(cemu_log);
 #else
-  soc.reset(new single_soc());
+  soc.reset(new single_soc(arg_useSnapShot, arg_ssDirStr));
   PaddrTop *nemu_paddr = soc->get_single_soc();
   nemu_paddr->set_logger(nemu_log);
 #endif
@@ -84,6 +84,8 @@ void init_monitor(int argc, char *argv[]) {
 
   /* Initialize the simple debugger. */
   init_sdb();
+  if (arg_useSnapShot)
+        nemu->loadSnapShot(arg_ssDirStr);
 
   /* Display welcome message. */
   welcome();

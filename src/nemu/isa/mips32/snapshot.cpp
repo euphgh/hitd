@@ -55,8 +55,7 @@ void mips32_CPU_state::saveSnapShot(string fileName) {
   PropertiesParser::Write(fileName, props);
 }
 void mips32_CPU_state::loadSnapShot(string fileName) {
-  Properties props =
-      PropertiesParser::Read("snapshot/" + fileName + "/nemu.properties");
+  Properties props = PropertiesParser::Read(fileName + "/nemu.properties");
   arch_state.pc = props.GetHexWord("PC", CONFIG_RESET_PC);
   arch_state.hi = props.GetHexWord("HI", 0);
   arch_state.lo = props.GetHexWord("LO", 0);
@@ -99,8 +98,7 @@ void mips32_CPU_state::loadSnapShot(string fileName) {
 #include <filesystem>
 #include <iostream>
 
-string mkSnapShotDir(const string &parentFolder) {
-  namespace fs = filesystem;
+string genTimeStr() {
   // 获取当前日期和时间
   auto now = chrono::system_clock::now();
   time_t time = chrono::system_clock::to_time_t(now);
@@ -108,6 +106,12 @@ string mkSnapShotDir(const string &parentFolder) {
   // 将日期和时间格式化为字符串
   char timeStr[100];
   strftime(timeStr, sizeof(timeStr), "%d_%H-%M-%S", localtime(&time));
+  return timeStr;
+}
+
+string mkSnapShotDir(const string &parentFolder) {
+  namespace fs = filesystem;
+  auto timeStr = genTimeStr();
 
   // 创建一个新的文件夹
   fs::path newFolder = fs::path(parentFolder) / timeStr;

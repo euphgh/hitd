@@ -69,6 +69,7 @@ class Pmem : public PaddrInterface  {/*{{{*/
         Pmem(size_t size_bytes, std::string,
              el::Logger *input_logger = el::Loggers::getLogger("default"));
         Pmem(const Pmem &src);
+        void printMem(std::string);
         ~Pmem() ;
         bool do_read (word_t addr, wen_t info, word_t* data);
         bool do_write(word_t addr, wen_t info, const word_t data);

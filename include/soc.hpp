@@ -46,15 +46,16 @@ class dual_soc {/*{{{*/
 
 class single_soc {/*{{{*/
     public:
-        single_soc();
-        inline PaddrTop* get_single_soc(){ return ptop; }
-        void tick();
-        void set_switch(uint8_t value);
+      single_soc(bool useSnapShot = false, std::string snapShotName = "");
+      inline PaddrTop *get_single_soc() { return ptop; }
+      void tick();
+      void set_switch(uint8_t value);
 #ifdef CONFIG_BASIC_SOC
         uint8_t ext_int() { return 0; }
 #else
         uint8_t ext_int() { return (puart->irq() << 1); }
 #endif
+        void saveSnapShot(std::string);
 
       private:
         PaddrTop* ptop;
@@ -62,9 +63,12 @@ class single_soc {/*{{{*/
         Puart8250 *puart;
         Pmem *resetMem;
         Pmem *mainMem;
-        void create_basic_soc();
-        void create_boot_soc();
-        void create_kernel_soc();
+        void create_basic_soc(bool useSnapShot = false,
+                              std::string snapShotName = "");
+        void create_boot_soc(bool useSnapShot = false,
+                             std::string snapShotName = "");
+        void create_kernel_soc(bool useSnapShot = false,
+                               std::string snapShotName = "");
 };/*}}}*/
 
 #endif // !__SOC_HPP__

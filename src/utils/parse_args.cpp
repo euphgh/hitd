@@ -39,7 +39,7 @@ void parse_args(int argc, char *argv[]) {
       arg_wave_on_tick = atol(optarg);
       break;
     case 's':
-      arg_ssDirStr = optarg;
+      arg_ssDirStr = "snapshot/" + std::string(optarg);
       arg_useSnapShot = true;
       break;
     default:

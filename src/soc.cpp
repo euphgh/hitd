@@ -61,7 +61,11 @@ kernel_soc(bool useSnapShot = false, std::string snapShotName = "") { /*{{{*/
   Pmem *dram = new Pmem(ddr_range);
   Pmem *resetMem = nullptr;
   auto binName = useSnapShot ? snapShotName + "/mainMem.bin" : __TEST_BIN__;
-  dram->load_binary(0x00100000, binName.c_str());
+  if (useSnapShot) {
+    dram->load_binary(0, snapShotName + "/mainMem.bin");
+  } else {
+    dram->load_binary(0x00100000, __TEST_BIN__);
+  }
 
   PaddrTop *top = new PaddrTop();
   top->add_dev(ddr_range, dram);
@@ -70,9 +74,9 @@ kernel_soc(bool useSnapShot = false, std::string snapShotName = "") { /*{{{*/
 } /*}}}*/
 
 dual_soc::dual_soc(bool useSnapShot, std::string snapShotName) { /*{{{*/
-  IFDEF(CONFIG_BASIC_SOC, create_basic_soc());
-  IFDEF(CONFIG_BOOT_SOC, create_boot_soc());
-  IFDEF(CONFIG_KERNEL_SOC, create_kernel_soc());
+  IFDEF(CONFIG_BASIC_SOC, create_basic_soc(useSnapShot, snapShotName));
+  IFDEF(CONFIG_BOOT_SOC, create_boot_soc(useSnapShot, snapShotName));
+  IFDEF(CONFIG_KERNEL_SOC, create_kernel_soc(useSnapShot, snapShotName));
 } /*}}}*/
 void dual_soc::create_basic_soc(bool useSnapShot,
                                 std::string snapShotName) { /*{{{*/
@@ -102,29 +106,42 @@ void dual_soc::create_kernel_soc(bool useSnapShot,
 } /*}}}*/
 
 void dual_soc::saveSnapShot(std::string parentDir) {
-  mainMem[DUT]->save_binary(parentDir + "/main.bin");
+  mainMem[DUT]->save_binary(parentDir + "/mainMem.bin");
 #ifndef CONFIG_TEST_LINUX
-  resetMem[DUT]->save_binary(parentDir + "/reset.bin");
+  resetMem[DUT]->save_binary(parentDir + "/resetMem.bin");
 #endif
 }
 
-single_soc::single_soc() {
-  IFDEF(CONFIG_BASIC_SOC, create_basic_soc());
-  IFDEF(CONFIG_BOOT_SOC, create_boot_soc());
-  IFDEF(CONFIG_KERNEL_SOC, create_kernel_soc());
+void single_soc::saveSnapShot(std::string parentDir) {
+  mainMem->save_binary(parentDir + "/mainMem.bin");
+#ifndef CONFIG_TEST_LINUX
+  resetMem->save_binary(parentDir + "/resetMem.bin");
+#endif
 }
 
-void single_soc::create_basic_soc(){/*{{{*/
-  std::tie(ptop, pcfreg, mainMem, resetMem) = basic_soc();
-}/*}}}*/
-void single_soc::create_boot_soc(){/*{{{*/
-    pcfreg = nullptr;
-    std::tie(ptop, puart, mainMem, resetMem) = boot_soc();
-}/*}}}*/
-void single_soc::create_kernel_soc(){/*{{{*/
-    pcfreg = nullptr;
-    std::tie(ptop, puart, mainMem, resetMem) = kernel_soc();
-}/*}}}*/
+single_soc::single_soc(bool useSnapShot, std::string snapShotName) {
+  IFDEF(CONFIG_BASIC_SOC, create_basic_soc(useSnapShot, snapShotName));
+  IFDEF(CONFIG_BOOT_SOC, create_boot_soc(useSnapShot, snapShotName));
+  IFDEF(CONFIG_KERNEL_SOC, create_kernel_soc(useSnapShot, snapShotName));
+}
+
+void single_soc::create_basic_soc(bool useSnapShot,
+                                  std::string snapShotName) { /*{{{*/
+  std::tie(ptop, pcfreg, mainMem, resetMem) =
+      basic_soc(useSnapShot, snapShotName);
+} /*}}}*/
+void single_soc::create_boot_soc(bool useSnapShot,
+                                 std::string snapShotName) { /*{{{*/
+  pcfreg = nullptr;
+  std::tie(ptop, puart, mainMem, resetMem) =
+      boot_soc(useSnapShot, snapShotName);
+} /*}}}*/
+void single_soc::create_kernel_soc(bool useSnapShot,
+                                   std::string snapShotName) { /*{{{*/
+  pcfreg = nullptr;
+  std::tie(ptop, puart, mainMem, resetMem) =
+      kernel_soc(useSnapShot, snapShotName);
+} /*}}}*/
 
 #define UART_CHAR "'{:c}'({:#x})"
 

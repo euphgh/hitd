@@ -13,20 +13,21 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include "disassemble.hpp"
 #include "sdb.hpp"
-#include <cstdlib>
-#include <fmt/core.h>
-#include <nemu/isa.hpp>
-#include <nemu/cpu/cpu.hpp>
-#include <readline/readline.h>
-#include <readline/history.h>
 #include "common.hpp"
+#include "disassemble.hpp"
 #include "macro.hpp"
+#include "nemu/Debugger.hpp"
 #include "nemu/memory/vaddr.hpp"
 #include "sdb.hpp"
+#include "soc.hpp"
 #include "utils.hpp"
-#include "nemu/Debugger.hpp"
+#include <cstdlib>
+#include <fmt/core.h>
+#include <nemu/cpu/cpu.hpp>
+#include <nemu/isa.hpp>
+#include <readline/history.h>
+#include <readline/readline.h>
 
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {/*{{{*/
@@ -266,6 +267,16 @@ int cmd_d(char *args){/*{{{*/
     return 0;
 }/*}}}*/
 
+static int cmd_ss(char *args) {
+    string mkSnapShotDir(const string &parentFolder);
+    auto pdir = mkSnapShotDir(HITD_HOME "/snapshot");
+    nemu->saveSnapShot(pdir + "/nemu.properties");
+    extern std::unique_ptr<SoC_t> soc;
+    soc->saveSnapShot(pdir);
+    fmt::print("save snapshot {:s}\n", pdir);
+    return 0;
+}
+
 static int cmd_pi(char* args){
     nemu->e_protect = true;
     word_t arch_pc = nemu->arch_state.pc;
@@ -318,6 +329,7 @@ cmd_table[] = {
     {"s", "run into function or next line by \"s [step]\"", cmd_s},
     {"n", "run to next line of src by \"n [step]\"", cmd_n},
     {"b", "set break point by \"b [addr]|[function name]\"", cmd_b},
+    {"ss", "save snapshot by \"ss\"", cmd_ss},
     {"fin", "return current function by \"fin\"", cmd_fin},
     {"l", "list source code arrounded by \"l [up] [down]\"", cmd_l},
     {"help", "Display information about all supported commands", cmd_help},
