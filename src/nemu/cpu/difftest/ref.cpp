@@ -10,9 +10,15 @@
 
 void CPU_state::ref_tick_and_int(uint8_t ext_int) { /*{{{*/
   // TODO: if update cause then add count, can run with verilog
+#ifdef CONFIG_NSC_DIFF
   bool new_ip5 = cp0.cause.ip_h >> 5 || (cp0.count.all == cp0.compare.all);
   cp0.cause.ip_h = (new_ip5 << 5) | (ext_int & 0b011111);
+#endif
   cp0.count.all += cp0.clock_tick;
+#ifndef CONFIG_NSC_DIFF
+  bool new_ip5 = cp0.cause.ip_h >> 5 || (cp0.count.all == cp0.compare.all);
+  cp0.cause.ip_h = (new_ip5 << 5) | (ext_int & 0b011111);
+#endif
   cp0.clock_tick = 1 - cp0.clock_tick;
   cp0.random.random = cp0.random.random == cp0.wire.wire
                           ? CONFIG_TLB_NR - 1
