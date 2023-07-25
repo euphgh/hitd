@@ -38,7 +38,7 @@ ifdef CONFIG_WAVE_ON
 endif
 
 VSRC_TOP := $(VSRC_HOME)/$(TOP_NAME).sv
-VSRC_ALL := $(shell find -L $(VSRC_HOME) -type f -name "*.s?v")
+VSRC_ALL := $(shell find -L $(VSRC_HOME) -type f -name "*.sv" -o -name "*.v")
 LD_LOG := $(BUILD_DIR)/$(BINARY).log
 
 vtest:
