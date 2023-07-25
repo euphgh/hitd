@@ -37,8 +37,8 @@ ifdef CONFIG_WAVE_ON
 	VXXFLAGS += --trace$(if $(CONFIG_EXT_FST),-fst)
 endif
 
-VSRC_TOP := $(VSRC_HOME)/$(TOP_NAME).v
-VSRC_ALL := $(shell find -L $(VSRC_HOME) -type f -name "*.v")
+VSRC_TOP := $(VSRC_HOME)/$(TOP_NAME).sv
+VSRC_ALL := $(shell find -L $(VSRC_HOME) -type f -name "*.s?v")
 LD_LOG := $(BUILD_DIR)/$(BINARY).log
 
 vtest:

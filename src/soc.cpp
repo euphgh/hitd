@@ -24,7 +24,7 @@ basic_soc(bool useSnapShot = false, std::string snapShotName = "") { /*{{{*/
   Pmem *inst_mem = new Pmem(inst_range, s0_mem->get_mem_ptr());
 
   /* new nscscc confreg */
-  PaddrConfreg *confreg = new PaddrConfreg(false);
+  PaddrConfreg *confreg = new PaddrConfreg(true);
 
   PaddrTop *top = new PaddrTop();
   top->add_dev(inst_range, inst_mem);
@@ -145,93 +145,103 @@ void single_soc::create_kernel_soc(bool useSnapShot,
 
 #define UART_CHAR "'{:c}'({:#x})"
 
-void loop_check(output* dut, output* ref){/*{{{*/
-    bool normal = true;
-    char ref_c = ref->getc();
-    if (ref->exist_tx()) {
-        ref->op_log->error("ref output multi-char in a cycle");
-        normal = false;
+void loop_check(output *dut, output *ref) { /*{{{*/
+  bool normal = true;
+  char ref_c = ref->getc();
+  if (ref->exist_tx()) {
+    ref->op_log->error("ref output multi-char in a cycle");
+    normal = false;
+  }
+  if (dut->exist_tx() == false) {
+    dut->op_log->error(
+        fmt::format("should output " UART_CHAR " but not", ref_c, ref_c));
+    normal = false;
+  } else {
+    char dut_c = dut->getc();
+    if (dut_c != ref_c) {
+      dut->op_log->error(fmt::format("output " UART_CHAR
+                                     " not equal to ref " UART_CHAR,
+                                     dut_c, dut_c, ref_c, ref_c));
+      normal = false;
     }
-    if (dut->exist_tx()==false) {
-        dut->op_log->error(fmt::format("should output " UART_CHAR " but not", ref_c, ref_c));
-        normal = false;
+    if (dut->exist_tx()) {
+      dut->op_log->error("ref output multi-char in a cycle");
+      normal = false;
     }
-    else {
-        char dut_c = dut->getc();
-        if (dut_c!=ref_c){
-            dut->op_log->error(fmt::format("output " UART_CHAR " not equal to ref " UART_CHAR, 
-                    dut_c,dut_c,ref_c,ref_c));
-            normal = false;
-        }
-        if (dut->exist_tx()) {
-            dut->op_log->error("ref output multi-char in a cycle");
-            normal = false;
-        }
-    }
-    if (normal) {
-        putchar(ref_c);
-        fflush(stdout);
-    }
-    IFDEF(CONFIG_NEED_NEMU,else nemu_state.state = NEMU_ABORT);
-}/*}}}*/
+  }
+  if (normal) {
+    putchar(ref_c);
+    fflush(stdout);
+  }
+  IFDEF(CONFIG_NEED_NEMU, else nemu_state.state = NEMU_ABORT);
+} /*}}}*/
 
-void chech_output(output* dut, output* ref){/*{{{*/
+void chech_output(output *dut, output *ref) { /*{{{*/
 #ifdef CONFIG_DIFFTEST
-    if (unlikely(ref->exist_tx())) loop_check(dut,ref);
-    else if (unlikely(dut->exist_tx())){
-            dut->op_log->error(fmt::format("should not output " UART_CHAR,
-                dut->getc(),dut->getc()));
-            IFDEF(CONFIG_NEED_NEMU,nemu_state.state = NEMU_ABORT);
-    }
+  if (unlikely(ref->exist_tx()))
+    loop_check(dut, ref);
+  else if (unlikely(dut->exist_tx())) {
+    dut->op_log->error(
+        fmt::format("should not output " UART_CHAR, dut->getc(), dut->getc()));
+    IFDEF(CONFIG_NEED_NEMU, nemu_state.state = NEMU_ABORT);
+  }
 #else
-    while (dut->exist_tx()) {
-        putchar(dut->getc());
-        fflush(stdout);
-    }
-#endif 
-}/*}}}*/
+  while (dut->exist_tx()) {
+    putchar(dut->getc());
+    fflush(stdout);
+  }
+#endif
+} /*}}}*/
 
-void dual_soc::tick(){ /*{{{*/
-    IFDEF(CONFIG_HAS_CONFREG, pcfreg[DUT]->tick();pcfreg[REF]->tick();)
-    IFDEF(CONFIG_HAS_CONFREG, chech_output(pcfreg[DUT], pcfreg[REF]));
-    IFDEF(CONFIG_HAS_UART, chech_output(puart[DUT], puart[REF]));
-    IFDEF(CONFIG_HAS_UART, ext_int[DUT] = puart[DUT]->irq() << 1); 
-    IFDEF(CONFIG_HAS_UART, ext_int[REF] = puart[REF]->irq() << 1); 
+void dual_soc::tick() { /*{{{*/
+  IFDEF(CONFIG_HAS_CONFREG, pcfreg[DUT]->tick(); pcfreg[REF]->tick();)
+  IFDEF(CONFIG_HAS_CONFREG, chech_output(pcfreg[DUT], pcfreg[REF]));
+  IFDEF(CONFIG_HAS_UART, chech_output(puart[DUT], puart[REF]));
+  IFDEF(CONFIG_HAS_UART, ext_int[DUT] = puart[DUT]->irq() << 1);
+  IFDEF(CONFIG_HAS_UART, ext_int[REF] = puart[REF]->irq() << 1);
 #ifdef CONFIG_HAS_UART
 #ifdef CONFIG_DIFFTEST
-    if (ext_int[DUT]!=ext_int[REF]) {
-        puart[DUT]->log_pt->error("ext_int is %v diffierent from ref %v", ext_int[DUT], ext_int[REF]);
-        IFDEF(CONFIG_NEED_NEMU,nemu_state.state = NEMU_ABORT);
-    }
-    auto& dut = puart[DUT];
-    auto& ref = puart[REF];
-    bool error = false;
-    error |= dut->DLL != ref->DLL;
-    error |= dut->DLM != ref->DLM;
-    error |= dut->IER != ref->IER;
-    error |= dut->IIR != ref->IIR;
-    error |= dut->LCR != ref->LCR;
-    error |= dut->MCR != ref->MCR;
-    error |= dut->rx.empty()!= ref->rx.empty();
-    error |= dut->thr_empty != ref->thr_empty;
-    if (error){
-        fmt::print("dut:{{DLL:{}, DLM:{}, IER:{}, IIR:{}, LCR:{}, MCR:{}, thr_empty:{}}}\n",
-                dut->DLL, dut->DLM, dut->IER, dut->IIR, dut->LCR, dut->MCR,dut->thr_empty);
-        fmt::print("ref:{{DLL:{}, DLM:{}, IER:{}, IIR:{}, LCR:{}, MCR:{}, thr_empty:{}}}\n",
-                ref->DLL, ref->DLM, ref->IER, ref->IIR, ref->LCR, ref->MCR,ref->thr_empty);
-        raise(SIGTRAP);
-    }
+  if (ext_int[DUT] != ext_int[REF]) {
+    puart[DUT]->log_pt->error("ext_int is %v diffierent from ref %v",
+                              ext_int[DUT], ext_int[REF]);
+    IFDEF(CONFIG_NEED_NEMU, nemu_state.state = NEMU_ABORT);
+  }
+  auto &dut = puart[DUT];
+  auto &ref = puart[REF];
+  bool error = false;
+  error |= dut->DLL != ref->DLL;
+  error |= dut->DLM != ref->DLM;
+  error |= dut->IER != ref->IER;
+  error |= dut->IIR != ref->IIR;
+  error |= dut->LCR != ref->LCR;
+  error |= dut->MCR != ref->MCR;
+  error |= dut->rx.empty() != ref->rx.empty();
+  error |= dut->thr_empty != ref->thr_empty;
+  if (error) {
+    fmt::print("dut:{{DLL:{}, DLM:{}, IER:{}, IIR:{}, LCR:{}, MCR:{}, "
+               "thr_empty:{}}}\n",
+               dut->DLL, dut->DLM, dut->IER, dut->IIR, dut->LCR, dut->MCR,
+               dut->thr_empty);
+    fmt::print("ref:{{DLL:{}, DLM:{}, IER:{}, IIR:{}, LCR:{}, MCR:{}, "
+               "thr_empty:{}}}\n",
+               ref->DLL, ref->DLM, ref->IER, ref->IIR, ref->LCR, ref->MCR,
+               ref->thr_empty);
+    raise(SIGTRAP);
+  }
 #endif
 #endif
-}/*}}}*/
-void dual_soc::set_switch(uint8_t value){/*{{{*/
-    IFDEF(CONFIG_HAS_CONFREG, pcfreg[0]->set_switch(value); pcfreg[1]->set_switch(value);)
-}/*}}}*/
-void single_soc::tick(){ /*{{{*/
-    IFDEF(CONFIG_HAS_CONFREG, pcfreg->tick();pcfreg->tick();)
-    IFDEF(CONFIG_HAS_CONFREG, chech_output(pcfreg, pcfreg));
-    IFDEF(CONFIG_HAS_UART, if (unlikely(puart->exist_tx())) putchar(puart->getc()));
-}/*}}}*/
-void single_soc::set_switch(uint8_t value){/*{{{*/
-    IFDEF(CONFIG_HAS_CONFREG, pcfreg->set_switch(value); pcfreg->set_switch(value);)
-}/*}}}*/
+} /*}}}*/
+void dual_soc::set_switch(uint8_t value) { /*{{{*/
+  IFDEF(CONFIG_HAS_CONFREG, pcfreg[0]->set_switch(value);
+        pcfreg[1]->set_switch(value);)
+} /*}}}*/
+void single_soc::tick() { /*{{{*/
+  IFDEF(CONFIG_HAS_CONFREG, pcfreg->tick(); pcfreg->tick();)
+  IFDEF(CONFIG_HAS_CONFREG, chech_output(pcfreg, pcfreg));
+  IFDEF(CONFIG_HAS_UART,
+        if (unlikely(puart->exist_tx())) putchar(puart->getc()));
+} /*}}}*/
+void single_soc::set_switch(uint8_t value) { /*{{{*/
+  IFDEF(CONFIG_HAS_CONFREG, pcfreg->set_switch(value);
+        pcfreg->set_switch(value);)
+} /*}}}*/
