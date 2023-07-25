@@ -21,8 +21,7 @@ class basic_block:
     def totalTime(self):
         return self.singleTimes.sum()
 
-
-filename = "./perf-10.bin"
+filename = "./logs/perf/perf-1.bin"
 headFmt = "=IcI"
 timeFmt = "=If"
 headSize = st.calcsize(headFmt)

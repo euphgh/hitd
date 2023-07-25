@@ -160,6 +160,7 @@ ifdef CONFIG_WAVE_ON
 	@mkdir -p $(WAVE_DIR)
 endif
 	@mkdir -p snapshot
+	@mkdir -p logs/perf
 
 elf: $(BINARY)
 

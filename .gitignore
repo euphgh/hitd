@@ -11,3 +11,4 @@ out/
 !.envrc
 core
 snapshot/*
+logs/**/*
