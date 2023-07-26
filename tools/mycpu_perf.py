@@ -21,87 +21,179 @@ class basic_block:
     def totalTime(self):
         return self.singleTimes.sum()
 
-filename = "./logs/perf/perf-1.bin"
-headFmt = "=IcI"
-timeFmt = "=If"
-headSize = st.calcsize(headFmt)
-timeSize = st.calcsize(timeFmt)
 
-inst_list:list = []
-with open(filename, "rb") as fp:
-    while True:
-        bytesRes = fp.read(headSize)
-        if bytesRes == b'':break
+def main(idx):
+    filename = "./logs/perf/perf-{}.bin".format(idx)
+    startTicks_filename = './output/startTicks-{}.txt'.format(idx)
+    headFmt = "=IcI"
+    timeFmt = "=If"
+    headSize = st.calcsize(headFmt)
+    timeSize = st.calcsize(timeFmt)
 
-        inst = inst_info()
-        res = st.unpack(headFmt, bytesRes)
-        inst.pc = res[0]
-        inst.isEnterance = res[1]==b'\x01'
-        inst.runTime = res[2]
-        for i in range(inst.runTime):
-            bytesRes = fp.read(timeSize)
-            res = st.unpack(timeFmt,bytesRes)
-            inst.allTicks.append(res[0])
-            inst.allConsume.append(res[1])
-        inst_list.append(inst)
-fp.close
+    temp = 0
+    inst_list:list = []
+    with open(filename, "rb") as fp:
+        while True:
+            bytesRes = fp.read(headSize)
+            if bytesRes == b'':break
 
-blist:list = []
-blk = basic_block()
-is_start:bool = True
-for inst in inst_list:
-    if inst.isEnterance==True:
-        if not (is_start): 
-            blist.append(blk)
+            inst = inst_info()
+            res = st.unpack(headFmt, bytesRes)
+            inst.pc = res[0]
+            inst.isEnterance = res[1]==b'\x01'
+            inst.runTime = res[2]
+            for i in range(inst.runTime):
+                bytesRes = fp.read(timeSize)
+                res = st.unpack(timeFmt,bytesRes)
+                inst.allTicks.append(res[0])
+                inst.allConsume.append(res[1])
+            inst_list.append(inst)
+            # temp += 1
+            # if temp == 50:
+            #     pass
+
+    fp.close
+
+    blist:list = []
+    blk = basic_block()
+    is_start:bool = True
+    for inst in inst_list:
+        if inst.isEnterance==True:
+            if not (is_start): 
+                blist.append(blk)
+            else:
+                is_start = False
+            blk = basic_block()
+            blk.instNum = 1
+            blk.runTime = inst.runTime
+            blk.startTicks = np.array(inst.allTicks)
+            blk.singleTimes = np.array(inst.allConsume)
+            blk.avgIPC.append(np.sum(inst.allConsume)/inst.runTime)
         else:
-            is_start = False
-        blk = basic_block()
-        blk.instNum = 1
-        blk.runTime = inst.runTime
-        blk.startTicks = np.array(inst.allTicks)
-        blk.singleTimes = np.array(inst.allConsume)
-        blk.avgIPC.append(np.sum(inst.allConsume)/inst.runTime)
-    else:
-        assert blk.runTime==inst.runTime, "block runtime not equal"
-        blk.singleTimes += np.array(inst.allConsume)
-        blk.avgIPC.append(np.sum(inst.allConsume)/inst.runTime)
-        blk.instNum += 1
+            assert blk.runTime==inst.runTime, "block runtime not equal"
+            blk.singleTimes += np.array(inst.allConsume)
+            blk.avgIPC.append(np.sum(inst.allConsume)/inst.runTime)
+            blk.instNum += 1
 
-blist.sort(key=lambda blk: blk.totalTime(),reverse=True)
-totalCons = np.sum([blk.totalTime() for blk in blist])
-totalTime = np.sum([blk.instNum * blk.runTime for blk in blist])
+    blist.sort(key=lambda blk: blk.totalTime(),reverse=True)
+    totalCons = np.sum([blk.totalTime() for blk in blist])
+    totalTime = np.sum([blk.instNum * blk.runTime for blk in blist])
 
-hlist = []
-print(len(blist))
-for blk in blist:
-    prop = blk.totalTime()/totalTime
-    if (prop>0.01): hlist.append(blk)
+    # for blk in blist:
+    #     print(blk.instNum, blk.runTime, blk.instNum * blk.runTime, blk.totalTime())
 
-print(len(hlist))
-for blk in hlist:
-    prop = blk.totalTime()/totalTime
-    print(blk.totalTime(), prop)
+    hlist = []
+    print(len(blist))
+    for blk in blist:
+        prop = blk.totalTime()/totalTime
+        if (prop>0.01): hlist.append(blk)
+    # print('s = ' + str(s))
+
+    print(len(hlist))
+    for blk in hlist:
+        prop = blk.totalTime()/totalTime
+        print(blk.totalTime(), prop)
+
+    mid_startTicks = []
+    for blk in hlist:
+        sorted_idx = np.argsort(blk.singleTimes)
+        # for i in sorted_idx.tolist():
+        #     print(blist[i].)
+        # exit(0)
+
+        median_idx = len(sorted_idx) // 2
+        slice_idx = sorted_idx[max(0, median_idx - 2): min(median_idx + 3, len(sorted_idx) - 1)]
+        timeSlice = blk.startTicks[np.array(slice_idx)]
+        mid_startTicks.append(timeSlice)
+
+    with open(startTicks_filename, 'w') as file:
+
+        for row in mid_startTicks:
+            line = ' '.join(str(element) for element in row)
+            file.write(line + '\n')
+
+    # hlist = list(filter(lambda blk: blk.totalTime()/totalCons > 0.01, blist))
+    # hlist.sort(key=lambda blk: blk.totalTime(),reverse=True)
+    #
+    #
+    #
+
+    plt.figure()
+
+    fig, ax1 = plt.subplots()
+    # ax1.set_ylim(0,10)
+    x_aix = range(np.sum([blk.instNum for blk in hlist]))
+    y_consProp = [ blk.avgIPC[i] for blk in hlist for i in range(blk.instNum) ]
+    # print(y_consProp)
+    y_time = [ blk.avgIPC[i]*blk.runTime for blk in hlist for i in range(blk.instNum) ]
+    ax2 = ax1.twinx()
+    ax2.plot(x_aix,y_time, '--', color="m")
+
+    y_timeProp = [ blk.runTime for blk in hlist ]
+
+    bar_width = [blk.instNum for blk in hlist]
+    bar_start = np.cumsum(np.array([0] + bar_width[0:-1]))
+    ax2.bar(bar_start,y_timeProp, width=bar_width, align='edge', edgecolor="c", alpha=0.5)
+
+    ax1.plot(x_aix,y_consProp, ".", color = "g")
+
+    # plt.show()
+    plt.savefig('./output/inst-{}.png'.format(idx))
+
+    # plt.figure()
+    # fig, (ax1, ax2) = plt.subplots(1, 2)
+    # x = np.arange(len(hlist)).tolist()
+    # y_runTime = [ blk.runTime for blk in hlist ]
+    # ax1.bar(x, y_runTime, width=1)
+
+    # y_totalCons = [ blk.totalTime() for blk in hlist ]
+    # y_avgCons = [ np.mean(blk.singleTimes) for blk in hlist]
+    # ax3 = ax2.twinx()
+    # ax2.plot(x, y_totalCons, color="b", marker="o", markersize=4)
+    # ax3.plot(x, y_avgCons, color="orange", marker="+")
+
+    # plt.tight_layout()
+    # plt.savefig('./output/blk.png')
+
+    plt.figure()
+    fig, ax1 = plt.subplots(dpi=500)
+    # fig.set_dpi(500)
+
+    x_aix = range(np.sum([blk.instNum for blk in hlist]))
+    y_consProp = [ blk.avgIPC[i] for blk in hlist for i in range(blk.instNum) ]
+    # print(y_consProp)
+    y_time = [ blk.avgIPC[i]*blk.runTime for blk in hlist for i in range(blk.instNum) ]
+    ax1.set_xticks(range(0, max(x_aix) + 10, 10))
+    ax2 = ax1.twinx()
+
+    # ax1.rcParams['figure.dpi'] = 500
+    ax1.set_yscale('log')
+    yticks = [ 10**i for i in range(10) ]
+    ax1.set_yticks(yticks)
+    ax1.set_yticklabels(yticks)
+
+    # line[0].set_markerfacecolor('red')
+    # ax1.plot(x_aix,y_consProp, '.', color="m", marker="o", markersize=0.5)
+    ax1.plot(x_aix, y_consProp, '-', color="g", linewidth=0.5, alpha=0.5)
+    ax1.plot(x_aix, y_consProp, 'o', color='m', markersize=0.5)
 
 
-# hlist = list(filter(lambda blk: blk.totalTime()/totalCons > 0.01, blist))
-# hlist.sort(key=lambda blk: blk.totalTime(),reverse=True)
-#
-#
-#
-fig, ax1 = plt.subplots()
-# ax1.set_ylim(0,10)
-x_aix = range(np.sum([blk.instNum for blk in hlist]))
-y_consProp = [ blk.avgIPC[i] for blk in hlist for i in range(blk.instNum) ]
+    y_timeProp = [ blk.totalTime() for blk in hlist ]
+    bar_width = [blk.instNum for blk in hlist]
+    bar_start = np.cumsum(np.array([0] + bar_width[0:-1]))
+    ax2.bar(bar_start,y_timeProp, width=bar_width, align='edge', edgecolor="w", alpha=0.5, linewidth=0.5)
 
-y_time = [ blk.avgIPC[i]*blk.runTime for blk in hlist for i in range(blk.instNum) ]
-ax2 = ax1.twinx()
-ax2.plot(x_aix,y_time, '--', color="m")
+    for x_start in bar_start:
+        if x_start > 0:
+            ax2.vlines(x_start, 0.0, max(y_timeProp), linestyle='-.', colors='b', alpha=0.6, linewidth=0.5)
 
-y_timeProp = [ blk.runTime for blk in hlist ]
-bar_width = [blk.instNum for blk in hlist]
-bar_start = np.cumsum(np.array([0] + bar_width[0:-1]))
-ax2.bar(bar_start,y_timeProp, width=bar_width, align='edge', edgecolor="c", alpha=0.5)
+    # print(sorted(y_timeProp, reverse=True))
 
-ax1.plot(x_aix,y_consProp, ".", color = "g")
+    plt.gcf().set_size_inches(np.sum([blk.instNum for blk in hlist]) / 16 + 1, 6)
+    plt.savefig('./output/blk-{}.png'.format(idx))
 
-plt.show()
+    # print(np.sum([blk.instNum for blk in hlist]))
+
+
+if __name__ == "__main__":
+    main(1)
