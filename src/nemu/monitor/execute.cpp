@@ -6,12 +6,37 @@
 #include "soc.hpp"
 #include <csignal>
 bool g_si_print = false;
+extern uint64_t ticks;
 void compare_exec(uint64_t n) {
   extern std::unique_ptr<SoC_t> soc;
+  uint64_t snapshotTick = CONFIG_SNAPSHOT_TICK;
+  const SoC_t *soc_ptr = soc.get();
+  auto tickAdd = [&soc_ptr, &snapshotTick]() {
+    ticks++;
+    if (unlikely(snapshotTick == ticks)) {
+      if (nemu->next_is_delay_slot) {
+        snapshotTick += 2;
+      } else {
+        string mkSnapShotDir(const string &parentFolder);
+        auto pdir = mkSnapShotDir(HITD_HOME "/snapshot");
+        nemu->saveSnapShot(pdir + "/nemu.properties");
+        soc_ptr->saveSnapShot(pdir);
+      }
+    }
+#ifdef CONFIG_TRUNCATE_MANUAL
+    extern void disableLogger(el::Logger * logger);
+    extern void enableLogger(el::Logger * logger);
+    if (unlikely(ticks == CONFIG_TRACE_START_TICK)) {
+      enableLogger(nemu->log_pt);
+    }
+    if (unlikely(ticks == CONFIG_TRACE_END_TICK)) {
+      disableLogger(nemu->log_pt);
+    }
+#endif
+  };
   for (; n > 0; n--) {
     // TIMED_SCOPE(exec_once, "compare exec once");
-    extern uint64_t ticks;
-    ++ticks;
+    tickAdd();
     soc->tick();
     nemu->ref_tick_and_int(
         soc->MUXDEF(CONFIG_DIFFTEST, dut_ext_int(), ext_int()));

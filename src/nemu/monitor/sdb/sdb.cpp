@@ -16,13 +16,13 @@
 #include "sdb.hpp"
 #include "common.hpp"
 #include "disassemble.hpp"
+#include "easylogging++.h"
 #include "macro.hpp"
 #include "nemu/Debugger.hpp"
 #include "nemu/memory/vaddr.hpp"
 #include "sdb.hpp"
 #include "soc.hpp"
 #include "utils.hpp"
-#include <cstdlib>
 #include <fmt/core.h>
 #include <nemu/cpu/cpu.hpp>
 #include <nemu/isa.hpp>
@@ -62,7 +62,7 @@ static int cmd_bt(char *args) {/*{{{*/
 
 static void print_description(const char *arg);
 
-static int cmd_s(char *args){/*{{{*/
+static int cmd_s(char *args) {
 #ifdef CONFIG_DWARF
     int step = 1;
     bool legal_arg = 1;
@@ -78,7 +78,7 @@ static int cmd_s(char *args){/*{{{*/
     printf("C level debugger not enable, please first enable it by \"make memuconfig\"\n");
 #endif 
     return 0;
-}/*}}}*/
+}
 
 static int cmd_n(char *args){/*{{{*/
 #ifdef CONFIG_DWARF
@@ -255,6 +255,36 @@ static int cmd_w(char *args){/*{{{*/
     return 0;
 }/*}}}*/
 
+static int cmd_tick(char *args) {
+    extern uint64_t ticks;
+    fmt::print("{:6s}{:d}\n", "Dec:", ticks);
+    fmt::print("{:6s}{:#010x}\n", "Hex:", ticks);
+    return 0;
+}
+
+static int cmd_tlog(char *args) {
+    extern void disableLogger(el::Logger * logger);
+    extern void enableLogger(el::Logger * logger);
+#ifndef CONFIG_TRACE
+    fmt::print("can not toggle log, becasue log disable\n");
+#else
+#ifdef CONFIG_TRUNCATE_AUTO
+    fmt::print("can not toggle log, becasue log is truncate automaticaly\n");
+#else
+    if (!nemu->log_pt->enabled(el::Level::Global)) {
+      fmt::print("detect nemu log disable\n");
+      enableLogger(nemu->log_pt);
+      fmt::print("now nemu log enable\n");
+    } else {
+      fmt::print("detect nemu log enable\n");
+      disableLogger(nemu->log_pt);
+      fmt::print("now nemu log disable\n");
+    }
+#endif
+#endif
+    return 0;
+}
+
 int cmd_d(char *args){/*{{{*/
     int number = 0;
     bool success = false;
@@ -330,6 +360,8 @@ cmd_table[] = {
     {"n", "run to next line of src by \"n [step]\"", cmd_n},
     {"b", "set break point by \"b [addr]|[function name]\"", cmd_b},
     {"ss", "save snapshot by \"ss\"", cmd_ss},
+    {"tick", "print currents tick by `tick`", cmd_tick},
+    {"tlog", "toggle log by `tlog`", cmd_tlog},
     {"fin", "return current function by \"fin\"", cmd_fin},
     {"l", "list source code arrounded by \"l [up] [down]\"", cmd_l},
     {"help", "Display information about all supported commands", cmd_help},
