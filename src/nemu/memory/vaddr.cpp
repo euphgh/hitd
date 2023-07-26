@@ -36,6 +36,24 @@ word_t CPU_state::vaddr_ifetch(vaddr_t addr, int len) {
     return paddr_read(paddr, len);
 }
 
+word_t CPU_state::readTranslate(vaddr_t addr) {
+    word_t paddr = addr & 0x1fffffff;
+    bool refill = false;
+    switch (mmu_check(addr)) {
+    case MMU_DIRECT:
+            paddr = addr & 0x1fffffff;
+            break;
+    case MMU_TRANSLATE:
+            if (mmu_translate(addr, paddr, refill).hit == false)
+                isa_raise_intr(EC_TLBL, addr, refill);
+            break;
+    case MMU_FAIL:
+            isa_raise_intr(EC_AdEL, addr);
+            break;
+    }
+    return paddr;
+}
+
 word_t CPU_state::vaddr_read(vaddr_t addr, int len) {
     word_t paddr = addr & 0x1fffffff;
     bool refill = false;
@@ -76,6 +94,16 @@ word_t CPU_state::writeTranslate(vaddr_t addr) {
     }
     // TODO: Bus Error Exception
     return paddr;
+}
+
+word_t CPU_state::notAlignRead(vaddr_t addr) {
+    auto paddr = readTranslate(addr);
+    return paddr_read(paddr & ~(0x3), 4);
+}
+
+void CPU_state::notAlignWrite(vaddr_t addr, int len, word_t data) {
+    word_t paddr = writeTranslate(addr);
+    paddr_write(paddr & ~(0x3), len, data);
 }
 
 void CPU_state::vaddr_write(vaddr_t addr, int len, word_t data) {
