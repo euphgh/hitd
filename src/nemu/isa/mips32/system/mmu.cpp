@@ -67,6 +67,7 @@ CPU_state::tlb_info CPU_state::mmu_translate(vaddr_t vaddr, paddr_t& paddr, bool
 }
 void CPU_state::tlbp(){
     bool not_find = true;
+    cp0.index.index = 0;
     for (size_t i = 0; i < CONFIG_TLB_NR; i++) {
         tlb_entry* tmp = &tlb[i];
         bool vaddr_hit = tmp->vpn2==cp0.entryhi.vpn2;

@@ -47,9 +47,9 @@ config WATCH_POINT
   default y
 
 config DWARF
-    depends on NSC_NEMU
-    bool "Enable C level debugger by DWARF"
-    default n
+  depends on NSC_NEMU
+  bool "Enable C level debugger by DWARF"
+  default n
 
 config DEADLOOP
   bool "Detect Dead loop in guest program"
@@ -58,7 +58,7 @@ config DEADLOOP
 config DIFFTEST
   depends on NSC_NEMU
   bool "Enable differential testing for nemu"
-  default y
+  default n
   help
     Enable differential testing with a reference design.
     Note that this will significantly reduce the performance of NEMU.
@@ -107,9 +107,9 @@ config RT_CHECK
   default y
 
 config NEMU_BAT
-    bool "run nemu with batch mode"
-    default n
+  bool "run nemu with batch mode"
+  default n
 config TLB_NR
-    int "TLB entry number"
-    default 16
+  int "TLB entry number"
+  default 16
 endmenu# }}}
