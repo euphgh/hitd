@@ -54,17 +54,7 @@ static bool sim_end_statistics(dual_soc &soc) { /*{{{*/
     mycpu_log->info("mycpu pass test");
     res = true;
     break;
-  case SIM_INT: {
-    string mkSnapShotDir(const string &parentFolder);
-    auto pdir = mkSnapShotDir(HITD_HOME "/snapshot");
-    nemu->saveSnapShot(pdir + "/nemu.properties");
-    soc.saveSnapShot(pdir);
-    mycpu_log->info("mycpu stop test for key board interrupt");
-    nemu->isa_reg_display();
-    break;
-  }
   case SIM_NEMU_QUIT:
-    nemu->isa_reg_display();
     mycpu_log->info("mycpu stop test for nemu abnormal exit");
     break;
   default:
@@ -90,6 +80,8 @@ static void inline checkCP0(const CP0_t &dut) {
   }
 }
 #endif
+
+extern void tinyShell();
 
 extern uint64_t arg_wave_on_tick;
 bool mainloop(Vmycpu_top *top, axi_paddr *axi, std::string wave_name,
@@ -200,8 +192,11 @@ bool mainloop(Vmycpu_top *top, axi_paddr *axi, std::string wave_name,
     IFDEF(CONFIG_COMMIT_WAIT,
           __ASSERT_SIM__(ticks - last_commit < CONFIG_COMMIT_TIME_LIMIT,
                          "{} ticks not commit inst", CONFIG_COMMIT_TIME_LIMIT));
-    if (sim_status != SIM_RUN)
-      break;
+    if (sim_status != SIM_RUN) {
+      tinyShell();
+      if (sim_status != SIM_RUN)
+        break;
+    }
 
     /* assign last commit PC to archState */
     dutArchState.pc = tmpDutLPC;
