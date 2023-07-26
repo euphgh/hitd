@@ -73,8 +73,11 @@ void mips32_CPU_state::isa_raise_intr(word_t NO, vaddr_t badva, bool refill) {/*
 #ifdef CONFIG_NSC_DIFF
     if (NO == EC_Sys || NO == EC_Tr || NO == EC_Bp || NO == EC_Int)
             throw false;
-    else
+    else {
+            IFDEF(CONFIG_ITRACE,
+                  nemu->log_pt->trace("[I] %v", nemu->isa_disasm_inst()));
             throw true;
+    }
 #endif
 #ifdef CONFIG_NSC_NEMU
     throw false;
