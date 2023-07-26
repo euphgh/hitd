@@ -24,7 +24,7 @@ class dual_soc {/*{{{*/
         void set_switch(uint8_t value);
         inline uint8_t dut_ext_int() { return ext_int[DUT]; }
         inline uint8_t ref_ext_int() { return ext_int[REF]; }
-        void saveSnapShot(std::string);
+        void saveSnapShot(std::string) const;
 
       private:
         PaddrTop*       ptop[2];
@@ -55,7 +55,7 @@ class single_soc {/*{{{*/
 #else
         uint8_t ext_int() { return (puart->irq() << 1); }
 #endif
-        void saveSnapShot(std::string);
+        void saveSnapShot(std::string) const;
 
       private:
         PaddrTop* ptop;
