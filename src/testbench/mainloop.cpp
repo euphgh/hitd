@@ -48,7 +48,6 @@ static bool sim_end_statistics(dual_soc &soc) { /*{{{*/
   switch (sim_status) {
   case SIM_ABORT:
     mycpu_log->info("mycpu has error and quit");
-    nemu->isa_reg_display();
     break;
   case SIM_END:
     mycpu_log->info("mycpu pass test");
@@ -82,11 +81,13 @@ static void inline checkCP0(const CP0_t &dut) {
 #endif
 
 extern void tinyShell();
+extern dual_soc *tinyShellSoc;
 
 extern uint64_t arg_wave_on_tick;
 bool mainloop(Vmycpu_top *top, axi_paddr *axi, std::string wave_name,
               dual_soc &soc) { /*{{{*/
   uint64_t snapshotTick = CONFIG_SNAPSHOT_TICK;
+  tinyShellSoc = &soc;
   auto tickAdd = [&soc, &snapshotTick]() {
     ticks++;
     if (unlikely(snapshotTick == ticks)) {

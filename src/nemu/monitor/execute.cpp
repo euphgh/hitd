@@ -15,7 +15,7 @@ void compare_exec(uint64_t n) {
     ticks++;
     if (unlikely(snapshotTick == ticks)) {
       if (nemu->next_is_delay_slot) {
-        snapshotTick += 2;
+        snapshotTick++;
       } else {
         string mkSnapShotDir(const string &parentFolder);
         auto pdir = mkSnapShotDir(HITD_HOME "/snapshot");

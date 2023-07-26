@@ -1,6 +1,7 @@
 #include "common.hpp"
 #include "fmt/core.h"
 #include "nemu/isa.hpp"
+#include "soc.hpp"
 #include "testbench/sim_state.hpp"
 #include <cstdlib>
 #include <fcntl.h>
@@ -22,6 +23,7 @@ using namespace fmt;
 static bool tinyShellEnd = false;
 extern vector<tuple<string, function<int(vector<string> &)>, string>>
     built_in_cmds;
+dual_soc *tinyShellSoc = nullptr;
 
 static int cmd_q(vector<string> &args) {
   if (sim_status == SIM_INT) {
@@ -53,11 +55,25 @@ static int cmd_c(vector<string> &args) {
   return 0;
 }
 
+static int cmd_ss(vector<string> &args) {
+  if (nemu->next_is_delay_slot) {
+    print("snapshot can not save, because next instruction is delay slot");
+  } else {
+    extern string mkSnapShotDir(const string &parentFolder);
+    auto pdir = mkSnapShotDir(HITD_HOME "/snapshot");
+    nemu->saveSnapShot(pdir + "/nemu.properties");
+    tinyShellSoc->saveSnapShot(pdir);
+    print("snapshot {:s} saved\n", pdir);
+  }
+  return 0;
+}
+
 // 内置命令
 vector<tuple<string, function<int(vector<string> &)>, string>> built_in_cmds = {
-    make_tuple("q", cmd_q, "quit TinyShell by `q`"),
-    make_tuple("help", cmd_help, "print help by `help`"),
-    make_tuple("c", cmd_c, "continue simulate by `c`"),
+    make_tuple("q", cmd_q, "Quit TinyShell by `q`"),
+    make_tuple("help", cmd_help, "Print help by `help`"),
+    make_tuple("c", cmd_c, "Continue simulate by `c`"),
+    make_tuple("ss", cmd_ss, "Save snapshot by `ss`"),
 };
 
 // 执行命令
@@ -221,9 +237,3 @@ void tinyShell() {
       break;
   }
 }
-// string mkSnapShotDir(const string &parentFolder);
-//     auto pdir = mkSnapShotDir(HITD_HOME "/snapshot");
-//     nemu->saveSnapShot(pdir + "/nemu.properties");
-//     soc.saveSnapShot(pdir);
-//     mycpu_log->info("mycpu stop test for key board interrupt");
-//     nemu->isa_reg_display();

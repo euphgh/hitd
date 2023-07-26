@@ -106,9 +106,9 @@ void dual_soc::create_kernel_soc(bool useSnapShot,
 } /*}}}*/
 
 void dual_soc::saveSnapShot(std::string parentDir) const {
-  mainMem[DUT]->save_binary(parentDir + "/mainMem.bin");
+  mainMem[REF]->save_binary(parentDir + "/mainMem.bin");
 #ifndef CONFIG_TEST_LINUX
-  resetMem[DUT]->save_binary(parentDir + "/resetMem.bin");
+  resetMem[REF]->save_binary(parentDir + "/resetMem.bin");
 #endif
 }
 
