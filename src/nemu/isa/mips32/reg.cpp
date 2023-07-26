@@ -35,6 +35,7 @@ void CPU_state::isa_reg_display() {/*{{{*/
     printf(FMT_REG, "lo", arch_state.lo, arch_state.lo);
     printf(FMT_REG, "llbit", arch_state.llbit, arch_state.llbit);
     nemu->cp0.println();
+    printf("inst execuate: %lu\n", nemu->inst_number);
     printAllTLB();
 }/*}}}*/
 

@@ -44,6 +44,7 @@ public:
   Decode inst_state;
   bool analysis;
   bool e_protect;
+  uint64_t inst_number;
 
   mips32_CPU_state(PaddrTop *ptop_input);
   void exec_once();

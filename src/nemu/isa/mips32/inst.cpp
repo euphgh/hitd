@@ -239,6 +239,7 @@ int mips32_CPU_state::decode_exec() {
 int mips32_CPU_state::isa_exec_once(bool has_int) {
   // TIMED_FUNC(isa_exec_once);
 except_restart:
+  inst_number++;
   inst_state.wnum = 0;
   inst_state.flag = 0;
   inst_state.snpc = inst_state.pc = arch_state.pc;

@@ -52,6 +52,7 @@ CPU_state::mips32_CPU_state(PaddrTop* ptop_input):
     mips_ftracer(__TEST_ELF__, ptop_input->log_pt, CONFIG_RESET_PC)
 {
     Assert(IS_2_POW(CONFIG_TLB_NR), "TLB entry number is not power of 2");
+    inst_number = 0;
 
 #ifdef CONFIG_GOLDEN_TRACE
     auto name = "golden_trace";
