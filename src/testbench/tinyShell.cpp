@@ -237,3 +237,23 @@ void tinyShell() {
       break;
   }
 }
+
+static uint64_t execInstrNum0 = 0, execInstrNum1 = 0;
+static string lastSSname0 = "", lastSSname1 = "";
+void checkSnapShop(uint64_t currInstrNum) {
+  if (unlikely(currInstrNum - execInstrNum0 >
+               900000)) { // 900000 is about 1 mins
+    extern string mkSnapShotDir(const string &parentFolder);
+    auto pdir = mkSnapShotDir(HITD_HOME "/snapshot");
+    nemu->saveSnapShot(pdir + "/nemu.properties");
+    tinyShellSoc->saveSnapShot(pdir);
+
+    extern void rmr(std::string dir);
+    rmr(lastSSname1);
+    lastSSname1 = std::move(lastSSname0);
+    execInstrNum1 = execInstrNum0;
+
+    lastSSname0 = std::move(pdir);
+    execInstrNum0 = currInstrNum;
+  }
+}

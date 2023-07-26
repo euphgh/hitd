@@ -120,3 +120,18 @@ string mkSnapShotDir(const string &parentFolder) {
   // 返回新文件夹的绝对路径
   return newFolder.string();
 }
+
+void rmr(std::string dir) {
+  namespace fs = filesystem;
+  fs::path path(dir); // 将目录名转换为路径对象
+  if (fs::exists(path)) {
+    if (fs::is_directory(path)) {
+      // 如果是目录，则递归删除目录中的所有文件和子目录
+      for (auto &entry : fs::directory_iterator(path)) {
+        rmr(entry.path().string());
+      }
+    }
+    // 删除目录本身
+    fs::remove(path);
+  }
+}

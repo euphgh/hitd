@@ -103,4 +103,8 @@ config TTRACE
   bool "Trace MyCPU all AXI Transition"
   default y
 
+config SNAPSHOT_AUTO
+  bool "Enable Automatically save snapshot"
+  default n
+
 endmenu

@@ -221,6 +221,8 @@ bool mainloop(Vmycpu_top *top, axi_paddr *axi, std::string wave_name,
       IFDEF(CONFIG_CP0_DIFF, checkCP0(dutCP0));
       IFDEF(CONFIG_TLB_DIFF, difftestTlbCheck());
       IFDEF(CONFIG_COMMIT_WAIT, last_commit = ticks);
+      extern void checkSnapShop(uint64_t currInstrNum);
+      IFDEF(CONFIG_SNAPSHOT_AUTO, checkSnapShop(nemu->inst_number));
     } /*}}}*/
   }
 
