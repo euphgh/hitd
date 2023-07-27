@@ -111,12 +111,13 @@ static void parse_cmd(const string &cmd_str) {
 }
 
 void tinyShell() {
-  tinyShellEnd = false;
-  // 读取输入并解析命令
+  nemu->isa_reg_display("logs/Nemu-State.txt");
   extern uint64_t ticks;
-  print("\nCPU State:\n");
-  nemu->isa_reg_display();
   print("now tick is {:d}, print `help` for more\n", ticks);
+
+  if (sim_status == SIM_END)
+    return;
+  tinyShellEnd = false;
   char *line;
   while ((line = readline(">>> ")) != nullptr) {
     if (strlen(line) > 0) {

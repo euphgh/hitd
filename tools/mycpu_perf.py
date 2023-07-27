@@ -2,6 +2,12 @@ import pdb
 import struct as st
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
+
+binPath = "./logs/perf/"
+sTickPath = "./logs/perf/"
+imgPath = "./logs/perf/"
+
 class inst_info:
     def __init__(self):
         self.pc:int
@@ -23,14 +29,13 @@ class basic_block:
 
 
 def main(idx):
-    filename = "./logs/perf/perf-{}.bin".format(idx)
-    startTicks_filename = './output/startTicks-{}.txt'.format(idx)
+    filename = binPath + "perf-{}.bin".format(idx)
+    startTicks_filename = sTickPath + "startTicks-{}.txt".format(idx)
     headFmt = "=IcI"
     timeFmt = "=If"
     headSize = st.calcsize(headFmt)
     timeSize = st.calcsize(timeFmt)
 
-    temp = 0
     inst_list:list = []
     with open(filename, "rb") as fp:
         while True:
@@ -48,9 +53,6 @@ def main(idx):
                 inst.allTicks.append(res[0])
                 inst.allConsume.append(res[1])
             inst_list.append(inst)
-            # temp += 1
-            # if temp == 50:
-            #     pass
 
     fp.close
 
@@ -112,12 +114,6 @@ def main(idx):
             line = ' '.join(str(element) for element in row)
             file.write(line + '\n')
 
-    # hlist = list(filter(lambda blk: blk.totalTime()/totalCons > 0.01, blist))
-    # hlist.sort(key=lambda blk: blk.totalTime(),reverse=True)
-    #
-    #
-    #
-
     plt.figure()
 
     fig, ax1 = plt.subplots()
@@ -138,7 +134,7 @@ def main(idx):
     ax1.plot(x_aix,y_consProp, ".", color = "g")
 
     # plt.show()
-    plt.savefig('./output/inst-{}.png'.format(idx))
+    plt.savefig(imgPath + "inst-{}.png".format(idx))
 
     # plt.figure()
     # fig, (ax1, ax2) = plt.subplots(1, 2)
@@ -190,10 +186,13 @@ def main(idx):
     # print(sorted(y_timeProp, reverse=True))
 
     plt.gcf().set_size_inches(np.sum([blk.instNum for blk in hlist]) / 16 + 1, 6)
-    plt.savefig('./output/blk-{}.png'.format(idx))
+    plt.savefig(imgPath + "blk-{}.png".format(idx))
 
     # print(np.sum([blk.instNum for blk in hlist]))
 
 
 if __name__ == "__main__":
-    main(1)
+    if (len(sys.argv)!=2):
+        print("can only input perf test number")
+    else:
+        main(int(sys.argv[1]))

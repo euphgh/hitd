@@ -14,6 +14,9 @@
 ***************************************************************************************/
 
 #include "nemu/isa.hpp"
+#include <cstddef>
+#include <fmt/core.h>
+using namespace fmt;
 
 const char *regs[] = {
   "$0", "at", "v0", "v1", "a0", "a1", "a2", "a3",
@@ -22,22 +25,34 @@ const char *regs[] = {
   "t8", "t9", "k0", "k1", "gp", "sp", "s8", "ra"
 };
 
-void CPU_state::isa_reg_display() {/*{{{*/
-    uint8_t regs_len = ARRLEN(regs);
-    printf(FMT_REG, "pc", arch_state.pc, arch_state.pc);
-    for (int i = 0; i < regs_len; i++) {
-        word_t value = arch_state.gpr[i];
-        char name[8];
-        sprintf(name, "$%-2d(%s)",i,regs[i]);
-        printf(FMT_REG,name,value,value);
-    }
-    printf(FMT_REG, "hi", arch_state.hi, arch_state.hi);
-    printf(FMT_REG, "lo", arch_state.lo, arch_state.lo);
-    printf(FMT_REG, "llbit", arch_state.llbit, arch_state.llbit);
-    nemu->cp0.println();
-    printAllTLB();
-    printf("Nemu have execuated %lu instructions\n", nemu->inst_number);
-}/*}}}*/
+void CPU_state::isa_reg_display(std::string fileName) { /*{{{*/
+  uint8_t regs_len = ARRLEN(regs);
+  FILE *file = nullptr;
+  if (fileName != "") {
+    file = fopen(fileName.c_str(), "w");
+    auto res = freopen(fileName.c_str(), "w", stdout);
+    if (res == nullptr)
+      print("can not redirect nemu regs info to {:s}", fileName);
+  }
+  printf(FMT_REG, "pc", arch_state.pc, arch_state.pc);
+  for (int i = 0; i < regs_len; i++) {
+    word_t value = arch_state.gpr[i];
+    char name[8];
+    sprintf(name, "$%-2d(%s)", i, regs[i]);
+    printf(FMT_REG, name, value, value);
+  }
+  printf(FMT_REG, "hi", arch_state.hi, arch_state.hi);
+  printf(FMT_REG, "lo", arch_state.lo, arch_state.lo);
+  printf(FMT_REG, "llbit", arch_state.llbit, arch_state.llbit);
+  nemu->cp0.println();
+  printAllTLB();
+  print("Nemu execuate {:d} instructs\n", inst_number);
+  print("Nemu execuate {:d} branch\n", branchNum);
+  print("Nemu execuate {:d} jump\n", jumpNum);
+  if (fileName != "") {
+    fclose(file);
+  }
+} /*}}}*/
 
 word_t CPU_state::isa_reg_str2val(const char *s, bool *success) {/*{{{*/
     word_t res = 0;

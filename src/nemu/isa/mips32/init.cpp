@@ -46,13 +46,11 @@ void CPU_state::reset(word_t reset_pc) {/*{{{*/
     analysis = false;
     cp0.reset();
 }/*}}}*/
-CPU_state::mips32_CPU_state(PaddrTop* ptop_input): 
-    log_pt(ptop_input->log_pt), 
-    paddr_top(ptop_input),
-    mips_ftracer(__TEST_ELF__, ptop_input->log_pt, CONFIG_RESET_PC)
-{
+CPU_state::mips32_CPU_state(PaddrTop *ptop_input)
+    : log_pt(ptop_input->log_pt), paddr_top(ptop_input), inst_number(0),
+      branchNum(0), jumpNum(0),
+      mips_ftracer(__TEST_ELF__, ptop_input->log_pt, CONFIG_RESET_PC) {
     Assert(IS_2_POW(CONFIG_TLB_NR), "TLB entry number is not power of 2");
-    inst_number = 0;
 
 #ifdef CONFIG_GOLDEN_TRACE
     auto name = "golden_trace";

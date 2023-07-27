@@ -51,6 +51,7 @@ static bool sim_end_statistics(dual_soc &soc) { /*{{{*/
     break;
   case SIM_END:
     mycpu_log->info("mycpu pass test");
+    difftestBrJmpStats("logs/Branch-Jump-Stats.txt");
     res = true;
     break;
   case SIM_NEMU_QUIT:

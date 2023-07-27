@@ -11,4 +11,5 @@ void difftest_init_PhyPosition();
 void difftest_count_phySign();
 std::pair<uint8_t, word_t> difftestPopRand();
 void difftestTlbCheck();
+void difftestBrJmpStats(std::string fileName = "");
 #endif

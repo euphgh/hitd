@@ -45,6 +45,8 @@ public:
   bool analysis;
   bool e_protect;
   uint64_t inst_number;
+  uint64_t branchNum;
+  uint64_t jumpNum;
 
   mips32_CPU_state(PaddrTop *ptop_input);
   void exec_once();
@@ -73,7 +75,7 @@ public:
   /*}}}*/
 
   // regs{{{
-  void isa_reg_display();
+  void isa_reg_display(std::string fileName = "");
   word_t isa_reg_str2val(const char *s, bool *success);
   // }}}
   word_t isa_vaddr_read(vaddr_t addr, int len) { return vaddr_read(addr, len); }

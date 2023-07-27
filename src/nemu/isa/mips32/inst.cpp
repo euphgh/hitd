@@ -62,6 +62,7 @@ void mips32_CPU_state::decode_operand(int *rd, word_t *src1, word_t *src2, word_
   *rd = (type == TYPE_U || type == TYPE_I) ? rt : BITS(i, 15, 11);
   switch (type) {
     case TYPE_J: 
+        jumpNum ++;
         immJ();
         src1R();
         check_link(rs);
@@ -70,6 +71,7 @@ void mips32_CPU_state::decode_operand(int *rd, word_t *src1, word_t *src2, word_
     case TYPE_U: src1R();immU(); break;
     case TYPE_R: src1R();src2R(); break;
     case TYPE_B: 
+        branchNum ++;
         src1R();
         immB(); 
         break;
