@@ -111,12 +111,14 @@ static void parse_cmd(const string &cmd_str) {
 }
 
 void tinyShell() {
-  nemu->isa_reg_display("logs/Nemu-State.txt");
   extern uint64_t ticks;
-  print("now tick is {:d}, print `help` for more\n", ticks);
-
-  if (sim_status == SIM_END)
+  if (sim_status == SIM_END) {
+    print("Simulation end at {:d}, saving Nemu state, please waiting ...\n",
+          ticks);
+    nemu->isa_reg_display("logs/Nemu-State.txt");
     return;
+  }
+  print("now tick is {:d}, print `help` for more\n", ticks);
   tinyShellEnd = false;
   char *line;
   while ((line = readline(">>> ")) != nullptr) {

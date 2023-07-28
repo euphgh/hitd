@@ -51,6 +51,9 @@ void CPU_state::isa_reg_display(std::string fileName) { /*{{{*/
   print("Nemu execuate {:d} jump\n", jumpNum);
   if (fileName != "") {
     fclose(file);
+    auto res = freopen("/dev/tty", "w", stdout);
+    if (res == nullptr)
+      print("can not redirect tty");
   }
 } /*}}}*/
 

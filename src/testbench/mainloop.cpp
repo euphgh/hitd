@@ -26,7 +26,7 @@ extern uint64_t total_times;
 extern el::Logger *mycpu_log;
 extern FILE *golden_trace;
 diff_state *dut_ptr;
-#define RST_TIME 128
+#define RST_TIME 32
 void disableLogger(el::Logger *logger);
 void enableLogger(el::Logger *logger);
 
@@ -43,7 +43,7 @@ inline static void sim_ending(int nemu_end_state) { /*{{{*/
     break;
   }
 } /*}}}*/
-static bool sim_end_statistics(dual_soc &soc) { /*{{{*/
+static bool sim_end_statistics(dual_soc &soc, string waveName) { /*{{{*/
   bool res = false;
   switch (sim_status) {
   case SIM_ABORT:
@@ -51,7 +51,7 @@ static bool sim_end_statistics(dual_soc &soc) { /*{{{*/
     break;
   case SIM_END:
     mycpu_log->info("mycpu pass test");
-    difftestBrJmpStats("logs/Branch-Jump-Stats.txt");
+    difftestBrJmpStats("Branch-Jump-Stats-" + waveName + ".txt");
     res = true;
     break;
   case SIM_NEMU_QUIT:
@@ -230,5 +230,5 @@ bool mainloop(Vmycpu_top *top, axi_paddr *axi, std::string wave_name,
   IFDEF(CONFIG_WAVE_ON, tfp.close());
   IFDEF(CONFIG_PERF_ANALISES,
         perf_timer.save_date("logs/perf/" + wave_name + ".bin"));
-  return sim_end_statistics(soc);
+  return sim_end_statistics(soc, wave_name);
 } /*}}}*/

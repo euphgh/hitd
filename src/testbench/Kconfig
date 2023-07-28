@@ -96,7 +96,7 @@ config COMMIT_WAIT
 config COMMIT_TIME_LIMIT
   depends on COMMIT_WAIT
   int "Wait how many clock cycles"
-  default 512
+  default 4096
 
 config TTRACE
   depends on TRACE

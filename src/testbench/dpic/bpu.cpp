@@ -1,9 +1,10 @@
 #include "common.hpp"
 #include "debug.hpp"
+#include "macro.hpp"
 #include "testbench/difftest/global_info.hpp"
 #include "verilated_dpi.h"
 #include <cinttypes>
-// clang format off
+#include <fmt/core.h>
 #define dblog(str, ...) mycpu_log->trace(fmt::format("[B] " str, ##__VA_ARGS__))
 #define dbError(str, ...)                                                      \
   mycpu_log->error(fmt::format("[B] " str, ##__VA_ARGS__))
@@ -40,15 +41,19 @@ static map<uint8_t, string> BranchType = {
 
 static map<word_t, BJInfo> instrInfo = {};
 
+static string bpuHash(word_t addr) {
+  return format("{:03x}_{:1d}", BITS(addr, 13, 4), BITS(addr, 3, 2));
+}
+
 extern "C" void v_difftest_BPUWrite(int io_pc, svBit io_btbWen,
                                     int io_btbTarget, char io_btbType,
                                     svBit io_phtWen, char io_phtCount) {
   if (io_btbWen) {
-    dblog("BTB(" HEX_WORD ")={:s}, " HEX_WORD, (word_t)io_pc,
-          BtbType[io_btbType], (word_t)io_btbTarget);
+    dblog("BTB({:s})={:s}, " HEX_WORD, bpuHash(io_pc), BtbType[io_btbType],
+          (word_t)io_btbTarget);
   }
   if (io_phtWen) {
-    dblog("PHT(" HEX_WORD ")={:b}", (word_t)io_pc, io_phtCount);
+    dblog("PHT({:s})={:b}", bpuHash(io_pc), io_phtCount);
   }
 }
 extern "C" void v_difftest_BackPred(int io_debugPC, svBit io_predTake,
@@ -66,8 +71,9 @@ extern "C" void v_difftest_BackPred(int io_debugPC, svBit io_predTake,
     dbError("instr " HEX_WORD " has two type: {:s} {:s}", (word_t)io_debugPC,
             BtbType[bjType], BtbType[io_btbType]);
   }
-  dblog("{:s} " HEX_WORD " takeMiss: {}, destMiss: {}", BtbType[io_btbType],
-        (word_t)io_debugPC, takeMiss, destMiss);
+  auto missStr = [](bool miss) { return miss ? "Miss" : "Hit"; };
+  dblog("{:s} " HEX_WORD " take{:s}, dest{:s}", BtbType[io_btbType],
+        (word_t)io_debugPC, missStr(takeMiss), missStr(destMiss));
   bjType = io_btbType;
 }
 extern "C" void v_difftest_FrontPred(const int *io_debugPC,
@@ -78,15 +84,19 @@ extern "C" void v_difftest_FrontPred(const int *io_debugPC,
     info.frontTimes += 1;
     bool noBrMiss = io_predType[i] != 0x0 && io_realType[i] == 0x0;
     if (noBrMiss) {
-      dblog("instr " HEX_WORD " No Br Miss", (word_t)io_debugPC[i]);
+      dblog("instr " HEX_WORD " NoBrMiss BtbType({:s})={:s}",
+            (word_t)io_debugPC[i], bpuHash(io_debugPC[i]),
+            BtbType[io_predType[i]]);
       info.frontNoBrMiss += 1;
     }
   }
 }
 
-void difftestBrJmpStats(string fileName) {
+void difftestBrJmpStats(string baseName) {
   FILE *file = nullptr;
-  if (fileName != "") {
+  extern string genTimeStr();
+  string fileName = "./logs/" + genTimeStr() + "-" + baseName;
+  if (baseName != "") {
     file = fopen(fileName.c_str(), "w");
     auto res = freopen(fileName.c_str(), "w", stdout);
     if (res == nullptr)
@@ -98,6 +108,7 @@ void difftestBrJmpStats(string fileName) {
   uint32_t backMiss = 0;
   uint32_t backTakeMiss = 0;
   uint32_t backDestMiss = 0;
+  uint32_t diffInstNum = 0;
   for (const auto it : instrInfo) {
     auto &info = it.second;
     frontTotal += info.frontTimes;
@@ -106,43 +117,55 @@ void difftestBrJmpStats(string fileName) {
     backMiss += info.miss;
     backTakeMiss += info.takeMiss;
     backDestMiss += info.destMiss;
+    diffInstNum++;
   }
   print("Total Result\n");
   print("FrontTotal: {:d}\n", frontTotal);
   print("FrontNoBrMiss: {:d}\n", frontNoBrMiss);
+  print("DiffInstr: {:d}\n", diffInstNum);
   print("BackTotal: {:d}\n", backTotal);
   print("BackMiss: {:d}\n", backMiss);
   print("BackTakeMiss: {:d}\n", backTakeMiss);
-  print("BackDestMiss: {:d}\n\n", backDestMiss);
+  print("BackDestMiss: {:d}\n", backDestMiss);
+  print("Total hit Rate: {:f}\n\n",
+        1 - ((double)(backMiss) / (double)(backTotal)));
 
   for (auto &btbType : BtbType) {
-    uint32_t frontTimes = 0;
-    uint32_t frontNoBrMiss = 0;
-    uint32_t total = 0;
-    uint32_t miss = 0;
-    uint32_t takeMiss = 0;
-    uint32_t destMiss = 0;
+    frontTotal = 0;
+    frontNoBrMiss = 0;
+    backTotal = 0;
+    backMiss = 0;
+    backTakeMiss = 0;
+    backDestMiss = 0;
+    diffInstNum = 0;
     for (const auto it : instrInfo) {
       if (it.second.btbType == btbType.first) {
         auto &info = it.second;
-        frontTimes += info.frontTimes;
+        frontTotal += info.frontTimes;
         frontNoBrMiss += info.frontNoBrMiss;
-        total += info.total;
-        miss += info.miss;
-        takeMiss += info.takeMiss;
-        destMiss += info.destMiss;
+        backTotal += info.total;
+        backMiss += info.miss;
+        backTakeMiss += info.takeMiss;
+        backDestMiss += info.destMiss;
+        diffInstNum++;
       }
     }
     print("{:s} Result\n", btbType.second);
-    print("FrontTotal: {:d}\n", frontTimes);
+    print("FrontTotal: {:d}\n", frontTotal);
     print("FrontNoBrMiss: {:d}\n", frontNoBrMiss);
-    print("BackTotal: {:d}\n", total);
-    print("BackMiss: {:d}\n", miss);
-    print("BackTakeMiss: {:d}\n", takeMiss);
-    print("BackDestMiss: {:d}\n\n", destMiss);
+    print("BackTotal: {:d}\n", backTotal);
+    print("DiffInstr: {:d}\n", diffInstNum);
+    print("BackMiss: {:d}\n", backMiss);
+    print("BackTakeMiss: {:d}\n", backTakeMiss);
+    print("BackDestMiss: {:d}\n", backDestMiss);
+    print("Total miss Rate: {:f}\n\n",
+          1 - ((double)(backMiss) / (double)(backTotal)));
   }
-  if (fileName != "") {
+  if (baseName != "") {
     fclose(file);
+    auto res = freopen("/dev/tty", "w", stdout);
+    if (res == nullptr)
+      print("can not redirect tty");
   }
 }
 
