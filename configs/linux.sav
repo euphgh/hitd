@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.115 (w)1999-2023 BSI
-[*] Thu Jul 27 14:05:11 2023
+[*] Fri Jul 28 09:52:52 2023
 [*]
 [dumpfile] "/home/hgh/mnt/wave/perf-1.fst"
-[dumpfile_mtime] "Thu Jul 27 13:54:00 2023"
-[dumpfile_size] 7288580
+[dumpfile_mtime] "Fri Jul 28 08:59:53 2023"
+[dumpfile_size] 7278962
 [savefile] "/home/hgh/mnt/configs/linux.sav"
-[timestart] 3999
+[timestart] 5322
 [size] 1920 989
 [pos] -1 -1
-*-2.300000 4003 3740843 254905 2834 6786 -1 6716 4006 4016 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-1.700000 5326 3740843 254905 2834 6786 5376 6716 4006 4016 5326 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.mycpu_top.
 [treeopen] TOP.mycpu_top.backend.
@@ -179,7 +179,7 @@ TOP.mycpu_top.backend.prf.checkArchRegs.io_gpr_2[31:0]
 TOP.mycpu_top.backend.prf.checkArchRegs.io_gpr_3[31:0]
 @1401200
 -PRF
-@800200
+@c00200
 -INSTBUFFER
 @28
 TOP.mycpu_top.aclk
@@ -272,7 +272,7 @@ TOP.mycpu_top.frontend.instBuffer.ib.io_pop_2_valid
 -pop
 @28
 TOP.mycpu_top.frontend.instBuffer.ib.io_flush
-@1000200
+@1401200
 -INSTBUFFER
 @c00200
 -BTB
@@ -517,8 +517,43 @@ TOP.mycpu_top.frontend.instFetch.ifStage1.btb.readRes_1_target[31:0]
 -BTB
 @800200
 -MALU
-@22
+@c00022
 TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+@28
+(0)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(1)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(2)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(3)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(4)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(5)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(6)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(7)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(8)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(9)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(10)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(11)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(12)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(13)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(14)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(15)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(16)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(17)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(18)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(19)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(20)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(21)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(22)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(23)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(24)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(25)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(26)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(27)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(28)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(29)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(30)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+(31)TOP.mycpu_top.backend.mAluFU.io_out_bits_wbRob_debugPC[31:0]
+@1401200
+-group_end
 @28
 TOP.mycpu_top.backend.mAluFU.valid
 TOP.mycpu_top.backend.mAluFU.io_in_valid
@@ -663,6 +698,30 @@ TOP.mycpu_top.frontend.instFetch.preIfStage.io_in_redirect_target[31:0]
 @1401200
 -preIF-in
 @800200
+-ArchRAS
+@28
+TOP.mycpu_top.backend.mAluFU.ras.io_pop
+TOP.mycpu_top.backend.mAluFU.ras.io_push_valid
+@22
+TOP.mycpu_top.backend.mAluFU.ras.io_push_bits[31:0]
+@28
+TOP.mycpu_top.backend.mAluFU.ras.top[2:0]
+@1000200
+-ArchRAS
+@800200
+-SpecRAS
+@28
+TOP.mycpu_top.frontend.instFetch.ifStage1.ras.io_push_valid
+TOP.mycpu_top.frontend.instFetch.ifStage1.ras.io_pop
+@22
+TOP.mycpu_top.frontend.instFetch.ifStage1.ras.io_push_bits[31:0]
+TOP.mycpu_top.frontend.instFetch.ifStage1.ras.io_topData[31:0]
+@28
+TOP.mycpu_top.frontend.instFetch.ifStage1.ras.top[2:0]
+TOP.mycpu_top.frontend.instFetch.ifStage1.ras.recoverValid__bore
+@1000200
+-SpecRAS
+@800200
 -IfStage1
 @28
 TOP.mycpu_top.frontend.instFetch.ifStage1.update
@@ -672,10 +731,29 @@ TOP.mycpu_top.frontend.instFetch.ifStage1.io_in_npc[31:0]
 TOP.mycpu_top.frontend.instFetch.ifStage1.tlbSearchTick
 @22
 TOP.mycpu_top.frontend.instFetch.ifStage1.pc[31:0]
+TOP.mycpu_top.frontend.instFetch.ifStage1.io_toPreIf_predictDst[31:0]
+@800023
+TOP.mycpu_top.frontend.instFetch.ifStage1.alignMask[3:0]
+@29
+(0)TOP.mycpu_top.frontend.instFetch.ifStage1.alignMask[3:0]
+(1)TOP.mycpu_top.frontend.instFetch.ifStage1.alignMask[3:0]
+(2)TOP.mycpu_top.frontend.instFetch.ifStage1.alignMask[3:0]
+(3)TOP.mycpu_top.frontend.instFetch.ifStage1.alignMask[3:0]
+@1001201
+-group_end
+@28
+TOP.mycpu_top.frontend.instFetch.ifStage1.bpuout_0_btbType[2:0]
+TOP.mycpu_top.frontend.instFetch.ifStage1.takeMask_0
+TOP.mycpu_top.frontend.instFetch.ifStage1.bpuout_1_btbType[2:0]
+TOP.mycpu_top.frontend.instFetch.ifStage1.takeMask_1
+TOP.mycpu_top.frontend.instFetch.ifStage1.bpuout_2_btbType[2:0]
+TOP.mycpu_top.frontend.instFetch.ifStage1.takeMask_2
+TOP.mycpu_top.frontend.instFetch.ifStage1.bpuout_3_btbType[2:0]
+TOP.mycpu_top.frontend.instFetch.ifStage1.takeMask_3
 @800200
 -channel0
 @28
-TOP.mycpu_top.frontend.instFetch.ifStage1.io_out_bits_predictResult_0_btbType[2:0]
+TOP.mycpu_top.frontend.instFetch.ifStage1.bpuout_0_btbType[2:0]
 TOP.mycpu_top.frontend.instFetch.ifStage1.io_out_bits_predictResult_0_counter[1:0]
 TOP.mycpu_top.frontend.instFetch.ifStage1.io_out_bits_predictResult_0_taken
 @22
@@ -730,7 +808,6 @@ TOP.mycpu_top.frontend.instFetch.ifStage2.io_out_bits_basicInstInfo_0_pcVal[31:0
 TOP.mycpu_top.frontend.instFetch.io_out_bits_isBd_0
 TOP.mycpu_top.frontend.instFetch.ifStage2.io_in_bits_validMask_0
 TOP.mycpu_top.frontend.instFetch.ifStage2.io_in_bits_predictResult_0_taken
-TOP.mycpu_top.frontend.instFetch.ifStage2.io_out_bits_predictResult_0_taken
 @1000200
 -channel0
 @800200
@@ -775,9 +852,7 @@ TOP.mycpu_top.frontend.instFetch.ifStage2.io_out_bits_basicInstInfo_1_pcVal[31:0
 @28
 TOP.mycpu_top.frontend.instFetch.io_out_bits_isBd_1
 TOP.mycpu_top.frontend.instFetch.ifStage2.io_in_bits_validMask_1
-@29
 TOP.mycpu_top.frontend.instFetch.ifStage2.nonBrMisPreVec_1
-@28
 TOP.mycpu_top.frontend.instFetch.ifStage2.io_in_bits_predictResult_1_taken
 TOP.mycpu_top.frontend.instFetch.ifStage2.io_out_bits_predictResult_1_taken
 @1000200
