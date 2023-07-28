@@ -56,6 +56,32 @@ extern "C" void v_difftest_BPUWrite(int io_pc, svBit io_btbWen,
     dblog("PHT({:s})={:b}", bpuHash(io_pc), io_phtCount);
   }
 }
+
+extern "C" void v_difftest_SpecRAS(svBit io_push, int io_pushData, int io_pop,
+                                   int io_topData, svBit io_flush) {
+  if (io_push) {
+    dblog("SpecRAS " HEX_WORD " PUSH " HEX_WORD, (word_t)(io_pushData - 8),
+          (word_t)(io_pushData));
+  }
+  if (io_pop) {
+    dblog("SpecRAS " HEX_WORD " POP  " HEX_WORD, (word_t)(io_pushData - 8),
+          (word_t)(io_topData));
+  }
+  if (io_flush) {
+    dblog("SpecRAS FLUSH");
+  }
+}
+extern "C" void v_difftest_ArchRAS(svBit io_push, int io_pushData, int io_pop,
+                                   int io_topData) {
+  if (io_push) {
+    dblog("ArchRAS " HEX_WORD " PUSH " HEX_WORD, (word_t)(io_pushData - 8),
+          (word_t)(io_pushData));
+  }
+  if (io_pop) {
+    dblog("ArchRAS " HEX_WORD " POP  " HEX_WORD, (word_t)(io_pushData - 8),
+          (word_t)(io_topData));
+  }
+}
 extern "C" void v_difftest_BackPred(int io_debugPC, svBit io_predTake,
                                     svBit io_realTake, int io_predDest,
                                     int io_realDest, char io_btbType) {
@@ -71,9 +97,13 @@ extern "C" void v_difftest_BackPred(int io_debugPC, svBit io_predTake,
     dbError("instr " HEX_WORD " has two type: {:s} {:s}", (word_t)io_debugPC,
             BtbType[bjType], BtbType[io_btbType]);
   }
-  auto missStr = [](bool miss) { return miss ? "Miss" : "Hit"; };
-  dblog("{:s} " HEX_WORD " take{:s}, dest{:s}", BtbType[io_btbType],
-        (word_t)io_debugPC, missStr(takeMiss), missStr(destMiss));
+  auto missStr = [](bool takeMiss, bool predTake, bool DestMiss) {
+    return takeMiss               ? "takeMiss"
+           : predTake && DestMiss ? "DestMiss"
+                                  : "All Hit";
+  };
+  dblog("{:s} " HEX_WORD " {:s}", BtbType[io_btbType], (word_t)io_debugPC,
+        missStr(takeMiss, io_predTake, destMiss));
   bjType = io_btbType;
 }
 extern "C" void v_difftest_FrontPred(const int *io_debugPC,
