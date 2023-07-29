@@ -45,15 +45,24 @@ static string bpuHash(word_t addr) {
   return format("{:03x}_{:1d}", BITS(addr, 13, 4), BITS(addr, 3, 2));
 }
 
-extern "C" void v_difftest_BPUWrite(int io_pc, svBit io_btbWen,
-                                    int io_btbTarget, char io_btbType,
-                                    svBit io_phtWen, char io_phtCount) {
-  if (io_btbWen) {
-    dblog("BTB({:s})={:s}, " HEX_WORD, bpuHash(io_pc), BtbType[io_btbType],
-          (word_t)io_btbTarget);
+extern "C" void v_difftest_PHTWrite(int io_tagIdx, const char *io_instrOff,
+                                    const svBit *io_wen, const char *io_count) {
+  for (int i = 0; i < 4; i++) {
+    if (io_wen[i]) {
+      auto pc = (io_tagIdx << 5) | (io_instrOff[i] << 2);
+      dblog("PHT({:s})={:b}", bpuHash(pc), io_count[i]);
+    }
   }
-  if (io_phtWen) {
-    dblog("PHT({:s})={:b}", bpuHash(io_pc), io_phtCount);
+}
+extern "C" void v_difftest_BTBWrite(int io_tagIdx, const char *io_instrOff,
+                                    const svBit *io_wen, const int *io_target,
+                                    const char *io_btbType) {
+  for (int i = 0; i < 4; i++) {
+    if (io_wen[i]) {
+      auto pc = (io_tagIdx << 5) | (io_instrOff[i] << 2);
+      dblog("BTB(" HEX_WORD " {:s})={:s}, " HEX_WORD, (word_t)pc, bpuHash(pc),
+            BtbType[io_btbType[i]], (word_t)io_target[i]);
+    }
   }
 }
 
