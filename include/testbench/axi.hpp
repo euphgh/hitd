@@ -150,7 +150,8 @@ class axi_paddr{
         void idel_wait_write();
         bool write_eval();
 
-        inline int rand_delay() { return rand() % 3 + 2; }
+        inline int r_delay() { return 25; }
+        inline int w_delay() { return 3; }
 };
 
 #endif // !__AXI_HPP__
