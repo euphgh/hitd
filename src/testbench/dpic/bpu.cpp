@@ -3,8 +3,12 @@
 #include "macro.hpp"
 #include "testbench/difftest/global_info.hpp"
 #include "verilated_dpi.h"
+#include <algorithm>
 #include <cinttypes>
+#include <cstdint>
 #include <fmt/core.h>
+#include <tuple>
+#include <vector>
 #define dblog(str, ...) mycpu_log->trace(fmt::format("[B] " str, ##__VA_ARGS__))
 #define dbError(str, ...)                                                      \
   mycpu_log->error(fmt::format("[B] " str, ##__VA_ARGS__))
@@ -25,9 +29,9 @@ struct BJInfo {
         takeMiss(0), destMiss(0) {}
 };
 
-#ifdef BTRACE
+#ifdef CONFIG_BTRACE
 static map<uint8_t, string> BtbType = {
-    make_pair(0b0, "NON"),     make_pair(0b1, "B"),
+    make_pair(0b0, "NON"),     make_pair(0b1, "BR"),
     make_pair(0b100, "JCALL"), make_pair(0b101, "JRET"),
     make_pair(0b110, "JMP"),   make_pair(0b111, "JR"),
 };
@@ -107,10 +111,11 @@ extern "C" void v_difftest_BackPred(int io_debugPC, svBit io_predTake,
     dbError("instr " HEX_WORD " has two type: {:s} {:s}", (word_t)io_debugPC,
             BtbType[bjType], BtbType[io_btbType]);
   }
-  auto missStr = [](bool takeMiss, bool predTake, bool DestMiss) {
-    return takeMiss               ? "takeMiss"
-           : predTake && DestMiss ? "DestMiss"
-                                  : "All Hit";
+  auto missStr = [](bool realTake, bool predTake, bool DestMiss) {
+    return string(realTake != predTake   ? "takeMiss "
+                  : predTake && DestMiss ? "DestMiss "
+                                         : "All Hits ") +
+           string(realTake ? "true " : "false");
   };
   dblog("{:s} " HEX_WORD " {:s}", BtbType[io_btbType], (word_t)io_debugPC,
         missStr(takeMiss, io_predTake, destMiss));
@@ -167,8 +172,8 @@ void difftestBrJmpStats(string baseName) {
   print("BackMiss: {:d}\n", backMiss);
   print("BackTakeMiss: {:d}\n", backTakeMiss);
   print("BackDestMiss: {:d}\n", backDestMiss);
-  print("Total hit Rate: {:f}\n\n",
-        1 - ((double)(backMiss) / (double)(backTotal)));
+  print("Total miss rate: {:f}\n\n",
+        ((double)(backMiss) / (double)(backTotal)));
 
   for (auto &btbType : BtbType) {
     frontTotal = 0;
@@ -178,6 +183,15 @@ void difftestBrJmpStats(string baseName) {
     backTakeMiss = 0;
     backDestMiss = 0;
     diffInstNum = 0;
+    auto cmp = [](const std::tuple<uint32_t, word_t, uint32_t> &a,
+                  const std::tuple<uint32_t, word_t, uint32_t> &b) {
+      return std::get<0>(a) < std::get<0>(b);
+    };
+    std::priority_queue<std::tuple<uint32_t, word_t, uint32_t>,
+                        std::vector<std::tuple<uint32_t, word_t, uint32_t>>,
+                        decltype(cmp)>
+        max_heap(cmp);
+
     for (const auto it : instrInfo) {
       if (it.second.btbType == btbType.first) {
         auto &info = it.second;
@@ -188,6 +202,9 @@ void difftestBrJmpStats(string baseName) {
         backTakeMiss += info.takeMiss;
         backDestMiss += info.destMiss;
         diffInstNum++;
+        if (it.second.btbType == 0b1) {
+          max_heap.push(make_tuple(info.takeMiss, it.first, info.total));
+        }
       }
     }
     print("{:s} Result\n", btbType.second);
@@ -198,8 +215,24 @@ void difftestBrJmpStats(string baseName) {
     print("BackMiss: {:d}\n", backMiss);
     print("BackTakeMiss: {:d}\n", backTakeMiss);
     print("BackDestMiss: {:d}\n", backDestMiss);
-    print("Total miss Rate: {:f}\n\n",
-          1 - ((double)(backMiss) / (double)(backTotal)));
+    print("Total miss rate: {:f}\n\n",
+          ((double)(backMiss) / (double)(backTotal)));
+    uint32_t cnt = 0;
+    uint8_t order = 32;
+    while (!max_heap.empty()) {
+      auto t = max_heap.top();
+      auto missNum = get<0>(t);
+      auto totalNum = get<2>(t);
+      if (order--) {
+        cnt += missNum;
+      }
+      if (missNum != 0)
+        print("[" HEX_WORD "]: {:d}/{:d} = {:f}\n", get<1>(t), missNum,
+              totalNum, (double)missNum / (double)totalNum);
+      max_heap.pop();
+    }
+    print("First 32: {:d}/{:d} = {:f}\n", cnt, backMiss,
+          (double)cnt / (double)backMiss);
   }
   if (baseName != "") {
     fclose(file);

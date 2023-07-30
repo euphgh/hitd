@@ -110,7 +110,6 @@ config CTRACE
 
 
 config BTRACE
-  depends on TRACE
   bool "Trace branch predict units"
   default n
 
