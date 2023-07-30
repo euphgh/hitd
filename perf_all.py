@@ -84,46 +84,32 @@ def main(idx):
 
     blist.sort(key=lambda blk: blk.totalTime(),reverse=True)
     totalCons = np.sum([blk.totalTime() for blk in blist])
-    totalTime = np.sum([blk.instNum * blk.runTime for blk in blist])
+    realTotalTime=np.sum([blk.totalTime() for blk in blist])
+    sum+=realTotalTime
 
-    # for blk in blist:
-    #     print(blk.instNum, blk.runTime, blk.instNum * blk.runTime, blk.totalTime())
 
     hlist = []
-    #print(len(blist))
     for blk in blist:
-        prop = blk.totalTime()/totalTime
+        prop = blk.totalTime()/realTotalTime
         if (prop>0.01): hlist.append(blk)
-    # print('s = ' + str(s))
-
-    #print(len(hlist))
-    for blk in hlist:
-        prop = blk.totalTime()/totalTime
-        #print(blk.totalTime(), prop)
 
     mid_startTicks = []
     for blk in hlist:
         sorted_idx = np.argsort(blk.singleTimes)
-        # for i in sorted_idx.tolist():
-        #     print(blist[i].)
-        # exit(0)
-
         median_idx = len(sorted_idx) // 2
         slice_idx = sorted_idx[max(0, median_idx - 2): min(median_idx + 3, len(sorted_idx) - 1)]
         timeSlice = blk.startTicks[np.array(slice_idx)]
         mid_startTicks.append(timeSlice)
 
     with open(startTicks_filename, 'w') as file:
-        # for blk in hlist:
-        #     line = ' '.join(str(blk.startTicks))
-        file.write('blk num: '+str(len(blist))+ '\n')
+        file.write('basic info\n'+'blk num: '+str(len(blist))+ '\n')
         file.write('hlk num: '+str(len(hlist))+ '\n')
-        file.write('total time: '+str(totalTime)+ '\n')
+        file.write('total time: '+str(realTotalTime)+ '\n'+'\n')
         for i in range(len(hlist)):
             blk=hlist[i]
             ticks=mid_startTicks[i]
             tick = ' '.join(str(element) for element in ticks)
-            prop = blk.totalTime()/totalTime
+            prop = blk.totalTime()/realTotalTime
 
             file.write('blk: ' + str(i) + '\n')
             file.write('total time: ' + str(blk.totalTime()) + '    prop: ' + str(prop)+'\n')
@@ -134,7 +120,7 @@ def main(idx):
             for j in range(len(blk.pcS)):
                 pc=str(blk.pcS[j])
                 ipc=str(blk.avgIPC[j])
-                file.write('pc: '+ pc + '       ipc: ' + ipc + '\n')
+                file.write('pc: '+ pc + '       CPI: ' + ipc + '\n')
             file.write('\n')
 
     plt.figure()
@@ -216,4 +202,5 @@ def main(idx):
 
 if __name__ == "__main__":
     for i in range (10):
+        sum=0
         main(i+1)
