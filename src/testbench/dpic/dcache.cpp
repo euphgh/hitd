@@ -33,7 +33,7 @@ enum CacheOp {
   HitWriteBackInvalidD = 0b10101,
 };
 
-#ifdef CTRACE
+#ifdef CONFIG_CTRACE
 static std::map<CacheMainState, std::string> mainStateStr = {
     std::make_pair(run, "run"),           std::make_pair(miss, "miss"),
     std::make_pair(readDram, "readDram"), std::make_pair(refill, "refill"),
