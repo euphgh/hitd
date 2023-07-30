@@ -25,6 +25,7 @@ struct BJInfo {
         takeMiss(0), destMiss(0) {}
 };
 
+#ifdef BTRACE
 static map<uint8_t, string> BtbType = {
     make_pair(0b0, "NON"),     make_pair(0b1, "B"),
     make_pair(0b100, "JCALL"), make_pair(0b101, "JRET"),
@@ -207,6 +208,25 @@ void difftestBrJmpStats(string baseName) {
       print("can not redirect tty");
   }
 }
+#else
+void difftestBrJmpStats(string baseName) {}
+extern "C" void v_difftest_PHTWrite(int io_tagIdx, const char *io_instrOff,
+                                    const svBit *io_wen, const char *io_count) {
+}
+extern "C" void v_difftest_BTBWrite(int io_tagIdx, const char *io_instrOff,
+                                    const svBit *io_wen, const int *io_target,
+                                    const char *io_btbType) {}
+extern "C" void v_difftest_SpecRAS(svBit io_push, int io_pushData, int io_pop,
+                                   int io_topData, svBit io_flush) {}
+extern "C" void v_difftest_ArchRAS(svBit io_push, int io_pushData, int io_pop,
+                                   int io_topData) {}
+extern "C" void v_difftest_BackPred(int io_debugPC, svBit io_predTake,
+                                    svBit io_realTake, int io_predDest,
+                                    int io_realDest, char io_btbType) {}
+extern "C" void v_difftest_FrontPred(const int *io_debugPC,
+                                     const char *io_predType,
+                                     const char *io_realType) {}
+#endif
 
 #undef dblog
 #undef dbError
