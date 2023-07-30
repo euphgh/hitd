@@ -90,16 +90,16 @@ def main(idx):
     #     print(blk.instNum, blk.runTime, blk.instNum * blk.runTime, blk.totalTime())
 
     hlist = []
-    print(len(blist))
+    #print(len(blist))
     for blk in blist:
         prop = blk.totalTime()/totalTime
         if (prop>0.01): hlist.append(blk)
     # print('s = ' + str(s))
 
-    print(len(hlist))
+    #print(len(hlist))
     for blk in hlist:
         prop = blk.totalTime()/totalTime
-        print(blk.totalTime(), prop)
+        #print(blk.totalTime(), prop)
 
     mid_startTicks = []
     for blk in hlist:
@@ -116,14 +116,20 @@ def main(idx):
     with open(startTicks_filename, 'w') as file:
         # for blk in hlist:
         #     line = ' '.join(str(blk.startTicks))
+        file.write('blk num: '+str(len(blist))+ '\n')
+        file.write('hlk num: '+str(len(hlist))+ '\n')
+        file.write('total time: '+str(totalTime)+ '\n')
         for i in range(len(hlist)):
             blk=hlist[i]
             ticks=mid_startTicks[i]
             tick = ' '.join(str(element) for element in ticks)
+            prop = blk.totalTime()/totalTime
 
             file.write('blk: ' + str(i) + '\n')
+            file.write('total time: ' + str(blk.totalTime()) + '    prop: ' + str(prop)+'\n')
             file.write('start time: '+tick + '\n')
             file.write('instNum is ' + str(blk.instNum) + '\n')
+
             assert len(blk.pcS)==len(blk.avgIPC)
             for j in range(len(blk.pcS)):
                 pc=str(blk.pcS[j])
@@ -209,7 +215,5 @@ def main(idx):
 
 
 if __name__ == "__main__":
-    if (len(sys.argv)!=2):
-        print("can only input perf test number")
-    else:
-        main(int(sys.argv[1]))
+    for i in range (10):
+        main(i+1)
