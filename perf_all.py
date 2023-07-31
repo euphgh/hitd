@@ -85,7 +85,7 @@ def main(idx):
     blist.sort(key=lambda blk: blk.totalTime(),reverse=True)
     totalCons = np.sum([blk.totalTime() for blk in blist])
     realTotalTime=np.sum([blk.totalTime() for blk in blist])
-    sum+=realTotalTime
+    
 
 
     hlist = []
@@ -198,9 +198,11 @@ def main(idx):
     plt.savefig(imgPath + "blk-{}.png".format(idx))
 
     # print(np.sum([blk.instNum for blk in hlist]))
-
+    print(realTotalTime)
+    return realTotalTime
 
 if __name__ == "__main__":
+    sum=0
     for i in range (10):
-        sum=0
-        main(i+1)
+        sum+=main(i+1)
+    print(sum)
