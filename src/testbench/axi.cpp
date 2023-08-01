@@ -136,7 +136,7 @@ bool axi_paddr::accept_read_req(){/*{{{*/
     generateReadStrb(r_cur_info, r_cur_addr);
     r_cur_NO = 0;
 
-    r_left_time = rand_delay();
+    r_left_time = r_delay();
     s_arready = 0;
     paddr_top->log_pt->trace(fmt::format("[T] read  req [" HEX_WORD "], size={}, len={}, burst={}, id={}", 
                 start_addr, num_bytes, r_burst_count, burst_str(r_burst_type), r_cur_id));
@@ -242,7 +242,7 @@ bool axi_paddr::accept_write_data(){/*{{{*/
     if (w_cur_NO == w_burst_count) {
         __ASSERT_SIM__(pins.wlast==1, "Write data %x wlast != 1 when the last wdata arrive",pins.wdata);
         s_wready = 0;
-        w_left_time = rand_delay();
+        w_left_time = w_delay();
         write_data_trace();
     }
     else {
