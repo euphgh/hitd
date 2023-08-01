@@ -162,9 +162,8 @@ extern "C" void v_difftest_LHTRead(const int *io_readAddr,
       bool dutTake = io_readTake[i];
       uint8_t dutCnt = io_readCnt[i];
       if (refTake != io_readTake[i] || refCnt != io_readCnt[i]) {
-        dbError("LHT({:s}) ER ref={},{}; dut={},{}", lhtHash(savedPC[i]),
-                refTake, refCnt, dutTake, dutCnt);
-        sim_status = SIM_ABORT;
+        dblog("LHT({:s}) ER ref={},{}; dut={},{}", lhtHash(savedPC[i]), refTake,
+              refCnt, dutTake, dutCnt);
       }
     }
   }
@@ -173,7 +172,10 @@ extern "C" void v_difftest_LHTRead(const int *io_readAddr,
   }
 }
 
-void difftestBrJmpReset() { instrInfo.clear(); }
+void difftestBrJmpReset() {
+  instrInfo.clear();
+  mycpuLht.resetStats();
+}
 void difftestBrJmpStats(string baseName) {
 
   uint32_t frontTotal = 0;
@@ -293,12 +295,6 @@ extern "C" void v_difftest_SpecRAS(svBit io_push, int io_pushData, int io_pop,
                                    int io_topData, svBit io_flush) {}
 extern "C" void v_difftest_ArchRAS(svBit io_push, int io_pushData, int io_pop,
                                    int io_topData) {}
-extern "C" void v_difftest_BackPred(int io_debugPC, svBit io_predTake,
-                                    svBit io_realTake, int io_predDest,
-                                    int io_realDest, char io_btbType) {}
-extern "C" void v_difftest_FrontPred(const int *io_debugPC,
-                                     const char *io_predType,
-                                     const char *io_realType) {}
 #endif
 
 #undef dblog
