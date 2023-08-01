@@ -187,10 +187,10 @@ void chech_output(output *dut, output *ref) { /*{{{*/
   }
 #else
   while (dut->exist_tx()) {
-    dut->getc();
-    ref->getc();
-    // putchar(dut->getc());
-    // fflush(stdout);
+    // dut->getc();
+    // ref->getc();
+    putchar(dut->getc());
+    fflush(stdout);
   }
 #endif
 } /*}}}*/
