@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.115 (w)1999-2023 BSI
-[*] Mon Jul 31 15:58:36 2023
+[*] Tue Aug  1 04:04:25 2023
 [*]
 [dumpfile] "/home/hgh/mnt/wave/perf-2.fst"
-[dumpfile_mtime] "Mon Jul 31 15:32:08 2023"
-[dumpfile_size] 50159286
+[dumpfile_mtime] "Tue Aug  1 03:46:37 2023"
+[dumpfile_size] 300903
 [savefile] "/home/hgh/mnt/configs/linux.sav"
-[timestart] 2084
+[timestart] 3128
 [size] 1920 989
 [pos] -1 -1
-*-17.600000 154000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-2.000000 3130 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.mycpu_top.
 [treeopen] TOP.mycpu_top.backend.
@@ -963,36 +963,76 @@ TOP.mycpu_top.backend.rob.robEntries.io_pop_1_ready
 TOP.mycpu_top.frontend.instFetch.ifStage1.lht.clock
 @800200
 -LocHitTab
+-channel0
 @28
 TOP.mycpu_top.frontend.instFetch.ifStage1.lht.update_data_0_valid
-TOP.mycpu_top.frontend.instFetch.ifStage1.lht.update_data_1_valid
-TOP.mycpu_top.frontend.instFetch.ifStage1.lht.update_data_2_valid
-TOP.mycpu_top.frontend.instFetch.ifStage1.lht.update_data_3_valid
-@1000200
--LocHitTab
-@800200
--tagsMem
-@28
-TOP.mycpu_top.frontend.instFetch.ifStage1.lht.tagsMem_2_ext.W0_en
 @22
-TOP.mycpu_top.frontend.instFetch.ifStage1.lht.tagsMem_2_ext.W0_addr[3:0]
-TOP.mycpu_top.frontend.instFetch.ifStage1.lht.tagsMem_2_ext.W0_data[23:0]
-@1000200
--tagsMem
-@800200
--hisAndCnt
+TOP.mycpu_top.frontend.instFetch.ifStage1.lht.wPCIdx[3:0]
+TOP.mycpu_top.frontend.instFetch.ifStage1.lht.clrMem_ext.W0_addr[3:0]
+TOP.mycpu_top.frontend.instFetch.ifStage1.lht.clrMem_ext.W0_data[3:0]
 @28
-TOP.mycpu_top.frontend.instFetch.ifStage1.lht.update_data_2_bits
+TOP.mycpu_top.frontend.instFetch.ifStage1.lht.clrMem_ext.W0_en
+@1000200
+-channel0
+@800200
+-channel1
+-read
 @22
-TOP.mycpu_top.frontend.instFetch.ifStage1.lht.hisAndCnts_2_ext.W0_addr[3:0]
+TOP.mycpu_top.frontend.instFetch.ifStage1.lht.readAddr_1_bits[31:0]
 @29
-TOP.mycpu_top.frontend.instFetch.ifStage1.lht.foo_res_2[1:0]
-@28
-TOP.mycpu_top.frontend.instFetch.ifStage1.lht.hisAndCnts_2_ext.W0_en
+TOP.mycpu_top.frontend.instFetch.ifStage1.lht.readAddr_1_valid
 @22
-TOP.mycpu_top.frontend.instFetch.ifStage1.lht.nextHis_2[8:0]
-TOP.mycpu_top.frontend.instFetch.ifStage1.lht.hisWData_2[8:0]
+TOP.mycpu_top.frontend.instFetch.ifStage1.lht.readPC_1[31:0]
+TOP.mycpu_top.frontend.instFetch.ifStage1.lht.readRes_1_cnt[3:0]
+@28
+TOP.mycpu_top.frontend.instFetch.ifStage1.lht.readRes_1_take
 @1000200
--hisAndCnt
+-read
+@800200
+-write
+@28
+TOP.mycpu_top.frontend.instFetch.ifStage1.lht.update_data_1_valid
+@22
+TOP.mycpu_top.frontend.instFetch.ifStage1.lht.wPCIdx_1[3:0]
+@800200
+-clr
+@22
+TOP.mycpu_top.frontend.instFetch.ifStage1.lht.clrMem_1_ext.W0_addr[3:0]
+TOP.mycpu_top.frontend.instFetch.ifStage1.lht.clrMem_1_ext.W0_data[3:0]
+@28
+TOP.mycpu_top.frontend.instFetch.ifStage1.lht.clrMem_1_ext.W0_en
+@1000200
+-clr
+-write
+-channel1
+@800200
+-channel2
+@28
+TOP.mycpu_top.frontend.instFetch.ifStage1.lht.update_data_2_valid
+@22
+TOP.mycpu_top.frontend.instFetch.ifStage1.lht.wPCIdx_2[3:0]
+@800200
+-clr
+@22
+TOP.mycpu_top.frontend.instFetch.ifStage1.lht.clrMem_2_ext.W0_addr[3:0]
+TOP.mycpu_top.frontend.instFetch.ifStage1.lht.clrMem_2_ext.W0_data[3:0]
+@28
+TOP.mycpu_top.frontend.instFetch.ifStage1.lht.clrMem_2_ext.W0_en
+@1000200
+-clr
+-channel2
+@800200
+-channel3
+@28
+TOP.mycpu_top.frontend.instFetch.ifStage1.lht.update_data_3_valid
+@22
+TOP.mycpu_top.frontend.instFetch.ifStage1.lht.wPCIdx_3[3:0]
+TOP.mycpu_top.frontend.instFetch.ifStage1.lht.clrMem_3_ext.W0_addr[3:0]
+TOP.mycpu_top.frontend.instFetch.ifStage1.lht.clrMem_3_ext.W0_data[3:0]
+@28
+TOP.mycpu_top.frontend.instFetch.ifStage1.lht.clrMem_3_ext.W0_en
+@1000200
+-channel3
+-LocHitTab
 [pattern_trace] 1
 [pattern_trace] 0

@@ -51,7 +51,7 @@ public:
            : cnt == 3 ? (take ? 3 : 2)
                       : (take ? cnt + 1 : cnt - 1);
   }
-  void update(word_t pc, bool take) {
+  std::tuple<word_t, uint8_t> update(word_t pc, bool take) {
     auto set = BITS(pc, 3, 2);
     auto idx = BITS(pc, 4 + idxWidth - 1, 4);
     auto tag = BITS(pc, 31, 4 + idxWidth);
@@ -74,6 +74,7 @@ public:
       lht.takeCnts[idx][0] = take ? 2 : 0;
     } else
       clearCnt--;
+    return std::make_tuple(lht.allTags[idx], clearCnt);
   }
   std::tuple<bool, uint8_t> getLhtRes(word_t pc) {
     auto set = BITS(pc, 3, 2);
@@ -81,10 +82,12 @@ public:
     auto tag = BITS(pc, 31, 4 + idxWidth);
     RegDatas &lht = lhts[set];
     bool predTake = false;
+    uint8_t clrCnt = 0;
     if (lht.allTags[idx] == tag) {
       predTake = lht.takeCnts[idx][lht.his[idx]] > 1;
+      clrCnt = lht.clearCnt[idx];
     }
-    return std::make_tuple(predTake, lht.clearCnt[idx]);
+    return std::make_tuple(predTake, clrCnt);
   }
 
   void predict(word_t pc, bool realtake) {

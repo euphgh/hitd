@@ -3,6 +3,7 @@
 #include "macro.hpp"
 #include "nemu/cpu/lht.hpp"
 #include "testbench/difftest/global_info.hpp"
+#include "testbench/sim_state.hpp"
 #include "verilated_dpi.h"
 #include <algorithm>
 #include <cinttypes>
@@ -52,14 +53,22 @@ static string bpuHash(word_t addr) {
   return format("{:03x}_{:1d}", BITS(addr, 13, 4), BITS(addr, 3, 2));
 }
 
+static string lhtHash(word_t addr) {
+  return format("{:1x}_{:1d}", BITS(addr, 7, 4), BITS(addr, 3, 2));
+}
+
 extern "C" void v_difftest_PHTWrite(int io_tagIdx, const char *io_instrOff,
                                     const svBit *io_wen, const char *io_count,
                                     const svBit *io_take) {
   for (int i = 0; i < 4; i++) {
     if (io_wen[i]) {
-      auto pc = (io_tagIdx << 5) | (io_instrOff[i] << 2);
-      dblog("PHT({:s})={:b} {}", bpuHash(pc), io_count[i], (bool)io_take[i]);
-      mycpuLht.update(pc, io_take[i]);
+      word_t pc = (io_tagIdx << 5) | (io_instrOff[i] << 2);
+      // dblog("PHT({:s})={:b} {}", bpuHash(pc), io_count[i], (bool)io_take[i]);
+
+      auto res = mycpuLht.update(pc, io_take[i]);
+      auto tagHit = get<0>(res) == (pc >> 8) ? "Hit" : "Miss";
+      dblog("LHT({:s}) WR {:s} " HEX_WORD ", take {:b}, cnt {:d}", lhtHash(pc),
+            tagHit, pc, (bool)io_take[i], get<1>(res));
     }
   }
 }
@@ -145,9 +154,6 @@ static word_t savedPC[4];
 extern "C" void v_difftest_LHTRead(const int *io_readAddr,
                                    const svBit *io_readTake,
                                    const char *io_readCnt, svBit io_outOK) {
-  for (int i = 0; i < 4; i++) {
-    savedPC[i] = io_readAddr[i];
-  }
   if (io_outOK) {
     for (int i = 0; i < 4; i++) {
       auto refRes = mycpuLht.getLhtRes(savedPC[i]);
@@ -156,9 +162,14 @@ extern "C" void v_difftest_LHTRead(const int *io_readAddr,
       bool dutTake = io_readTake[i];
       uint8_t dutCnt = io_readCnt[i];
       if (refTake != io_readTake[i] || refCnt != io_readCnt[i]) {
-        dblog("ref={}, {}; dut = {}, {}", refTake, refCnt, dutTake, dutCnt);
+        dbError("LHT({:s}) ER ref={},{}; dut={},{}", lhtHash(savedPC[i]),
+                refTake, refCnt, dutTake, dutCnt);
+        sim_status = SIM_ABORT;
       }
     }
+  }
+  for (int i = 0; i < 4; i++) {
+    savedPC[i] = io_readAddr[i];
   }
 }
 
@@ -269,7 +280,6 @@ void difftestBrJmpStats(string baseName) {
   }
   print("MyCPU Total Br Miss Rate: {:5d}/{:5d} = {:.6f}\n", brMiss, brTotal,
         (double)brMiss / (double)brTotal);
-  mycpuLht.show("RefLHT.txt");
 }
 #else
 void difftestBrJmpStats(string baseName) {}
