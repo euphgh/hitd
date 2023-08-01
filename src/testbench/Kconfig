@@ -103,6 +103,16 @@ config TTRACE
   bool "Trace MyCPU all AXI Transition"
   default y
 
+config CTRACE
+  depends on TRACE
+  bool "Trace Cache Req and States"
+  default n
+
+
+config BTRACE
+  bool "Trace branch predict units"
+  default n
+
 config SNAPSHOT_AUTO
   bool "Enable Automatically save snapshot"
   default n

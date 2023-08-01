@@ -33,6 +33,7 @@ enum CacheOp {
   HitWriteBackInvalidD = 0b10101,
 };
 
+#ifdef CONFIG_CTRACE
 static std::map<CacheMainState, std::string> mainStateStr = {
     std::make_pair(run, "run"),           std::make_pair(miss, "miss"),
     std::make_pair(readDram, "readDram"), std::make_pair(refill, "refill"),
@@ -81,13 +82,6 @@ static bool reqIsSame() {
   res &= state[oldMap].isWrite == state[newMap].isWrite;
   res &= state[oldMap].writeData == state[newMap].writeData;
   res &= state[oldMap].cancel == state[newMap].cancel;
-  return res;
-}
-
-bool stateIsSame() {
-  auto res = true;
-  res &= state[oldMap].mainState == state[newMap].mainState;
-  res &= state[oldMap].writeState == state[newMap].writeState;
   return res;
 }
 
@@ -201,5 +195,14 @@ extern "C" void v_difftest_CacheRun(
             writeStateStr[state[newMap].writeState]);
   }
 }
+#else
+extern "C" void v_difftest_CacheRun(
+    char io_mainState, svBit io_hasValid, int io_reqAddr, svBit io_isUncache,
+    svBit io_isWrite, int io_writeData, svBit io_cancel, int io_retData,
+    char io_hitWays, svBit io_isHit, char io_victimWay, const int *io_tagFrom1,
+    const svBit *io_dirtyFrom1, const svBit *io_validFrom1,
+    const int *io_wbBuffer, int io_wbAddr, char io_writeState,
+    char io_instrState, svBit io_instrValid, char io_tagWay, char io_instrOp) {}
+#endif
 #undef dclog
 #undef dcError

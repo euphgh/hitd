@@ -1,16 +1,23 @@
 #include "common.hpp"
 #include "debug.hpp"
 #include "macro.hpp"
+#include "nemu/cpu/lht.hpp"
 #include "testbench/difftest/global_info.hpp"
+#include "testbench/sim_state.hpp"
 #include "verilated_dpi.h"
+#include <algorithm>
 #include <cinttypes>
+#include <cstdint>
 #include <fmt/core.h>
+#include <tuple>
+#include <vector>
 #define dblog(str, ...) mycpu_log->trace(fmt::format("[B] " str, ##__VA_ARGS__))
 #define dbError(str, ...)                                                      \
   mycpu_log->error(fmt::format("[B] " str, ##__VA_ARGS__))
 
 using namespace std;
 using namespace fmt;
+LocHisTable<> mycpuLht;
 
 struct BJInfo {
   uint8_t btbType;
@@ -25,8 +32,9 @@ struct BJInfo {
         takeMiss(0), destMiss(0) {}
 };
 
+#ifdef CONFIG_BTRACE
 static map<uint8_t, string> BtbType = {
-    make_pair(0b0, "NON"),     make_pair(0b1, "B"),
+    make_pair(0b0, "NON"),     make_pair(0b1, "BR"),
     make_pair(0b100, "JCALL"), make_pair(0b101, "JRET"),
     make_pair(0b110, "JMP"),   make_pair(0b111, "JR"),
 };
@@ -45,12 +53,22 @@ static string bpuHash(word_t addr) {
   return format("{:03x}_{:1d}", BITS(addr, 13, 4), BITS(addr, 3, 2));
 }
 
+static string lhtHash(word_t addr) {
+  return format("{:1x}_{:1d}", BITS(addr, 7, 4), BITS(addr, 3, 2));
+}
+
 extern "C" void v_difftest_PHTWrite(int io_tagIdx, const char *io_instrOff,
-                                    const svBit *io_wen, const char *io_count) {
+                                    const svBit *io_wen, const char *io_count,
+                                    const svBit *io_take) {
   for (int i = 0; i < 4; i++) {
     if (io_wen[i]) {
-      auto pc = (io_tagIdx << 5) | (io_instrOff[i] << 2);
-      dblog("PHT({:s})={:b}", bpuHash(pc), io_count[i]);
+      word_t pc = (io_tagIdx << 5) | (io_instrOff[i] << 2);
+      // dblog("PHT({:s})={:b} {}", bpuHash(pc), io_count[i], (bool)io_take[i]);
+
+      auto res = mycpuLht.update(pc, io_take[i]);
+      auto tagHit = get<0>(res) == (pc >> 8) ? "Hit" : "Miss";
+      dblog("LHT({:s}) WR {:s} " HEX_WORD ", take {:b}, cnt {:d}", lhtHash(pc),
+            tagHit, pc, (bool)io_take[i], get<1>(res));
     }
   }
 }
@@ -106,10 +124,11 @@ extern "C" void v_difftest_BackPred(int io_debugPC, svBit io_predTake,
     dbError("instr " HEX_WORD " has two type: {:s} {:s}", (word_t)io_debugPC,
             BtbType[bjType], BtbType[io_btbType]);
   }
-  auto missStr = [](bool takeMiss, bool predTake, bool DestMiss) {
-    return takeMiss               ? "takeMiss"
-           : predTake && DestMiss ? "DestMiss"
-                                  : "All Hit";
+  auto missStr = [](bool realTake, bool predTake, bool DestMiss) {
+    return string(realTake != predTake   ? "takeMiss "
+                  : predTake && DestMiss ? "DestMiss "
+                                         : "All Hits ") +
+           string(realTake ? "true " : "false");
   };
   dblog("{:s} " HEX_WORD " {:s}", BtbType[io_btbType], (word_t)io_debugPC,
         missStr(takeMiss, io_predTake, destMiss));
@@ -131,16 +150,32 @@ extern "C" void v_difftest_FrontPred(const int *io_debugPC,
   }
 }
 
-void difftestBrJmpStats(string baseName) {
-  FILE *file = nullptr;
-  extern string genTimeStr();
-  string fileName = "./logs/" + genTimeStr() + "-" + baseName;
-  if (baseName != "") {
-    file = fopen(fileName.c_str(), "w");
-    auto res = freopen(fileName.c_str(), "w", stdout);
-    if (res == nullptr)
-      fmt::print("can not redirect BPU info to {:s}", fileName);
+static word_t savedPC[4];
+extern "C" void v_difftest_LHTRead(const int *io_readAddr,
+                                   const svBit *io_readTake,
+                                   const char *io_readCnt, svBit io_outOK) {
+  if (io_outOK) {
+    for (int i = 0; i < 4; i++) {
+      auto refRes = mycpuLht.getLhtRes(savedPC[i]);
+      auto refTake = get<0>(refRes);
+      auto refCnt = get<1>(refRes);
+      bool dutTake = io_readTake[i];
+      uint8_t dutCnt = io_readCnt[i];
+      if (refTake != io_readTake[i] || refCnt != io_readCnt[i]) {
+        dbError("LHT({:s}) ER ref={},{}; dut={},{}", lhtHash(savedPC[i]),
+                refTake, refCnt, dutTake, dutCnt);
+        sim_status = SIM_ABORT;
+      }
+    }
   }
+  for (int i = 0; i < 4; i++) {
+    savedPC[i] = io_readAddr[i];
+  }
+}
+
+void difftestBrJmpReset() { instrInfo.clear(); }
+void difftestBrJmpStats(string baseName) {
+
   uint32_t frontTotal = 0;
   uint32_t frontNoBrMiss = 0;
   uint32_t backTotal = 0;
@@ -158,6 +193,17 @@ void difftestBrJmpStats(string baseName) {
     backDestMiss += info.destMiss;
     diffInstNum++;
   }
+  print("MyCPU Total    Miss Rate: {:4d}/{:4d} = {:.6f}\n", backMiss, backTotal,
+        ((double)(backMiss) / (double)(backTotal)));
+  FILE *file = nullptr;
+  extern string genTimeStr();
+  string fileName = "./logs/" + genTimeStr() + "-" + baseName;
+  if (baseName != "") {
+    file = fopen(fileName.c_str(), "w");
+    auto res = freopen(fileName.c_str(), "w", stdout);
+    if (res == nullptr)
+      fmt::print("can not redirect BPU info to {:s}", fileName);
+  }
   print("Total Result\n");
   print("FrontTotal: {:d}\n", frontTotal);
   print("FrontNoBrMiss: {:d}\n", frontNoBrMiss);
@@ -166,9 +212,11 @@ void difftestBrJmpStats(string baseName) {
   print("BackMiss: {:d}\n", backMiss);
   print("BackTakeMiss: {:d}\n", backTakeMiss);
   print("BackDestMiss: {:d}\n", backDestMiss);
-  print("Total hit Rate: {:f}\n\n",
-        1 - ((double)(backMiss) / (double)(backTotal)));
+  print("Total miss rate: {:f}\n\n",
+        ((double)(backMiss) / (double)(backTotal)));
 
+  uint32_t brTotal = 0;
+  uint32_t brMiss = 0;
   for (auto &btbType : BtbType) {
     frontTotal = 0;
     frontNoBrMiss = 0;
@@ -177,6 +225,15 @@ void difftestBrJmpStats(string baseName) {
     backTakeMiss = 0;
     backDestMiss = 0;
     diffInstNum = 0;
+    auto cmp = [](const std::tuple<uint32_t, word_t, uint32_t> &a,
+                  const std::tuple<uint32_t, word_t, uint32_t> &b) {
+      return std::get<0>(a) < std::get<0>(b);
+    };
+    std::priority_queue<std::tuple<uint32_t, word_t, uint32_t>,
+                        std::vector<std::tuple<uint32_t, word_t, uint32_t>>,
+                        decltype(cmp)>
+        max_heap(cmp);
+
     for (const auto it : instrInfo) {
       if (it.second.btbType == btbType.first) {
         auto &info = it.second;
@@ -187,6 +244,9 @@ void difftestBrJmpStats(string baseName) {
         backTakeMiss += info.takeMiss;
         backDestMiss += info.destMiss;
         diffInstNum++;
+        if (it.second.btbType == 0b1) {
+          max_heap.push(make_tuple(info.takeMiss, it.first, info.total));
+        }
       }
     }
     print("{:s} Result\n", btbType.second);
@@ -197,8 +257,20 @@ void difftestBrJmpStats(string baseName) {
     print("BackMiss: {:d}\n", backMiss);
     print("BackTakeMiss: {:d}\n", backTakeMiss);
     print("BackDestMiss: {:d}\n", backDestMiss);
-    print("Total miss Rate: {:f}\n\n",
-          1 - ((double)(backMiss) / (double)(backTotal)));
+    print("Total miss rate: {:f}\n\n",
+          ((double)(backMiss) / (double)(backTotal)));
+
+    while (!max_heap.empty()) {
+      auto t = max_heap.top();
+      auto missNum = get<0>(t);
+      auto totalNum = get<2>(t);
+      brTotal += totalNum;
+      brMiss += missNum;
+      if (missNum != 0)
+        print("[" HEX_WORD "]: {:d}/{:d} = {:f}\n", get<1>(t), missNum,
+              totalNum, (double)missNum / (double)totalNum);
+      max_heap.pop();
+    }
   }
   if (baseName != "") {
     fclose(file);
@@ -206,7 +278,28 @@ void difftestBrJmpStats(string baseName) {
     if (res == nullptr)
       print("can not redirect tty");
   }
+  print("MyCPU Total Br Miss Rate: {:5d}/{:5d} = {:.6f}\n", brMiss, brTotal,
+        (double)brMiss / (double)brTotal);
 }
+#else
+void difftestBrJmpStats(string baseName) {}
+extern "C" void v_difftest_PHTWrite(int io_tagIdx, const char *io_instrOff,
+                                    const svBit *io_wen, const char *io_count) {
+}
+extern "C" void v_difftest_BTBWrite(int io_tagIdx, const char *io_instrOff,
+                                    const svBit *io_wen, const int *io_target,
+                                    const char *io_btbType) {}
+extern "C" void v_difftest_SpecRAS(svBit io_push, int io_pushData, int io_pop,
+                                   int io_topData, svBit io_flush) {}
+extern "C" void v_difftest_ArchRAS(svBit io_push, int io_pushData, int io_pop,
+                                   int io_topData) {}
+extern "C" void v_difftest_BackPred(int io_debugPC, svBit io_predTake,
+                                    svBit io_realTake, int io_predDest,
+                                    int io_realDest, char io_btbType) {}
+extern "C" void v_difftest_FrontPred(const int *io_debugPC,
+                                     const char *io_predType,
+                                     const char *io_realType) {}
+#endif
 
 #undef dblog
 #undef dbError

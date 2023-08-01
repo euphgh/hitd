@@ -115,9 +115,9 @@ void tinyShell() {
   if (sim_status == SIM_END) {
     print("Simulation end at {:d}, saving Nemu state, please waiting ...\n",
           ticks);
-    nemu->isa_reg_display("logs/Nemu-State.txt");
     return;
   }
+  nemu->isa_reg_display("logs/Nemu-State.txt");
   print("now tick is {:d}, print `help` for more\n", ticks);
   tinyShellEnd = false;
   char *line;

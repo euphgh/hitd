@@ -51,7 +51,8 @@ static bool sim_end_statistics(dual_soc &soc, string waveName) { /*{{{*/
     break;
   case SIM_END:
     mycpu_log->info("mycpu pass test");
-    difftestBrJmpStats("Branch-Jump-Stats-" + waveName + ".txt");
+    difftestBrJmpStats("MyCPUBrJmpStats" + waveName + ".txt");
+    nemu->lhts.show("NemuBrStats" + waveName + ".txt");
     res = true;
     break;
   case SIM_NEMU_QUIT:
@@ -145,6 +146,8 @@ bool mainloop(Vmycpu_top *top, axi_paddr *axi, std::string wave_name,
   }
 
   top->aresetn = 1;
+  nemu->lhts.resetStats();
+  difftestBrJmpReset();
 
   if (arg_ssDirStr != "") {
     nemu->loadSnapShot(arg_ssDirStr);
