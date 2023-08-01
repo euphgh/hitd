@@ -24,7 +24,6 @@
 #include <nemu/cpu/ifetch.hpp>
 #include "isa-def.hpp"
 #include "utils.hpp"
-#include <csignal>
 
 enum {
   TYPE_I, // signed extended imm

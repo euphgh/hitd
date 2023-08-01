@@ -51,11 +51,12 @@ static string bpuHash(word_t addr) {
 }
 
 extern "C" void v_difftest_PHTWrite(int io_tagIdx, const char *io_instrOff,
-                                    const svBit *io_wen, const char *io_count) {
+                                    const svBit *io_wen, const char *io_count,
+                                    const svBit *io_take) {
   for (int i = 0; i < 4; i++) {
     if (io_wen[i]) {
       auto pc = (io_tagIdx << 5) | (io_instrOff[i] << 2);
-      dblog("PHT({:s})={:b}", bpuHash(pc), io_count[i]);
+      dblog("PHT({:s})={:b} {}", bpuHash(pc), io_count[i], (bool)io_take[i]);
     }
   }
 }
@@ -137,16 +138,9 @@ extern "C" void v_difftest_FrontPred(const int *io_debugPC,
   }
 }
 
+void difftestBrJmpReset() { instrInfo.clear(); }
 void difftestBrJmpStats(string baseName) {
-  FILE *file = nullptr;
-  extern string genTimeStr();
-  string fileName = "./logs/" + genTimeStr() + "-" + baseName;
-  if (baseName != "") {
-    file = fopen(fileName.c_str(), "w");
-    auto res = freopen(fileName.c_str(), "w", stdout);
-    if (res == nullptr)
-      fmt::print("can not redirect BPU info to {:s}", fileName);
-  }
+
   uint32_t frontTotal = 0;
   uint32_t frontNoBrMiss = 0;
   uint32_t backTotal = 0;
@@ -164,6 +158,17 @@ void difftestBrJmpStats(string baseName) {
     backDestMiss += info.destMiss;
     diffInstNum++;
   }
+  print("MyCPU Total    Miss Rate: {:4d}/{:4d} = {:.6f}\n", backMiss, backTotal,
+        ((double)(backMiss) / (double)(backTotal)));
+  FILE *file = nullptr;
+  extern string genTimeStr();
+  string fileName = "./logs/" + genTimeStr() + "-" + baseName;
+  if (baseName != "") {
+    file = fopen(fileName.c_str(), "w");
+    auto res = freopen(fileName.c_str(), "w", stdout);
+    if (res == nullptr)
+      fmt::print("can not redirect BPU info to {:s}", fileName);
+  }
   print("Total Result\n");
   print("FrontTotal: {:d}\n", frontTotal);
   print("FrontNoBrMiss: {:d}\n", frontNoBrMiss);
@@ -175,6 +180,8 @@ void difftestBrJmpStats(string baseName) {
   print("Total miss rate: {:f}\n\n",
         ((double)(backMiss) / (double)(backTotal)));
 
+  uint32_t brTotal = 0;
+  uint32_t brMiss = 0;
   for (auto &btbType : BtbType) {
     frontTotal = 0;
     frontNoBrMiss = 0;
@@ -217,22 +224,18 @@ void difftestBrJmpStats(string baseName) {
     print("BackDestMiss: {:d}\n", backDestMiss);
     print("Total miss rate: {:f}\n\n",
           ((double)(backMiss) / (double)(backTotal)));
-    uint32_t cnt = 0;
-    uint8_t order = 32;
+
     while (!max_heap.empty()) {
       auto t = max_heap.top();
       auto missNum = get<0>(t);
       auto totalNum = get<2>(t);
-      if (order--) {
-        cnt += missNum;
-      }
+      brTotal += totalNum;
+      brMiss += missNum;
       if (missNum != 0)
         print("[" HEX_WORD "]: {:d}/{:d} = {:f}\n", get<1>(t), missNum,
               totalNum, (double)missNum / (double)totalNum);
       max_heap.pop();
     }
-    print("First 32: {:d}/{:d} = {:f}\n", cnt, backMiss,
-          (double)cnt / (double)backMiss);
   }
   if (baseName != "") {
     fclose(file);
@@ -240,6 +243,8 @@ void difftestBrJmpStats(string baseName) {
     if (res == nullptr)
       print("can not redirect tty");
   }
+  print("MyCPU Total Br Miss Rate: {:5d}/{:5d} = {:.6f}\n", brMiss, brTotal,
+        (double)brMiss / (double)brTotal);
 }
 #else
 void difftestBrJmpStats(string baseName) {}

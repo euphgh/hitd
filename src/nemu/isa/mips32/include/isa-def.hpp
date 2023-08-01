@@ -23,6 +23,7 @@
 #include "isa/mmu.hpp"
 #include "macro.hpp"
 #include "nemu/cpu/decode.hpp"
+#include "nemu/cpu/lht.hpp"
 #include "nemu/memory/vaddr.hpp"
 #include "nemu/mytrace.hpp"
 #include "paddr/paddr_interface.hpp"
@@ -139,6 +140,7 @@ private:
     delay_slot_npc = dest;
   }                                                            /*}}}*/
   inline void inst_branch(bool cond, word_t imm, word_t npc) { /*{{{*/
+    lhts.predict(inst_state.pc, cond);
     inst_jump(cond ? (imm + npc) : (4 + npc));
   }                         /*}}}*/
   inline void inst_eret() { /*{{{*/
@@ -276,6 +278,7 @@ private:
   ftracer mips_ftracer;
 
 public:
+  LocHisTable<> lhts;
   // void isa_ftrace();
   // void isa_call_stack();
 };
