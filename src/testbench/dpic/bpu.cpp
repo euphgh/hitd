@@ -1,6 +1,7 @@
 #include "common.hpp"
 #include "debug.hpp"
 #include "macro.hpp"
+#include "nemu/cpu/lht.hpp"
 #include "testbench/difftest/global_info.hpp"
 #include "verilated_dpi.h"
 #include <algorithm>
@@ -15,6 +16,7 @@
 
 using namespace std;
 using namespace fmt;
+LocHisTable<> mycpuLht;
 
 struct BJInfo {
   uint8_t btbType;
@@ -57,6 +59,7 @@ extern "C" void v_difftest_PHTWrite(int io_tagIdx, const char *io_instrOff,
     if (io_wen[i]) {
       auto pc = (io_tagIdx << 5) | (io_instrOff[i] << 2);
       dblog("PHT({:s})={:b} {}", bpuHash(pc), io_count[i], (bool)io_take[i]);
+      mycpuLht.update(pc, io_take[i]);
     }
   }
 }
@@ -134,6 +137,27 @@ extern "C" void v_difftest_FrontPred(const int *io_debugPC,
             (word_t)io_debugPC[i], bpuHash(io_debugPC[i]),
             BtbType[io_predType[i]]);
       info.frontNoBrMiss += 1;
+    }
+  }
+}
+
+static word_t savedPC[4];
+extern "C" void v_difftest_LHTRead(const int *io_readAddr,
+                                   const svBit *io_readTake,
+                                   const char *io_readCnt, svBit io_outOK) {
+  for (int i = 0; i < 4; i++) {
+    savedPC[i] = io_readAddr[i];
+  }
+  if (io_outOK) {
+    for (int i = 0; i < 4; i++) {
+      auto refRes = mycpuLht.getLhtRes(savedPC[i]);
+      auto refTake = get<0>(refRes);
+      auto refCnt = get<1>(refRes);
+      bool dutTake = io_readTake[i];
+      uint8_t dutCnt = io_readCnt[i];
+      if (refTake != io_readTake[i] || refCnt != io_readCnt[i]) {
+        dblog("ref={}, {}; dut = {}, {}", refTake, refCnt, dutTake, dutCnt);
+      }
     }
   }
 }
@@ -245,6 +269,7 @@ void difftestBrJmpStats(string baseName) {
   }
   print("MyCPU Total Br Miss Rate: {:5d}/{:5d} = {:.6f}\n", brMiss, brTotal,
         (double)brMiss / (double)brTotal);
+  mycpuLht.show("RefLHT.txt");
 }
 #else
 void difftestBrJmpStats(string baseName) {}

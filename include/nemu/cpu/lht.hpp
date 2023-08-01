@@ -75,18 +75,25 @@ public:
     } else
       clearCnt--;
   }
-
-  void predict(word_t pc, bool realtake) {
+  std::tuple<bool, uint8_t> getLhtRes(word_t pc) {
     auto set = BITS(pc, 3, 2);
     auto idx = BITS(pc, 4 + idxWidth - 1, 4);
     auto tag = BITS(pc, 31, 4 + idxWidth);
-    auto &info = missRates[pc];
     RegDatas &lht = lhts[set];
     bool predTake = false;
     if (lht.allTags[idx] == tag) {
       predTake = lht.takeCnts[idx][lht.his[idx]] > 1;
     }
+    return std::make_tuple(predTake, lht.clearCnt[idx]);
+  }
 
+  void predict(word_t pc, bool realtake) {
+    auto lhtRes = getLhtRes(pc);
+    bool predTake = std::get<0>(lhtRes);
+
+    auto set = BITS(pc, 3, 2);
+    auto idx = BITS(pc, 4 + idxWidth - 1, 4);
+    auto tag = BITS(pc, 31, 4 + idxWidth);
     auto &pht = phts[set];
     auto phtPred = false;
     auto phtHit = (pht.tags[idx] == tag) && pht.valid[idx];
@@ -100,9 +107,10 @@ public:
       pht.cnt[idx] = realtake ? 2 : 0;
     }
 
-    if (lht.clearCnt[idx] < 14)
+    if (std::get<1>(lhtRes) < 0)
       predTake = phtPred;
 
+    auto &info = missRates[pc];
     auto miss = std::get<0>(info) + (predTake != realtake);
     auto total = std::get<1>(info) + 1;
     info = std::make_tuple(miss, total);
@@ -122,8 +130,9 @@ public:
       totalMissNum += std::get<0>(it.second);
       totalInstrNum += std::get<1>(it.second);
     }
-    fmt::print("Nemu  Total Br Miss Rate: {:5d}/{:5d} = {:.6f}\n", totalMissNum,
-               totalInstrNum, (double)totalMissNum / (double)totalInstrNum);
+    fmt::print("{:s} Total Br Miss Rate: {:5d}/{:5d} = {:.6f}\n", baseName,
+               totalMissNum, totalInstrNum,
+               (double)totalMissNum / (double)totalInstrNum);
 
     FILE *file = nullptr;
     extern std::string genTimeStr();
