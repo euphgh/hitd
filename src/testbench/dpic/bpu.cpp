@@ -285,6 +285,7 @@ void difftestBrJmpStats(string baseName) {
 }
 #else
 void difftestBrJmpStats(string baseName) {}
+void difftestBrJmpReset() {}
 extern "C" void v_difftest_PHTWrite(int io_tagIdx, const char *io_instrOff,
                                     const svBit *io_wen, const char *io_count) {
 }
@@ -295,6 +296,15 @@ extern "C" void v_difftest_SpecRAS(svBit io_push, int io_pushData, int io_pop,
                                    int io_topData, svBit io_flush) {}
 extern "C" void v_difftest_ArchRAS(svBit io_push, int io_pushData, int io_pop,
                                    int io_topData) {}
+extern "C" void v_difftest_BackPred(int io_debugPC, svBit io_predTake,
+                                    svBit io_realTake, int io_predDest,
+                                    int io_realDest, char io_btbType) {}
+extern "C" void v_difftest_FrontPred(const int *io_debugPC,
+                                     const char *io_predType,
+                                     const char *io_realType) {}
+extern "C" void v_difftest_LHTRead(const int *io_readAddr,
+                                   const svBit *io_readTake,
+                                   const char *io_readCnt, svBit io_outOK) {}
 #endif
 
 #undef dblog
