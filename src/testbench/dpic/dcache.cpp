@@ -144,7 +144,8 @@ extern "C" void v_difftest_CacheRun(
   }
   if (state[newMap].instrState == fake) {
     if (state[oldMap].instrState != fake)
-      dclog("{:s}", cacheOpStr[(CacheOp)io_instrOp]);
+      dclog("{:s} with addr: " HEX_WORD, cacheOpStr[(CacheOp)io_instrOp],
+            (word_t)io_reqAddr);
   }
 
   if (state[newMap].writeState != state[oldMap].writeState) {
