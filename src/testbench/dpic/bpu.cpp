@@ -7,7 +7,6 @@
 #include "verilated_dpi.h"
 #include <algorithm>
 #include <cinttypes>
-#include <cstdint>
 #include <fmt/core.h>
 #include <tuple>
 #include <vector>
@@ -131,7 +130,7 @@ extern "C" void v_difftest_BackPred(int io_debugPC, svBit io_predTake,
            string(realTake ? "true " : "false");
   };
   dblog("{:s} " HEX_WORD " {:s}", BtbType[io_btbType], (word_t)io_debugPC,
-        missStr(takeMiss, io_predTake, destMiss));
+        missStr(io_realTake, io_predTake, destMiss));
   bjType = io_btbType;
 }
 extern "C" void v_difftest_FrontPred(const int *io_debugPC,
@@ -246,9 +245,6 @@ void difftestBrJmpStats(string baseName) {
         backTakeMiss += info.takeMiss;
         backDestMiss += info.destMiss;
         diffInstNum++;
-        if (it.second.btbType == 0b1) {
-          max_heap.push(make_tuple(info.takeMiss, it.first, info.total));
-        }
       }
     }
     print("{:s} Result\n", btbType.second);
