@@ -1,22 +1,25 @@
 [*]
 [*] GTKWave Analyzer v3.3.115 (w)1999-2023 BSI
-[*] Thu Aug  3 08:25:55 2023
+[*] Thu Aug  3 16:41:23 2023
 [*]
-[dumpfile] "/home/hgh/mnt/wave/perf-1.fst"
-[dumpfile_mtime] "Thu Aug  3 08:25:31 2023"
-[dumpfile_size] 300362
+[dumpfile] "/home/hgh/mnt/wave/perf-10.fst"
+[dumpfile_mtime] "Thu Aug  3 16:22:06 2023"
+[dumpfile_size] 33205749
 [savefile] "/home/hgh/mnt/configs/linux.sav"
-[timestart] 4263
+[timestart] 220944
 [size] 1920 989
 [pos] -1 -1
-*-2.600000 4272 4064 4298 4270 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-2.900000 220958 4262 4484 4504 220884 220858 220832 220910 220936 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.mycpu_top.
+[treeopen] TOP.mycpu_top.backend.
+[treeopen] TOP.mycpu_top.backend.lsuFU.
 [treeopen] TOP.mycpu_top.backend.lsuFU.memStage1.cache1.datas_0.array_ext.unnamedblk1.
-[treeopen] TOP.mycpu_top.backend.lsuFU.memStage2.cache2.
+[treeopen] TOP.mycpu_top.backend.lsuFU.memStage2.
+[treeopen] TOP.mycpu_top.backend.lsuFU.memStage2.uBuffer.
+[treeopen] TOP.mycpu_top.backend.lsuRS.
 [treeopen] TOP.mycpu_top.backend.mduFU.clz.
 [treeopen] TOP.mycpu_top.backend.rob.robEntries.unnamedblk3.
-[treeopen] TOP.mycpu_top.frontend.
 [treeopen] TOP.mycpu_top.frontend.instFetch.
 [sst_width] 507
 [signals_width] 515
@@ -48,7 +51,7 @@ TOP.mycpu_top.backend.prf.checkArchRegs.io_gpr_8[31:0]
 TOP.mycpu_top.backend.rob.difftestRetire.io_retireNum[7:0]
 @1401200
 -prf
-@800200
+@c00200
 -Difftest-Retire
 @28
 TOP.mycpu_top.backend.rob.difftestRetire.io_clock
@@ -56,9 +59,9 @@ TOP.mycpu_top.backend.rob.difftestRetire.io_clock
 TOP.mycpu_top.backend.rob.difftestRetire.io_interrSeq[7:0]
 TOP.mycpu_top.backend.rob.difftestRetire.io_lastPC[31:0]
 TOP.mycpu_top.backend.rob.difftestRetire.io_retireNum[7:0]
-@1000200
+@1401200
 -Difftest-Retire
-@800200
+@c00200
 -ROB-PUSH
 @22
 TOP.mycpu_top.backend.rob.robEntries.headPtr[5:0]
@@ -73,9 +76,9 @@ TOP.mycpu_top.backend.rob.robEntries.io_push_1_valid
 TOP.mycpu_top.backend.rob.robEntries.io_push_2_bits_debugPC[31:0]
 @28
 TOP.mycpu_top.backend.rob.robEntries.io_push_2_valid
-@1000200
+@1401200
 -ROB-PUSH
-@800200
+@c00200
 -Rob-Pop
 @28
 TOP.mycpu_top.backend.rob.robEntries.io_flush
@@ -104,7 +107,6 @@ TOP.mycpu_top.backend.rob.state[2:0]
 (2)TOP.mycpu_top.backend.rob.state[2:0]
 @1401200
 -group_end
-@1000200
 -Rob-Pop
 @c00200
 -PRF-WB
@@ -217,7 +219,7 @@ TOP.mycpu_top.backend.prf.checkArchRegs.io_gpr_2[31:0]
 TOP.mycpu_top.backend.prf.checkArchRegs.io_gpr_3[31:0]
 @1401200
 -PRF
-@c00200
+@c00201
 -INSTBUFFER
 @28
 TOP.mycpu_top.aclk
@@ -306,9 +308,9 @@ TOP.mycpu_top.frontend.instBuffer.ib.io_pop_2_valid
 -pop
 @28
 TOP.mycpu_top.frontend.instBuffer.ib.io_flush
-@1401200
+@1401201
 -INSTBUFFER
-@800200
+@c00200
 -if2
 @28
 TOP.mycpu_top.frontend.instFetch.ifStage2.io_in_valid
@@ -331,9 +333,8 @@ TOP.mycpu_top.frontend.instFetch.ifStage2.io_out_bits_validMask_1
 TOP.mycpu_top.frontend.instFetch.ifStage2.validBranch_1
 @22
 TOP.mycpu_top.frontend.instFetch.ifStage2.io_out_bits_basicInstInfo_2_pcVal[31:0]
-@29
-TOP.mycpu_top.frontend.instFetch.ifStage2.io_out_bits_validMask_2
 @28
+TOP.mycpu_top.frontend.instFetch.ifStage2.io_out_bits_validMask_2
 TOP.mycpu_top.frontend.instFetch.ifStage2.io_out_bits_validMask_2
 TOP.mycpu_top.frontend.instFetch.ifStage2.validBranch_2
 @22
@@ -353,7 +354,119 @@ TOP.mycpu_top.frontend.instFetch.ifStage2.io_out_bits_dsDstRedir_target[31:0]
 TOP.mycpu_top.frontend.instFetch.ifStage2.io_selfFlush
 TOP.mycpu_top.frontend.instFetch.ifStage2.io_out_valid
 TOP.mycpu_top.frontend.instFetch.ifStage2.io_out_ready
-@1000200
+@1401200
 -if2
+@800200
+-MyCPU-AW
+@22
+TOP.mycpu_top.awaddr[31:0]
+TOP.mycpu_top.awid[3:0]
+TOP.mycpu_top.awlen[3:0]
+@28
+TOP.mycpu_top.awsize[2:0]
+TOP.mycpu_top.awburst[1:0]
+TOP.mycpu_top.awvalid
+TOP.mycpu_top.awready
+@1000200
+-MyCPU-AW
+@800200
+-MyCPU-W
+@22
+TOP.mycpu_top.wdata[31:0]
+TOP.mycpu_top.wid[3:0]
+TOP.mycpu_top.wstrb[3:0]
+@28
+TOP.mycpu_top.wvalid
+TOP.mycpu_top.wready
+TOP.mycpu_top.wlast
+@1000200
+-MyCPU-W
+@800200
+-UartBuffer
+-enq
+@28
+TOP.mycpu_top.backend.lsuFU.memStage2.uBuffer.io_enq_valid
+TOP.mycpu_top.backend.lsuFU.memStage2.uBuffer.io_enq_ready
+@22
+TOP.mycpu_top.backend.lsuFU.memStage2.uBuffer.io_enq_bits[7:0]
+TOP.mycpu_top.backend.lsuFU.memStage2.uBuffer.fewCnt[3:0]
+@1000200
+-enq
+@800200
+-deq
+@22
+TOP.mycpu_top.backend.lsuFU.memStage2.uBuffer.ram.io_deq_bits[7:0]
+@28
+TOP.mycpu_top.backend.lsuFU.memStage2.uBuffer.ram.io_deq_valid
+TOP.mycpu_top.backend.lsuFU.memStage2.uBuffer.ram.io_deq_ready
+@1000200
+-deq
+@28
+TOP.mycpu_top.backend.lsuFU.memStage2.uBuffer.state[1:0]
+@800200
+-aw
+@22
+TOP.mycpu_top.backend.lsuFU.memStage2.uBuffer.io_dram_aw_bits_len[3:0]
+@28
+TOP.mycpu_top.backend.lsuFU.memStage2.uBuffer.io_dram_aw_valid
+TOP.mycpu_top.backend.lsuFU.memStage2.uBuffer.io_dram_aw_ready
+TOP.mycpu_top.backend.lsuFU.memStage2.uBuffer.awOk
+@1000200
+-aw
+@800200
+-w
+@22
+TOP.mycpu_top.backend.lsuFU.memStage2.uBuffer.io_dram_w_bits_data[31:0]
+@28
+TOP.mycpu_top.backend.lsuFU.memStage2.uBuffer.io_dram_w_bits_last
+TOP.mycpu_top.backend.lsuFU.memStage2.uBuffer.io_dram_w_valid
+TOP.mycpu_top.backend.lsuFU.memStage2.uBuffer.io_dram_w_ready
+TOP.mycpu_top.backend.lsuFU.memStage2.uBuffer.wOk
+@1000200
+-w
+@28
+TOP.mycpu_top.backend.lsuFU.memStage2.uBuffer.io_dram_b_ready
+TOP.mycpu_top.backend.lsuFU.memStage2.uBuffer.io_dram_b_valid
+@1000200
+-UartBuffer
+@800200
+-Mem2
+@22
+TOP.mycpu_top.backend.lsuFU.memStage2.io_dmem_aw_bits_addr[31:0]
+TOP.mycpu_top.backend.lsuFU.memStage2.io_dmem_aw_bits_id[3:0]
+TOP.mycpu_top.backend.lsuFU.memStage2.io_dmem_aw_bits_len[3:0]
+@28
+TOP.mycpu_top.backend.lsuFU.memStage2.io_dmem_aw_bits_size[2:0]
+TOP.mycpu_top.backend.lsuFU.memStage2.io_dmem_aw_bits_burst[1:0]
+TOP.mycpu_top.backend.lsuFU.memStage2.io_dmem_aw_valid
+TOP.mycpu_top.backend.lsuFU.memStage2.io_dmem_aw_ready
+@1000200
+-Mem2
+@800200
+-Cache2
+-AW
+@22
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_dram_aw_bits_addr[31:0]
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_dram_aw_bits_len[3:0]
+@28
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_dram_aw_bits_size[2:0]
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_dram_aw_valid
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_dram_aw_ready
+@1000200
+-AW
+@800200
+-W
+@22
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_dram_w_bits_data[31:0]
+@28
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_dram_w_bits_last
+@22
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_dram_w_bits_strb[3:0]
+@28
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_dram_w_valid
+TOP.mycpu_top.backend.lsuFU.memStage2.cache2.io_dram_w_ready
+@1000200
+-W
+-Cache2
 [pattern_trace] 1
 [pattern_trace] 0
