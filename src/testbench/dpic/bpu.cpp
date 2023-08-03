@@ -245,6 +245,9 @@ void difftestBrJmpStats(string baseName) {
         backTakeMiss += info.takeMiss;
         backDestMiss += info.destMiss;
         diffInstNum++;
+        if (it.second.btbType == 0b1) {
+          max_heap.push(make_tuple(info.takeMiss, it.first, info.total));
+        }
       }
     }
     print("{:s} Result\n", btbType.second);
