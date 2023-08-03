@@ -52,6 +52,7 @@ static bool sim_end_statistics(dual_soc &soc, string waveName) { /*{{{*/
   case SIM_END:
     mycpu_log->info("mycpu pass test");
     difftestBrJmpStats("MyCPUBrJmpStats" + waveName + ".txt");
+    difftestBCacheStats();
     nemu->lhts.show("NemuBrStats" + waveName + ".txt");
     res = true;
     break;
