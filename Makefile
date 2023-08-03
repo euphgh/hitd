@@ -28,3 +28,6 @@ include $(HITD_HOME)/scripts/config.mk
 
 # use verilator ar and cpp compile elf
 include $(HITD_HOME)/scripts/cpp_to_elf.mk
+
+perfall:
+	python ./tools/perf_all.py
