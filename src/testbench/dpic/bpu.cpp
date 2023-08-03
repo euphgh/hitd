@@ -120,8 +120,8 @@ extern "C" void v_difftest_BackPred(int io_debugPC, svBit io_predTake,
   info.destMiss += destMiss;
   auto &bjType = info.btbType;
   if ((bjType != io_btbType) && (bjType != 0b0)) {
-    dbError("instr " HEX_WORD " has two type: {:s} {:s}", (word_t)io_debugPC,
-            BtbType[bjType], BtbType[io_btbType]);
+    dblog("instr " HEX_WORD " has two type: {:s} {:s}", (word_t)io_debugPC,
+          BtbType[bjType], BtbType[io_btbType]);
   }
   auto missStr = [](bool realTake, bool predTake, bool DestMiss) {
     return string(realTake != predTake   ? "takeMiss "
