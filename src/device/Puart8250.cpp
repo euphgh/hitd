@@ -1,8 +1,10 @@
+#include "common.hpp"
 #include "macro.hpp"
 #include "paddr/paddr_interface.hpp"
 #include "testbench/sim_state.hpp"
 #include <csignal>
 #include <cstdio>
+#include <cstdlib>
 
 #define UART8250_TX_RX_DLL 0
 #define UART8250_IER_DLM 1
@@ -26,8 +28,9 @@ bool Puart8250::do_read(word_t addr, wen_t info, word_t *data) { /*{{{*/
   std::unique_lock<std::mutex> lock(rx_lock);
   *data = 0;
   if (info.size != 1) {
-    log_pt->error("read uart8250 size not 1");
-    return false;
+    log_pt->warn("read uart8250 size not 1");
+    *data = rand();
+    return true;
   }
   switch (addr) {
   case UART8250_TX_RX_DLL: {
@@ -83,10 +86,8 @@ bool Puart8250::do_read(word_t addr, wen_t info, word_t *data) { /*{{{*/
     break;
   }
   default:
-    IFDEF(
-        CONFIG_NSC_DIFF,
-        __ASSERT_SIM__(false, "read not exist addr of uart: " HEX_WORD, addr));
-    return false;
+    log_pt->warn(fmt::format("Read not exist addr of uart: " HEX_WORD, addr));
+    return true;
   }
   return true;
 } /*}}}*/
@@ -95,7 +96,7 @@ bool Puart8250::do_write(word_t addr, wen_t info, const word_t data) { /*{{{*/
   std::unique_lock<std::mutex> lock_rx(rx_lock);
   bool res = true;
   if (info.size != 1) {
-    log_pt->error("write uart8250 size not 1");
+    log_pt->error("WRITE uart8250 size not 1");
     return false;
   }
   switch (addr) {
@@ -137,7 +138,7 @@ bool Puart8250::do_write(word_t addr, wen_t info, const word_t data) { /*{{{*/
   case UART8250_MSR:
   case UART8250_SCR:
   default:
-    log_pt->error("write uart8250 addr %v error", addr);
+    log_pt->error(fmt::format("WRITE not exist addr of uart: " HEX_WORD, addr));
     return false;
   }
   return res;
