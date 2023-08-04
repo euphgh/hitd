@@ -149,6 +149,9 @@ bool mainloop(Vmycpu_top *top, axi_paddr *axi, std::string wave_name,
   top->aresetn = 1;
   nemu->lhts.resetStats();
   difftestBrJmpReset();
+  while (!randQueue.empty()) {
+    randQueue.pop();
+  }
 
   if (arg_ssDirStr != "") {
     nemu->loadSnapShot(arg_ssDirStr);
