@@ -113,6 +113,11 @@ config BTRACE
   bool "Trace branch predict units"
   default n
 
+config UTRACE
+  depends on TRACE
+  bool "Trace Uart Buffer IO"
+  default n
+
 config SNAPSHOT_AUTO
   bool "Enable Automatically save snapshot"
   default n
