@@ -14,4 +14,5 @@ void difftestTlbCheck();
 void difftestBrJmpStats(std::string fileName = "");
 void difftestBCacheStats();
 void difftestBrJmpReset();
+void difftestResetUartStats();
 #endif
