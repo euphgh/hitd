@@ -21,6 +21,7 @@ static uint32_t totalFireIn = 0;
 static uint32_t missFireIn = 0;
 static string getIdx(word_t pc) { return format("{:02x}", BITS(pc, 6, 2)); }
 
+#ifdef CONFIG_BTRACE
 extern "C" void v_difftest_BCache(svBit io_hasBranch, svBit io_dsFetch,
                                   svBit io_bCacheHit, svBit io_bCacheUse,
                                   int io_bCacheDst, int io_predictDst,
@@ -75,6 +76,15 @@ void difftestBCacheStats() {
   print("BCache Miss Rate: {:5d} / {:5d} = {:.6f}\n", missFireIn, totalFireIn,
         (double)missFireIn / (double)totalFireIn);
 }
+#else
+extern "C" void v_difftest_BCache(svBit io_hasBranch, svBit io_dsFetch,
+                                  svBit io_bCacheHit, svBit io_bCacheUse,
+                                  int io_bCacheDst, int io_predictDst,
+                                  svBit io_wen, int io_wPC, int io_wDst,
+                                  char io_state, svBit io_fireIn,
+                                  int io_pcVal) {}
+void difftestBCacheStats() {}
+#endif
 
 #undef dglog
 #undef dgError
