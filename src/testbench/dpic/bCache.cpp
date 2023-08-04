@@ -9,19 +9,19 @@
 using namespace std;
 using namespace fmt;
 
+#define dglog(str, ...) mycpu_log->trace(fmt::format("[G] " str, ##__VA_ARGS__))
+#define dgError(str, ...) mycpu_log->error(fmt::format(str, ##__VA_ARGS__))
+#ifdef CONFIG_BTRACE
+static uint8_t lastState = 0x0;
+static uint32_t totalFireIn = 0;
+static uint32_t missFireIn = 0;
 static map<uint8_t, string> predState = {
     make_pair(0x0, "normal"),
     make_pair(0x1, "waitDS"),
     make_pair(0x2, "comeDS"),
 };
-static uint8_t lastState = 0x0;
-#define dglog(str, ...) mycpu_log->trace(fmt::format("[G] " str, ##__VA_ARGS__))
-#define dgError(str, ...) mycpu_log->error(fmt::format(str, ##__VA_ARGS__))
-static uint32_t totalFireIn = 0;
-static uint32_t missFireIn = 0;
 static string getIdx(word_t pc) { return format("{:02x}", BITS(pc, 6, 2)); }
 
-#ifdef CONFIG_BTRACE
 extern "C" void v_difftest_BCache(svBit io_hasBranch, svBit io_dsFetch,
                                   svBit io_bCacheHit, svBit io_bCacheUse,
                                   int io_bCacheDst, int io_predictDst,
