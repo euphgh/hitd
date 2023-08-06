@@ -56,18 +56,27 @@ static string lhtHash(word_t addr) {
   return format("{:1x}_{:1d}", BITS(addr, 7, 4), BITS(addr, 3, 2));
 }
 
+static bool lastIsWrite[4] = {false, false, false, false};
+static bool lastTake[4];
+static word_t lastPC[4];
 extern "C" void v_difftest_PHTWrite(int io_tagIdx, const char *io_instrOff,
                                     const svBit *io_wen, const char *io_count,
                                     const svBit *io_take) {
   for (int i = 0; i < 4; i++) {
-    if (io_wen[i]) {
-      word_t pc = (io_tagIdx << 5) | (io_instrOff[i] << 2);
-      // dblog("PHT({:s})={:b} {}", bpuHash(pc), io_count[i], (bool)io_take[i]);
-
-      auto res = mycpuLht.update(pc, io_take[i]);
+    if (lastIsWrite[i]) {
+      word_t pc = lastPC[i];
+      word_t take = lastTake[i];
+      auto res = mycpuLht.update(pc, take);
       auto tagHit = get<0>(res) == (pc >> 8) ? "Hit" : "Miss";
       dblog("LHT({:s}) WR {:s} " HEX_WORD ", take {:b}, cnt {:d}", lhtHash(pc),
-            tagHit, pc, (bool)io_take[i], get<1>(res));
+            tagHit, pc, (bool)take, get<1>(res));
+    }
+    if (io_wen[i]) {
+      lastTake[i] = io_take[i];
+      lastPC[i] = (io_tagIdx << 6) | (io_instrOff[i] << 2);
+      lastIsWrite[i] = true;
+    } else {
+      lastIsWrite[i] = false;
     }
   }
 }
@@ -161,8 +170,9 @@ extern "C" void v_difftest_LHTRead(const int *io_readAddr,
       bool dutTake = io_readTake[i];
       uint8_t dutCnt = io_readCnt[i];
       if (refTake != io_readTake[i] || refCnt != io_readCnt[i]) {
-        dblog("LHT({:s}) ER ref={},{}; dut={},{}", lhtHash(savedPC[i]), refTake,
-              refCnt, dutTake, dutCnt);
+        dbError("LHT({:s}) ER ref={},{}; dut={},{}",
+                lhtHash((word_t)savedPC[i]), refTake, refCnt, dutTake, dutCnt);
+        sim_status = SIM_ABORT;
       }
     }
   }
