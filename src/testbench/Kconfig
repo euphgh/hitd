@@ -110,7 +110,12 @@ config CTRACE
 
 
 config BTRACE
+  depends on TRACE
   bool "Trace branch predict units"
+  default n
+
+config BRANCH_STATS
+  bool "Statistics branch predict rate"
   default n
 
 config UTRACE
