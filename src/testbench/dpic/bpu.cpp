@@ -36,7 +36,7 @@ map<uint8_t, string> BtbType = {
     make_pair(0b100, "JCALL"), make_pair(0b101, "JRET"),
     make_pair(0b110, "JMP"),   make_pair(0b111, "JR"),
 };
-static string bpuHash(word_t addr) {
+string bpuHash(word_t addr) {
   return format("{:03x}_{:1d}", BITS(addr, 13, 4), BITS(addr, 3, 2));
 }
 
