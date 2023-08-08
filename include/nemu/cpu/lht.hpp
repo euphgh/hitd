@@ -51,7 +51,7 @@ public:
            : cnt == 3 ? (take ? 3 : 2)
                       : (take ? cnt + 1 : cnt - 1);
   }
-  std::tuple<word_t, uint8_t> update(word_t pc, bool take) {
+  std::tuple<word_t, uint8_t, uint16_t, uint8_t> update(word_t pc, bool take) {
     auto set = BITS(pc, 3, 2);
     auto idx = BITS(pc, 4 + idxWidth - 1, 4);
     auto tag = BITS(pc, 31, 4 + idxWidth);
@@ -74,7 +74,9 @@ public:
       lht.takeCnts[idx][0] = take ? 2 : 0;
     } else
       clearCnt--;
-    return std::make_tuple(lht.allTags[idx], clearCnt);
+    auto newHis = lht.his[idx];
+    return std::make_tuple(lht.allTags[idx], clearCnt, newHis,
+                           lht.takeCnts[idx][newHis]);
   }
   std::tuple<bool, uint8_t> getLhtRes(word_t pc) {
     auto set = BITS(pc, 3, 2);

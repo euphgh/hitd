@@ -31,9 +31,7 @@ struct BJInfo {
         takeMiss(0), destMiss(0) {}
 };
 
-#ifdef CONFIG_BTRACE
-#ifdef CONFIG_BRANCH_STATS
-static map<uint8_t, string> BtbType = {
+map<uint8_t, string> BtbType = {
     make_pair(0b0, "NON"),     make_pair(0b1, "BR"),
     make_pair(0b100, "JCALL"), make_pair(0b101, "JRET"),
     make_pair(0b110, "JMP"),   make_pair(0b111, "JR"),
@@ -41,16 +39,6 @@ static map<uint8_t, string> BtbType = {
 static string bpuHash(word_t addr) {
   return format("{:03x}_{:1d}", BITS(addr, 13, 4), BITS(addr, 3, 2));
 }
-#endif
-#endif
-
-// static map<uint8_t, string> BranchType = {
-//     make_pair(0x0, "NON"),  make_pair(0x1, "BEQ"),    make_pair(0x2, "BNE"),
-//     make_pair(0x3, "BGEZ"), make_pair(0x4, "BLEZ"),   make_pair(0x5, "BLTZ"),
-//     make_pair(0x6, "BGTZ"), make_pair(0x7, "BLTZAL"), make_pair(0x8,
-//     "BGEZAL"), make_pair(0x9, "J"),    make_pair(0xa, "JAL"), make_pair(0xb,
-//     "JR"), make_pair(0xc, "JALR"), make_pair(0xd, "JRHB"),
-// };
 
 #ifdef CONFIG_BTRACE
 
@@ -70,8 +58,10 @@ extern "C" void v_difftest_PHTWrite(int io_tagIdx, const char *io_instrOff,
       word_t take = lastTake[i];
       auto res = mycpuLht.update(pc, take);
       auto tagHit = get<0>(res) == (pc >> 8) ? "Hit" : "Miss";
-      dblog("LHT({:s}) WR {:s} " HEX_WORD ", take {:b}, cnt {:d}", lhtHash(pc),
-            tagHit, pc, (bool)take, get<1>(res));
+      dblog("LHT({:s}) WR {:s} " HEX_WORD
+            ", take {:b}, clr {:d}, his {:09b}, cnt: {:d}",
+            lhtHash(pc), tagHit, pc, (bool)take, get<1>(res), get<2>(res),
+            get<3>(res));
     }
     if (io_wen[i]) {
       lastTake[i] = io_take[i];
