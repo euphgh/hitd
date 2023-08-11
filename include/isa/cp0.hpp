@@ -141,12 +141,12 @@
     f2(config1,16,1,\
             f1(m        ,31 ,31 ,0x0 ,__R__, __c__) /* 0: no config2 */ \
             f1(ms       ,30 ,25 ,CONFIG_TLB_NR-1,__R__, __c__) /* 7: 8 tlb item */ \
-            f1(is       ,24 ,22 ,0x0 ,__R__, __c__) /* 1: Icache sets per way 128 */ \
-            f1(il       ,21 ,19 ,0x5 ,__R__, __c__) /* 4: Icache line size 32bytes */ \
-            f1(ia       ,18 ,16 ,0x3 ,__R__, __c__) /* 3: Icache associativity 4-way */ \
-            f1(ds       ,15 ,13 ,0x0 ,__R__, __c__) /* 1: Dcache sets per way 128 */ \
-            f1(dl       ,12 ,10 ,0x5 ,__R__, __c__) /* 4: Dcache line size 32bytes */ \
-            f1(da       ,9  ,7  ,0x3 ,__R__, __c__) /* 3: Dcache associativity 4-way */ \
+            f1(is       ,24 ,22 ,0x0 ,__R__, __c__) /* 1: Icache sets per way 64 */ \
+            f1(il       ,21 ,19 ,0x5 ,__R__, __c__) /* 4: Icache line size 64bytes */ \
+            f1(ia       ,18 ,16 ,0x2 ,__R__, __c__) /* 3: Icache associativity 3-way */ \
+            f1(ds       ,15 ,13 ,0x0 ,__R__, __c__) /* 1: Dcache sets per way 64 */ \
+            f1(dl       ,12 ,10 ,0x5 ,__R__, __c__) /* 4: Dcache line size 64bytes */ \
+            f1(da       ,9  ,7  ,0x2 ,__R__, __c__) /* 3: Dcache associativity 3-way */ \
             f1(c2       ,6  ,6  ,0x0 ,__R__, __c__) /* 0: no COP2    */ \
             f1(md       ,5  ,5  ,0x0 ,__R__, __c__) /* 0: no MDMX    */ \
             f1(pc       ,4  ,4  ,0x0 ,__R__, __c__) /* 0: no perf counter   */ \
