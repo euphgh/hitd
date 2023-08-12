@@ -1,5 +1,23 @@
 menu "AXI Options"# {{{
 
+config AXI_READ_DELAY_MIN
+int "Random minimum read delay"
+default 0
+
+config AXI_READ_DELAY_MAX
+int "Random maximum read delay"
+range AXI_READ_DELAY_MIN 2147483647
+default 1
+
+config AXI_WRITE_DELAY_MIN
+int "Random minimum write delay"
+default 0
+
+config AXI_WRITE_DELAY_MAX
+int "Stop perference test after run which program"
+range AXI_WRITE_DELAY_MIN 2147483647
+default 1
+
 config AXI_DWID
 int "AXI bus data channal width"
 default 32

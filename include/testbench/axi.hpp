@@ -150,8 +150,18 @@ class axi_paddr{
         void idel_wait_write();
         bool write_eval();
 
-        inline int r_delay() { return 25; }
-        inline int w_delay() { return 3; }
+  inline int r_delay() {
+    return MUXDEF(
+        CONFIG_TEST_PERF, 25,
+        rand() % (CONFIG_AXI_READ_DELAY_MAX - CONFIG_AXI_READ_DELAY_MIN + 1) +
+            CONFIG_AXI_READ_DELAY_MIN;)
+  }
+  inline int w_delay() {
+    return MUXDEF(
+        CONFIG_TEST_PERF, 3,
+        rand() % (CONFIG_AXI_WRITE_DELAY_MAX - CONFIG_AXI_WRITE_DELAY_MIN + 1) +
+            CONFIG_AXI_READ_DELAY_MIN;)
+  }
 };
 
 #endif // !__AXI_HPP__
