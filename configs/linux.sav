@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.115 (w)1999-2023 BSI
-[*] Fri Aug 11 09:14:42 2023
+[*] Sat Aug 12 03:47:30 2023
 [*]
-[dumpfile] "/home/hgh/mnt/wave/linux.fst"
-[dumpfile_mtime] "Fri Aug 11 09:12:07 2023"
-[dumpfile_size] 16153497
+[dumpfile] "/home/hgh/mnt/wave/func-0.fst"
+[dumpfile_mtime] "Sat Aug 12 03:45:41 2023"
+[dumpfile_size] 74589127
 [savefile] "/home/hgh/mnt/configs/linux.sav"
-[timestart] 1195564
+[timestart] 2748127
 [size] 2560 1499
 [pos] -1 -1
-*-1.700000 1195572 4262 4484 4504 220884 220858 220832 220910 220936 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-6.800000 1216823 4262 4484 4504 220884 220858 220832 220910 220936 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.mycpu_top.
 [treeopen] TOP.mycpu_top.backend.
@@ -49,20 +49,19 @@ TOP.mycpu_top.backend.lsuFU.roStage.io_out_ready
 @800200
 -MemStage1
 -RoDecouple
-@28
-TOP.mycpu_top.backend.lsuFU.memStage1.roDecp_valid
 @22
 TOP.mycpu_top.backend.lsuFU.memStage1.roDecp_bits_r_debugPC[31:0]
 @28
+TOP.mycpu_top.backend.lsuFU.memStage1.tlbStable
+TOP.mycpu_top.backend.lsuFU.memStage1.idxStable
 TOP.mycpu_top.backend.lsuFU.memStage1.roDecp_bits_r_dirCattr[2:0]
 TOP.mycpu_top.backend.lsuFU.memStage1.roDecp_bits_r_isDir
+@29
 TOP.mycpu_top.backend.lsuFU.memStage1.storeModeRdy
 @1000200
 -RoDecouple
 @800200
 -SqDecouple
-@28
-TOP.mycpu_top.backend.lsuFU.memStage1.sqDecp_valid
 @22
 TOP.mycpu_top.backend.lsuFU.memStage1.sqDecp_bits_r_debugPC[31:0]
 @1000200
@@ -70,9 +69,6 @@ TOP.mycpu_top.backend.lsuFU.memStage1.sqDecp_bits_r_debugPC[31:0]
 @28
 TOP.mycpu_top.backend.lsuFU.memStage1.state[2:0]
 TOP.mycpu_top.backend.lsuFU.memStage1.io_flush
-TOP.mycpu_top.backend.lsuFU.memStage1.isNextRo
-TOP.mycpu_top.backend.lsuFU.memStage1.cModeNext
-@29
 TOP.mycpu_top.backend.lsuFU.memStage1.nextIsLoad
 @800200
 -toMem2
