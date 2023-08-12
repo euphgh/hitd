@@ -54,6 +54,7 @@ static bool sim_end_statistics(dual_soc &soc, string waveName) { /*{{{*/
     difftestBrJmpStats("MyCPUBrJmpStats" + waveName + ".txt");
     difftestBCacheStats();
     nemu->lhts.show("NemuBrStats" + waveName + ".txt");
+    nemu->isa_reg_display("logs/Nemu-State.txt");
     res = true;
     break;
   case SIM_NEMU_QUIT:

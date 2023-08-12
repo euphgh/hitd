@@ -69,9 +69,15 @@ static int cmd_ss(vector<string> &args) {
   return 0;
 }
 
+static int cmd_as(vector<string> &args) {
+  nemu->isa_reg_display();
+  return 0;
+}
+
 // 内置命令
 vector<tuple<string, function<int(vector<string> &)>, string>> built_in_cmds = {
     make_tuple("q", cmd_q, "Quit TinyShell by `q`"),
+    make_tuple("as", cmd_as, "print arch state"),
     make_tuple("help", cmd_help, "Print help by `help`"),
     make_tuple("c", cmd_c, "Continue simulate by `c`"),
     make_tuple("ss", cmd_ss, "Save snapshot by `ss`"),
@@ -117,7 +123,6 @@ void tinyShell() {
           ticks);
     return;
   }
-  nemu->isa_reg_display("logs/Nemu-State.txt");
   print("now tick is {:d}, print `help` for more\n", ticks);
   tinyShellEnd = false;
   char *line;
