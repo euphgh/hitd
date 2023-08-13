@@ -189,11 +189,11 @@ extern "C" void v_difftest_FrontPred(const int *io_debugPC,
   }
 }
 
-void difftestBrJmpReset() {
+void dpic_bpu_init() {
   instrInfo.clear();
   mycpuLht.resetStats();
 }
-void difftestBrJmpStats(string baseName) {
+void dpic_bpu_stats(string baseName) {
 
   uint32_t frontTotal = 0;
   uint32_t frontNoBrMiss = 0;
@@ -301,8 +301,8 @@ void difftestBrJmpStats(string baseName) {
         (double)brMiss / (double)brTotal);
 }
 #else
-void difftestBrJmpStats(string baseName) {}
-void difftestBrJmpReset() {}
+void dpic_bpu_stats(string baseName) {}
+void dpic_bpu_init() {}
 extern "C" void v_difftest_BackPred(int io_debugPC, svBit io_predTake,
                                     svBit io_realTake, int io_predDest,
                                     int io_realDest, char io_btbType) {}

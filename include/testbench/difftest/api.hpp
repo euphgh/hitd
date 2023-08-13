@@ -9,10 +9,7 @@ void dut_get_state(diff_state *mycpu);
 void difftest_clean_phySign();
 void difftest_init_PhyPosition();
 void difftest_count_phySign();
-std::pair<uint8_t, word_t> difftestPopRand();
 void difftestTlbCheck();
-void difftestBrJmpStats(std::string fileName = "");
-void difftestBCacheStats();
-void difftestBrJmpReset();
-void difftestResetUartStats();
+void difftestInit();
+void difftestStats(std::string waveName);
 #endif

@@ -1,22 +1,22 @@
 [*]
 [*] GTKWave Analyzer v3.3.115 (w)1999-2023 BSI
-[*] Sat Aug 12 03:47:30 2023
+[*] Sat Aug 12 14:48:19 2023
 [*]
-[dumpfile] "/home/hgh/mnt/wave/func-0.fst"
-[dumpfile_mtime] "Sat Aug 12 03:45:41 2023"
-[dumpfile_size] 74589127
+[dumpfile] "/home/hgh/mnt/wave/perf-2.fst"
+[dumpfile_mtime] "Sat Aug 12 14:46:46 2023"
+[dumpfile_size] 106105
 [savefile] "/home/hgh/mnt/configs/linux.sav"
-[timestart] 2748127
+[timestart] 2151
 [size] 2560 1499
 [pos] -1 -1
-*-6.800000 1216823 4262 4484 4504 220884 220858 220832 220910 220936 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-0.500000 2156 4262 4484 4504 220884 220858 220832 220910 220936 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.mycpu_top.
 [treeopen] TOP.mycpu_top.backend.
 [treeopen] TOP.mycpu_top.backend.lsuFU.
 [treeopen] TOP.mycpu_top.backend.lsuFU.memStage1.cache1.datas_0.array_ext.unnamedblk1.
 [treeopen] TOP.mycpu_top.backend.lsuFU.memStage2.uBuffer.
-[treeopen] TOP.mycpu_top.backend.lsuRS.
+[treeopen] TOP.mycpu_top.backend.lsuFU.roStage.
 [treeopen] TOP.mycpu_top.backend.mduFU.clz.
 [treeopen] TOP.mycpu_top.backend.rob.robEntries.unnamedblk3.
 [treeopen] TOP.mycpu_top.frontend.instFetch.
@@ -34,7 +34,7 @@ TOP.mycpu_top.backend.rob.difftestRetire.io_lastPC[31:0]
 TOP.mycpu_top.backend.rob.difftestRetire.io_retireNum[7:0]
 @1000200
 -Difftest-Retire
-@800200
+@c00200
 -LSU-RO
 @22
 TOP.mycpu_top.backend.lsuFU.roStage.io_out_bits_debugPC[31:0]
@@ -44,10 +44,11 @@ TOP.mycpu_top.backend.lsuFU.roStage.io_out_bits_mem_dirCattr[2:0]
 TOP.mycpu_top.backend.lsuFU.roStage.io_out_bits_mem_cache_rwReq_isWrite
 TOP.mycpu_top.backend.lsuFU.roStage.io_out_valid
 TOP.mycpu_top.backend.lsuFU.roStage.io_out_ready
-@1000200
+@1401200
 -LSU-RO
-@800200
+@c00200
 -MemStage1
+@800200
 -RoDecouple
 @22
 TOP.mycpu_top.backend.lsuFU.memStage1.roDecp_bits_r_debugPC[31:0]
@@ -56,38 +57,59 @@ TOP.mycpu_top.backend.lsuFU.memStage1.tlbStable
 TOP.mycpu_top.backend.lsuFU.memStage1.idxStable
 TOP.mycpu_top.backend.lsuFU.memStage1.roDecp_bits_r_dirCattr[2:0]
 TOP.mycpu_top.backend.lsuFU.memStage1.roDecp_bits_r_isDir
-@29
 TOP.mycpu_top.backend.lsuFU.memStage1.storeModeRdy
 @1000200
 -RoDecouple
-@800200
+@c00200
 -SqDecouple
 @22
 TOP.mycpu_top.backend.lsuFU.memStage1.sqDecp_bits_r_debugPC[31:0]
-@1000200
+@1401200
 -SqDecouple
 @28
 TOP.mycpu_top.backend.lsuFU.memStage1.state[2:0]
 TOP.mycpu_top.backend.lsuFU.memStage1.io_flush
 TOP.mycpu_top.backend.lsuFU.memStage1.nextIsLoad
-@800200
+@c00200
 -toMem2
 @22
 TOP.mycpu_top.backend.lsuFU.memStage1.io_out_toMem2_bits_debugPC[31:0]
 @28
 TOP.mycpu_top.backend.lsuFU.memStage1.io_out_toMem2_valid
 TOP.mycpu_top.backend.lsuFU.memStage1.io_out_toMem2_ready
-@1000200
+@1401200
 -toMem2
-@800200
+@c00200
 -toStoreQ
 @22
 TOP.mycpu_top.backend.lsuFU.memStage1.io_out_toStoreQ_bits_stqEnq_debugPC[31:0]
 @28
 TOP.mycpu_top.backend.lsuFU.memStage1.io_out_toStoreQ_valid
 TOP.mycpu_top.backend.lsuFU.memStage1.io_out_toStoreQ_ready
-@1000200
+@1401200
 -toStoreQ
 -MemStage1
+@28
+TOP.mycpu_top.backend.lsuFU.roStage.mip.clock
+@800200
+-Read
+@22
+TOP.mycpu_top.backend.lsuFU.roStage.mip.io_readReq[31:0]
+@28
+TOP.mycpu_top.backend.lsuFU.roStage.mip.io_readRes_valid
+@22
+TOP.mycpu_top.backend.lsuFU.roStage.mip.io_readRes_bits[5:0]
+@1000200
+-Read
+@800200
+-Write
+@28
+TOP.mycpu_top.backend.lsuFU.roStage.mip.io_writeReq_valid
+@22
+TOP.mycpu_top.backend.lsuFU.roStage.mip.io_writeReq_bits_idx[5:0]
+TOP.mycpu_top.backend.lsuFU.roStage.mip.io_writeReq_bits_pc[31:0]
+TOP.mycpu_top.backend.lsuFU.roStage.mip.wData_tag[23:0]
+@1000200
+-Write
 [pattern_trace] 1
 [pattern_trace] 0

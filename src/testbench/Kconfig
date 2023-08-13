@@ -141,6 +141,10 @@ config UTRACE
   bool "Trace Uart Buffer IO"
   default n
 
+config MEM_INDEX
+  bool "Trace Mem Index "
+  default n
+
 config SNAPSHOT_AUTO
   bool "Enable Automatically save snapshot"
   default n

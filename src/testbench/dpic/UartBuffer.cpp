@@ -43,7 +43,7 @@ extern "C" void v_difftest_UartBuffer(char io_curGroup, char io_curFew,
   }
 }
 #else
-void difftestResetUartStats() {}
+void dpic_UartBuffer_init() {}
 extern "C" void v_difftest_UartBuffer(char io_curGroup, char io_curFew,
                                       svBit io_enqFire, char io_enqChar,
                                       char io_state, svBit io_awFire,

@@ -22,6 +22,12 @@ static map<uint8_t, string> predState = {
 };
 static string getIdx(word_t pc) { return format("{:02x}", BITS(pc, 6, 2)); }
 
+void dpic_bCache_init() {
+  lastState = 0x0;
+  totalFireIn = 0;
+  missFireIn = 0;
+}
+
 extern "C" void v_difftest_BCache(svBit io_hasBranch, svBit io_dsFetch,
                                   svBit io_bCacheHit, svBit io_bCacheUse,
                                   int io_bCacheDst, int io_predictDst,
@@ -72,7 +78,7 @@ extern "C" void v_difftest_BCache(svBit io_hasBranch, svBit io_dsFetch,
           (word_t)io_wPC, (word_t)io_wDst);
   }
 }
-void difftestBCacheStats() {
+void dpic_bCache_stats() {
   print("BCache Miss Rate: {:5d} / {:5d} = {:.6f}\n", missFireIn, totalFireIn,
         (double)missFireIn / (double)totalFireIn);
 }
@@ -83,7 +89,10 @@ extern "C" void v_difftest_BCache(svBit io_hasBranch, svBit io_dsFetch,
                                   svBit io_wen, int io_wPC, int io_wDst,
                                   char io_state, svBit io_fireIn,
                                   int io_pcVal) {}
-void difftestBCacheStats() {}
+void dpic_bCache_stats() {}
+
+void dpic_bCache_init() {}
+
 #endif
 
 #undef dglog
