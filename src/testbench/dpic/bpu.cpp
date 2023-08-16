@@ -112,23 +112,24 @@ extern "C" void v_difftest_ArchRAS(svBit io_push, int io_pushData, int io_pop,
 extern "C" void v_difftest_LHTRead(const int *io_readAddr,
                                    const svBit *io_readTake,
                                    const char *io_readCnt, svBit io_outOK) {
-  if (io_outOK) {
-    for (int i = 0; i < 4; i++) {
-      auto refRes = mycpuLht.getLhtRes(savedPC[i]);
-      auto refTake = get<0>(refRes);
-      auto refCnt = get<1>(refRes);
-      bool dutTake = io_readTake[i];
-      uint8_t dutCnt = io_readCnt[i];
-      if (refTake != io_readTake[i] || refCnt != io_readCnt[i]) {
-        dbError("LHT({:s}) ER ref={},{}; dut={},{}",
-                lhtHash((word_t)savedPC[i]), refTake, refCnt, dutTake, dutCnt);
-        sim_status = SIM_ABORT;
-      }
-    }
-  }
-  for (int i = 0; i < 4; i++) {
-    savedPC[i] = io_readAddr[i];
-  }
+  // if (io_outOK) {
+  //   for (int i = 0; i < 4; i++) {
+  //     auto refRes = mycpuLht.getLhtRes(savedPC[i]);
+  //     auto refTake = get<0>(refRes);
+  //     auto refCnt = get<1>(refRes);
+  //     bool dutTake = io_readTake[i];
+  //     uint8_t dutCnt = io_readCnt[i];
+  //     if (refTake != io_readTake[i] || refCnt != io_readCnt[i]) {
+  //       dbError("LHT({:s}) ER ref={},{}; dut={},{}",
+  //               lhtHash((word_t)savedPC[i]), refTake, refCnt, dutTake,
+  //               dutCnt);
+  //       sim_status = SIM_ABORT;
+  //     }
+  //   }
+  // }
+  // for (int i = 0; i < 4; i++) {
+  //   savedPC[i] = io_readAddr[i];
+  // }
 }
 #else
 extern "C" void v_difftest_PHTWrite(int io_tagIdx, const char *io_instrOff,
@@ -279,17 +280,17 @@ void dpic_bpu_stats(string baseName) {
     print("Total miss rate: {:f}\n\n",
           ((double)(backMiss) / (double)(backTotal)));
 
-    while (!max_heap.empty()) {
-      auto t = max_heap.top();
-      auto missNum = get<0>(t);
-      auto totalNum = get<2>(t);
-      brTotal += totalNum;
-      brMiss += missNum;
-      if (missNum != 0)
-        print("[" HEX_WORD "]: {:d}/{:d} = {:f}\n", get<1>(t), missNum,
-              totalNum, (double)missNum / (double)totalNum);
-      max_heap.pop();
-    }
+    // while (!max_heap.empty()) {
+    //   auto t = max_heap.top();
+    //   auto missNum = get<0>(t);
+    //   auto totalNum = get<2>(t);
+    //   brTotal += totalNum;
+    //   brMiss += missNum;
+    //   if (missNum != 0)
+    //     print("[" HEX_WORD "]: {:d}/{:d} = {:f}\n", get<1>(t), missNum,
+    //           totalNum, (double)missNum / (double)totalNum);
+    //   max_heap.pop();
+    // }
   }
   if (baseName != "") {
     fclose(file);

@@ -11,22 +11,21 @@ using namespace fmt;
 
 #define dglog(str, ...) mycpu_log->trace(fmt::format("[G] " str, ##__VA_ARGS__))
 #define dgError(str, ...) mycpu_log->error(fmt::format(str, ##__VA_ARGS__))
-#ifdef CONFIG_BTRACE
 static uint8_t lastState = 0x0;
 static uint32_t totalFireIn = 0;
 static uint32_t missFireIn = 0;
+void dpic_bCache_init() {
+  lastState = 0;
+  totalFireIn = 0;
+  missFireIn = 0;
+}
+#ifdef CONFIG_BRANCH_STATS
 static map<uint8_t, string> predState = {
     make_pair(0x0, "normal"),
     make_pair(0x1, "waitDS"),
     make_pair(0x2, "comeDS"),
 };
 static string getIdx(word_t pc) { return format("{:02x}", BITS(pc, 6, 2)); }
-
-void dpic_bCache_init() {
-  lastState = 0x0;
-  totalFireIn = 0;
-  missFireIn = 0;
-}
 
 extern "C" void v_difftest_BCache(svBit io_hasBranch, svBit io_dsFetch,
                                   svBit io_bCacheHit, svBit io_bCacheUse,
@@ -79,8 +78,8 @@ extern "C" void v_difftest_BCache(svBit io_hasBranch, svBit io_dsFetch,
   }
 }
 void dpic_bCache_stats() {
-  print("BCache Miss Rate: {:5d} / {:5d} = {:.6f}\n", missFireIn, totalFireIn,
-        (double)missFireIn / (double)totalFireIn);
+  print("BCache Hits Rate: {:5d} / {:5d} = {:.6f}\n", totalFireIn - missFireIn,
+        totalFireIn, (double)(totalFireIn - missFireIn) / (double)totalFireIn);
 }
 #else
 extern "C" void v_difftest_BCache(svBit io_hasBranch, svBit io_dsFetch,
@@ -90,8 +89,6 @@ extern "C" void v_difftest_BCache(svBit io_hasBranch, svBit io_dsFetch,
                                   char io_state, svBit io_fireIn,
                                   int io_pcVal) {}
 void dpic_bCache_stats() {}
-
-void dpic_bCache_init() {}
 
 #endif
 
