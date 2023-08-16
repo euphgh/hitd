@@ -245,6 +245,7 @@ bool axi_paddr::accept_write_req() { /*{{{*/
 
   w_cur_NO = 0;
   w_cur_id = pins.awid;
+  lastw_id = pins.awid;
   w_cur_addr[w_cur_NO] = start_addr;
   w_cur_info[w_cur_NO].size = num_bytes;
   s_awready = 0;
@@ -260,6 +261,10 @@ bool axi_paddr::accept_write_data() { /*{{{*/
   __ASSERT_SIM__(pins.wid == w_cur_id,
                  "Write data " HEX_WORD " wid({:d}) != awid({:d})", pins.wdata,
                  pins.wid, w_cur_id);
+  __ASSERT_SIM__(pins.wid == lastw_id,
+                 "Write data " HEX_WORD " wid({:d}) != last_wid({:d})",
+                 pins.wdata, pins.wid, lastw_id);
+  lastw_id = pins.wid;
   w_cur_data[w_cur_NO] = pins.wdata;
   w_cur_info[w_cur_NO].wstrb = pins.wstrb;
   w_cur_NO++;

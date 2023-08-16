@@ -141,6 +141,7 @@ class axi_paddr{
         word_t w_cur_addr[16];
         wen_t w_cur_info[16];
         uint8_t w_cur_id;
+        uint8_t lastw_id;
         word_t w_cur_data[16];
         uint8_t w_cur_NO;
 
