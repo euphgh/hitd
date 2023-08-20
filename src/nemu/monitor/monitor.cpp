@@ -69,7 +69,7 @@ void init_monitor(int argc, char *argv[]) {
   PaddrTop *nemu_paddr = soc->get_single_soc();
   nemu_paddr->set_logger(nemu_log);
 #endif
-  soc->set_switch(1);
+  soc->set_switch(0);
 
   /* Perform ISA dependent initialization. */
   init_isa(nemu_paddr);

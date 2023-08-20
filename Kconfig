@@ -23,6 +23,10 @@ config NEED_TB
   bool
   default y if NSC_DIFF
 
+config EXPT_NOT_TRACE
+  bool
+  default y if NSC_DIFF || (NSC_NEMU && GOLDEN_TRACE)
+
 choice
   prompt "Test Program"
   default TEST_UBOOT

@@ -15,8 +15,10 @@
 #define __FUNC_ELF__ __FUNC_DIR__ "main.elf"  
 #define __PERF_ELF__ __PERF_DIR__ "main.elf"  
 #define __SYST_ELF__ __SYST_DIR__ "kernel.elf"
-#define __UBOOT_ELF__ __UBOOT_DIR__ "u-boot"   
-#define __LINUX_ELF__ __LINUX_DIR__ "vmlinux"  
+#define __UBOOT_ELF__ __UBOOT_DIR__ "u-boot"
+#define __LINUX_ELF__ __LINUX_DIR__ "vmlinux"
+
+#define __FUNC_GTC__ __FUNC_DIR__ "golden_trace.txt"
 
 #define __TEST_BIN__ \
     MUXDEF(CONFIG_TEST_FUNC, __FUNC_BIN__, \

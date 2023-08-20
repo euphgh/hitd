@@ -41,6 +41,10 @@ endmenu# }}}
 
 menu "Testing and Debugging"# {{{
 
+config GOLDEN_TRACE
+  bool "Compare with golden trace"
+  default n
+
 config WATCH_POINT
   depends on NSC_NEMU
   bool "Watch points in simple debug"

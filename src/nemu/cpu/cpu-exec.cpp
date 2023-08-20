@@ -23,8 +23,10 @@
 #include "nemu/cpu/decode.hpp"
 #include "nemu/cpu/difftest.hpp"
 #include "nemu/deadloop.hpp"
+#include "nemu/goldenFile.hpp"
 #include "nemu/isa.hpp"
 #include "nemu/mytrace.hpp"
+#include "path.hh"
 #include "soc.hpp"
 #include "utils.hpp"
 #include <csignal>
@@ -45,13 +47,19 @@ void check_deadloop(word_t pc){
         nemu_state.halt_pc = pc;
     }
 }
-
+IFDEF(CONFIG_GOLDEN_TRACE, static auto gtrace = GoldenFile(__FUNC_GTC__));
 void trace_and_difftest(Decode *_this) {
     // TIMED_FUNC(trace_and_difftest);
     IFDEF(CONFIG_ITRACE, nemu->log_pt->trace("[I] %v", nemu->isa_disasm_inst()));
     IFDEF(CONFIG_DIFFTEST, extern std::unique_ptr<SoC_t> soc;
           difftest_step(soc->ref_ext_int()));
-    IFDEF(CONFIG_WATCH_POINT, if(is_wp_change())nemu_state.state=NEMU_STOP);
+#ifdef CONFIG_GOLDEN_TRACE
+    if (!gtrace.compare(nemu->inst_state.pc, nemu->inst_state.wnum,
+                        nemu->inst_state.wdata)) {
+        nemu_state.state = NEMU_ABORT;
+    }
+#endif
+    IFDEF(CONFIG_WATCH_POINT, if (is_wp_change()) nemu_state.state = NEMU_STOP);
     IFDEF(CONFIG_DEADLOOP, check_deadloop(_this->pc));
 #ifdef CONFIG_DWARD
     uint8_t flag = _this->flag;
